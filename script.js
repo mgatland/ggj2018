@@ -15,6 +15,16 @@ spriteImage.addEventListener('load', function() {
   loaded = true
 }, false)
 
+let rngSeed = 1;
+function random() {
+    var x = Math.sin(rngSeed++) * 10000;
+    return x - Math.floor(x);
+}
+
+function rnd(n) {
+  return Math.floor(random() * n)
+}
+
 const mapSize = 100
 const cellSize = 7
 const dir = {up:{name:"up", y:-1}, left:{name:"left",x:1}, down:{name:"down",y:1}, right:{name:"right",x:-1}}
@@ -34,6 +44,7 @@ const depth = 0
 const map = []
 makeMap()
 function makeMap() {
+  rngSeed = depth
   for(let x = 0; x < mapSize; x++) {
     map[x] = [];
     for (let y = 0; y < mapSize; y++) {
@@ -41,32 +52,37 @@ function makeMap() {
     }
   }
   //rooms
-  for(let i = 0; i < 160; i++) {
-    let xPos = rnd(mapSize)
-    let yPos = rnd(mapSize)
-    let xSize = rnd(10)
-    let ySize = rnd(10)
-    while (xSize + xPos >= mapSize) xPos--
-    while (ySize + yPos >= mapSize) yPos--
-    for(let x = xPos; x < xPos + xSize; x++) {
-      for (let y = yPos; y < yPos + ySize; y++) {
-        map[x][y] = 1
-      }
-    }
-  }
+  times(100, () => addRoom(2, 12))
+  times(160, () => addRoom(1, 20, true))
 }
 
-
-function rnd(n) {
-  return Math.floor(Math.random() * n)
+function addRoom(minSize, maxSize, hallway) {
+  let xPos = rnd(mapSize)
+  let yPos = rnd(mapSize)
+  let xSize = rnd(maxSize - minSize) + minSize
+  let ySize = rnd(maxSize - minSize) + minSize
+  if (hallway) {
+    if (xSize > ySize) {
+      xSize = 1
+    } else {
+      ySize = 1
+    }
+  }
+  while (xSize + xPos >= mapSize) xPos--
+  while (ySize + yPos >= mapSize) yPos--
+  for(let x = xPos; x < xPos + xSize; x++) {
+    for (let y = yPos; y < yPos + ySize; y++) {
+      map[x][y] = 1
+    }
+  }
 }
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   drawMap()
-  ctx.font="30px Verdana"
-  ctx.fillStyle="black"
-  ctx.fillText("position: " + pos.x + ":" + pos.y + ":" + pos.dir.name, 50, 50)
+  ctx.font="12px Verdana"
+  ctx.fillStyle="white"
+  ctx.fillText("position: " + pos.x + ":" + pos.y + ":" + pos.dir.name, 12, 12)
   
 }
 
@@ -160,3 +176,4 @@ function forward() {
   }
   draw()
 }
+function times(n,f) {while(n-->0)f()}
