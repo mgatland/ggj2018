@@ -1,90 +1,162 @@
 "use strict"
 //DOM stuff
-var canvas = document.querySelector(".gameCanvas")
-var ctx = canvas.getContext('2d')
+const canvas = document.querySelector(".gameCanvas")
+const ctx = canvas.getContext('2d')
 ctx.webkitImageSmoothingEnabled = false
 ctx.mozImageSmoothingEnabled = false
 ctx.imageSmoothingEnabled = false
-var width = canvas.width
-var height = canvas.height
-var loaded = false
+const width = canvas.width
+const height = canvas.height
+const loaded = false
 
-var spriteImage = new Image()
+const spriteImage = new Image()
 spriteImage.src = 'sprites.png'
 spriteImage.addEventListener('load', function() {
   loaded = true
 }, false)
 
 const mapSize = 100
+const cellSize = 7
 const dir = {up:{name:"up", y:-1}, left:{name:"left",x:1}, down:{name:"down",y:1}, right:{name:"right",x:-1}}
 setDirs([dir.up, dir.left, dir.down, dir.right])
 function setDirs(dirs) {
-	for(let i = 0; i < dirs.length; i++) {
-		dirs[i].cw = dirs[(i+1)%dirs.length]
-		dirs[i].ccw = dirs[(i+3)%dirs.length]
-		dirs[i].reverse = dirs[(i+2)%dirs.length]
-		if (dirs[i].x==undefined) dirs[i].x = 0
-		if (dirs[i].y==undefined) dirs[i].y = 0
-	}
+  for(let i = 0; i < dirs.length; i++) {
+    dirs[i].cw = dirs[(i+1)%dirs.length]
+    dirs[i].ccw = dirs[(i+3)%dirs.length]
+    dirs[i].reverse = dirs[(i+2)%dirs.length]
+    if (dirs[i].x==undefined) dirs[i].x = 0
+    if (dirs[i].y==undefined) dirs[i].y = 0
+  }
 }
 
 const pos = {x: 5, y: 5, dir: dir.up}
 const depth = 0
 const map = []
-for(let x = 0; x < mapSize; x++) {
-	map[x] = [];
-	for (let y = 0; y < mapSize; y++) {
-		map[x][y] = rnd(2) == 0 ? 1 : 0
-	}
+makeMap()
+function makeMap() {
+  for(let x = 0; x < mapSize; x++) {
+    map[x] = [];
+    for (let y = 0; y < mapSize; y++) {
+      map[x][y] = 0
+    }
+  }
+  //rooms
+  for(let i = 0; i < 160; i++) {
+    let xPos = rnd(mapSize)
+    let yPos = rnd(mapSize)
+    let xSize = rnd(10)
+    let ySize = rnd(10)
+    while (xSize + xPos >= mapSize) xPos--
+    while (ySize + yPos >= mapSize) yPos--
+    for(let x = xPos; x < xPos + xSize; x++) {
+      for (let y = yPos; y < yPos + ySize; y++) {
+        map[x][y] = 1
+      }
+    }
+  }
 }
 
+
 function rnd(n) {
-	return Math.floor(Math.random * n)
+  return Math.floor(Math.random() * n)
 }
 
 function draw() {
-	ctx.clearRect(0, 0, canvas.width, canvas.height)
-	ctx.font="30px Verdana"
-	ctx.fillStyle="black"
-	ctx.fillText("position: " + pos.x + ":" + pos.y + ":" + pos.dir.name, 50, 50)
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  drawMap()
+  ctx.font="30px Verdana"
+  ctx.fillStyle="black"
+  ctx.fillText("position: " + pos.x + ":" + pos.y + ":" + pos.dir.name, 50, 50)
+  
+}
+
+function drawMap() {
+  const width = 100
+  const height = 100
+  ctx.fillStyle = "grey"
+  ctx.fillRect(0, 0, width*cellSize, height*cellSize)
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      const cell = cellAt(x, y)
+      if (cell == 1) {
+        drawCell(x, y)
+      }
+    }
+  }
+  ctx.fillStyle = "white"
+  ctx.fillRect(pos.x * cellSize, pos.y*cellSize, cellSize-1, cellSize-1)
 }
 
 draw()
 
+function drawCell(x, y) {
+  const edgeLength = cellSize - 1
+  ctx.fillStyle = "black"
+  ctx.fillRect(x*cellSize,y*cellSize,cellSize-1,cellSize-1)
+  ctx.fillStyle = "white"
+  if (cellAt(x-1, y) == 0) {
+    ctx.fillRect(x*cellSize-1,y*cellSize,1,edgeLength)
+  }
+  if (cellAt(x+1, y) == 0) {
+    ctx.fillRect((x+1)*cellSize-1,y*cellSize,1,edgeLength)
+  }
+  if (cellAt(x, y-1) == 0) {
+    ctx.fillRect(x*cellSize,y*cellSize-1,edgeLength,1)
+  }
+  if (cellAt(x, y+1) == 0) {
+    ctx.fillRect(x*cellSize,(y+1)*cellSize-1,edgeLength,1)
+  }
+}
+
+function cellAt(x, y) { //or {x,y} object
+  //unpack object
+  if (x.x != undefined) {
+    y = x.y
+    x = x.x
+  }
+  if (x > 0 && x < mapSize && y > 0 && y < mapSize) {
+    return map[x][y]
+  }
+  return 0
+}
+
 window.addEventListener("keyup", function (e) {
-	doKey(e.keyCode)
+  doKey(e.keyCode)
 })
 
 function doKey(keyCode, state) {
-	switch (keyCode) {
-		case 37: turnLeft()
-		  break
-		case 38: forward()
-		  break
-		case 39: turnRight()
-		  break
-		case 40: turnBack()
-		  break
-		 case 32: /*space */p0.shoot = state
-		 	break
-		 	break
-	}
+  switch (keyCode) {
+    case 37: turnLeft()
+      break
+    case 38: forward()
+      break
+    case 39: turnRight()
+      break
+    case 40: turnBack()
+      break
+     case 32: /*space */p0.shoot = state
+      break
+      break
+  }
 }
 
 function turnBack() {
-	pos.dir = pos.dir.reverse
-	draw()
+  pos.dir = pos.dir.reverse
+  draw()
 }
 function turnLeft() {
-	pos.dir = pos.dir.ccw
-	draw()
+  pos.dir = pos.dir.ccw
+  draw()
 }
 function turnRight() {
-	pos.dir = pos.dir.cw
-	draw()
+  pos.dir = pos.dir.cw
+  draw()
 }
 function forward() {
-	pos.x += pos.dir.x
-	pos.y += pos.dir.y
-	draw()
+  const dest = {x:pos.x + pos.dir.x, y:pos.y + pos.dir.y}
+  if (cellAt(dest.x, dest.y) == 1) {
+    pos.x += pos.dir.x
+    pos.y += pos.dir.y
+  }
+  draw()
 }
