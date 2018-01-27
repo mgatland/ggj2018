@@ -424,7 +424,7 @@ function fight(e) {
   e.hp -= damage
   playerCombatMessage1 = "You hit the monster!"
   playerCombatMessage2 = "It takes " + damage + " points of damage!"
-  if (e.hp <= 0) enemies.splice(enemies.indexOf(e))
+  if (e.hp <= 0) enemies.splice(enemies.indexOf(e), 1)
   draw()
 }
 
