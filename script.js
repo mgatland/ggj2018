@@ -120,7 +120,7 @@ function draw() {
   
   drawMap(col3X, 0, canvas.width - col3X, smallViewY)
   ctx.font="12px Verdana"
-  ctx.fillStyle="black"
+  ctx.fillStyle="white"
   ctx.fillText("position: " + pos.x + ":" + pos.y + ":" + pos.dir.name, 12, 748)
 }
 
@@ -129,7 +129,7 @@ function draw3D(viewX, viewY, viewSize, dir) {
   const viewSizeY = Math.floor(viewSize / 1.5)
   const viewXCentre = viewSizeX / 2
   const viewYCentre = viewSizeY / 2
-  const depthFactor = 3
+  const depthFactor = 2
   tCtx.fillStyle = "darkgrey"
   tCtx.fillRect(0, 0, viewSizeX, viewSizeY/2)
   tCtx.fillStyle = "brown"
