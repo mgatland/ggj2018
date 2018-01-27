@@ -1,0 +1,31 @@
+"As long as we have each other, we will never run out of problems"
+-basic attack
+-instakill with 10% chance of reducing to 1hp
+
+"Deception"
+-enemies stop hunting you
+
+"Extinction"
+-destroys all instances of an enemy on floor (no exp)
+
+An image of "Ouroboros"
+-enemy's attacks become self-directed
+
+The Sound of a Heartbeat
+-healing
+
+"We don't see things as they are, we see them as we are"
+-no fog of war
+
+"What do we do now?"
+-teleport
+
+"Ritual"
+-better healing?
+-random status effect?
+
+"Waves"
+-radial attack
+
+"Transmission"
+-talk to the monsters
