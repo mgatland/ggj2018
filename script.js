@@ -132,7 +132,7 @@ function draw3D(viewX, viewY, viewSize, dir) {
   const depthFactor = 3
   tCtx.fillStyle = "darkgrey"
   tCtx.fillRect(0, 0, viewSizeX, viewSizeY/2)
-  tCtx.fillStyle = "darkblue"
+  tCtx.fillStyle = "brown"
   tCtx.fillRect(0, 0+viewSizeY/2, viewSizeX, viewSizeY/2)
   const across = [-8,-7,-6,-5,-4,-3,-2,-1,7,6,5,4,3,2,1,0]
   for (let i = 15; i > 0; i--) { //depth
@@ -177,6 +177,9 @@ function draw3D(viewX, viewY, viewSize, dir) {
     }
   }
   ctx.drawImage(tempCanvas, 0, 0, viewSizeX, viewSizeY, viewX, viewY, viewSizeX, viewSizeY)
+  ctx.strokeStyle = "darkblue"
+  ctx.lineWidth = 4
+  ctx.strokeRect(viewX, viewY, viewSizeX, viewSizeY)
 }
 
 function viewCellPos(pos, viewDir, i, j)
@@ -216,6 +219,10 @@ function drawMap(viewX, viewY, viewSizeX, viewSizeY) {
   ctx.fillStyle = "grey"
   ctx.fillRect(viewX, viewY, viewSizeX, viewSizeY)
   ctx.drawImage(tempCanvas, cropX, cropY, viewSizeX, viewSizeY, viewX, viewY, viewSizeX, viewSizeY)
+
+  ctx.strokeStyle = "darkblue"
+  ctx.lineWidth = 4
+  ctx.strokeRect(viewX, viewY, viewSizeX, viewSizeY)
 }
 
 draw()
