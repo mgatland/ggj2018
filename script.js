@@ -23,6 +23,7 @@ const spriteImage = new Image()
 spriteImage.src = 'sprites.png'
 spriteImage.addEventListener('load', function() {
   loaded = true
+  draw()
 }, false)
 
 let rngSeed = 1;
@@ -49,7 +50,7 @@ function setDirs(dirs) {
   }
 }
 
-const pos = {x: 28, y: 4, dir: dir.down}
+const pos = {x: 27, y: 11, dir: dir.down}
 let depth = 0
 let tileSet = 0
 const map = []
@@ -168,10 +169,10 @@ function draw3D(viewX, viewY, viewSize, dir) {
         const e = enemies.find(e => e.x == cellPos.x && e.y == cellPos.y)
         if (e != undefined) {
           tCtx.fillStyle = "red"
-          const eSize = viewSizeX/(Math.pow(depthFactor,i-0.5))
-          const left = viewXCentre - size/2 + j*size
-          const top = viewYCentre - size/2
-          tCtx.drawImage(spriteImage, 256, 0, 256, 256, left+(size-eSize)/2, top+(size-eSize)/2, eSize, eSize)
+          const eSize = viewSizeX/(Math.pow(depthFactor,i-0.4))
+          const left = viewXCentre - eSize/2 + j*eSize
+          const top = viewYCentre - eSize/2
+          tCtx.drawImage(spriteImage, 256*1, 0, 256, 256, left, top, eSize, eSize)
         }
       } 
     }
