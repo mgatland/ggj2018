@@ -65,7 +65,10 @@ let depth = 0
 let tileSet = 0
 const map = []
 const enemies = []
+const ladders = []
+
 makeMap()
+
 function makeMap() {
   rngSeed = depth
   for(let x = 0; x < mapSize; x++) {
@@ -79,6 +82,25 @@ function makeMap() {
   times(160, () => addRoom(1, 20, true))
 
   makeEnemies()
+  makeLadders(depth)
+}
+
+function makeLadders(n) {
+  ladders.length = 0
+  rngSeed = n
+  times(100, () => addLadderDown())
+}
+
+function addLadderDown() {
+  let x = -1
+  let y = -1
+  while (x == -1 || ladders.some(l => l.x == x && l.y == y)) {
+    x = rnd(mapSize)
+    y = rnd(mapSize)
+    
+  }
+  var ladder = {x:x, y:y, type:"down"}
+  ladders.push(ladder)
 }
 
 function makeEnemies() {
@@ -227,11 +249,18 @@ function draw3D(viewX, viewY, viewSize, dir) {
         const e = enemies.find(e => e.x == cellPos.x && e.y == cellPos.y)
         if (e != undefined) {
           const et = enemyType[e.type]
-          tCtx.fillStyle = "red"
           const eSize = viewSizeX/(Math.pow(depthFactor,i-0.4))
           const left = viewXCentre - eSize/2 + j*eSize
           const top = viewYCentre - eSize/2
           tCtx.drawImage(spriteImage, 256*et.sprite, et.tileSet*256, 256, 256, left, top, eSize, eSize)
+        }
+        const l = ladders.find(e => e.x == cellPos.x && e.y == cellPos.y)
+        if (l != undefined)
+        {
+          const eSize = viewSizeX/(Math.pow(depthFactor,i-0.4))
+          const left = viewXCentre - eSize/2 + j*eSize
+          const top = viewYCentre - eSize/2+eSize*0.2
+          tCtx.drawImage(spriteImage, 0, 6*256, 256, 256, left, top, eSize, eSize)
         }
       } 
     }
