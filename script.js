@@ -3,11 +3,17 @@
 const canvas = document.querySelector(".gameCanvas")
 
 const ctx = canvas.getContext('2d')
+ctx.webkitImageSmoothingEnabled = false
+ctx.mozImageSmoothingEnabled = false
+ctx.imageSmoothingEnabled = false
 
 const tempCanvas = document.createElement("canvas")
 const tCtx = tempCanvas.getContext("2d")
 tempCanvas.width = 1024
 tempCanvas.height = 768
+tCtx.webkitImageSmoothingEnabled = false
+tCtx.mozImageSmoothingEnabled = false
+tCtx.imageSmoothingEnabled = false
 
 const width = canvas.width
 const height = canvas.height
