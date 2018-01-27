@@ -1,9 +1,15 @@
 thing to do:
+
+
+
+you can die
+enemies fight back during combat
+enemies only follow you if they can see you \ have seen you recently \ are close
+
 fewer dead-end ladders
 fog of war
-enemies fight back during combat
-you can die
+
 nice error messages on invalid actions
 enemies level up as you go deeper
-enemies only follow you if they can see you \ have seen you recently \ are close
+
 more gameplay

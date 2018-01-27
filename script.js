@@ -21,6 +21,7 @@ let loaded = false
 let playerCombatMessage1 = ""
 let playerCombatMessage2 = ""
 let enemyCombatMessage = []
+let flipped = false
 
 const spriteImage = new Image()
 spriteImage.src = 'sprites.png'
@@ -39,7 +40,11 @@ function rnd(n) {
   return Math.floor(random() * n)
 }
 
-const playerStats = {speed:10, attack:10, level:0, exp:0, sp:5, maxSp:5, hp:10, maxHp:10}
+const states = { main:{}, dead:{}, start:{}}
+let state = states.start
+
+
+let playerStats = {}
 const mapSize = 100
 const cellSize = 7
 const dirs = {up:{name:"up", y:-1}, right:{name:"right",x:1}, down:{name:"down",y:1}, left:{name:"left",x:-1}}
@@ -65,7 +70,7 @@ enemyType.push({tileSet:1, sprite:3, maxHp:30, speed:3, attack:7, name: "Sewer W
 enemyType.push({tileSet:1, sprite:4, maxHp:40, speed:2, attack:8, name: "Canbion", desc:"It shuffles back and forth"})
 
 
-const playerPos = {x: 27, y: 11, dir: dirs.down}
+let playerPos = {}
 let depth = 0
 let tileSet = 0
 const map = []
@@ -73,7 +78,20 @@ const enemies = []
 const laddersUp = []
 const laddersDown = []
 
-makeMap()
+
+restart()
+
+function restart() {
+  state = states.start
+  playerStats = {speed:10, attack:10, level:0, exp:0, sp:5, maxSp:5, hp:10, maxHp:10}
+  depth = 0
+  playerPos = {x: 27, y: 11, dir: dirs.down}
+  enemyCombatMessage.length = 0
+  makeMap()
+  draw()
+}
+
+
 
 function makeMap() {
   rngSeed = depth
@@ -166,7 +184,8 @@ function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   const smallColWidth = 186
   const viewSize = canvas.width - smallColWidth*2
-  const smallViewY = Math.floor(viewSize/1.5)-Math.floor(smallColWidth/1.5)
+  const viewSizeY = Math.floor(viewSize/1.5)
+  const smallViewY = viewSizeY-Math.floor(smallColWidth/1.5)
   const col1X = 0
   const col2X = smallColWidth
   const col3X = smallColWidth + viewSize
@@ -174,7 +193,7 @@ function draw() {
   draw3D(col2X, 0, viewSize, playerPos.dir)
   draw3D(col3X, smallViewY, smallColWidth, playerPos.dir.cw)
   const rearViewX = smallColWidth + viewSize/2-smallColWidth/2
-  draw3D(rearViewX, Math.floor(viewSize/1.5), smallColWidth, playerPos.dir.reverse)
+  draw3D(rearViewX, viewSizeY, smallColWidth, playerPos.dir.reverse)
   
   drawMap(col3X, 0, canvas.width - col3X, smallViewY)
   ctx.font="16px Verdana"
@@ -219,9 +238,31 @@ function draw() {
     ctx.fillText("Experience value: " + et.maxHp*5, x, y);  y+=lineHeight
     ctx.fillText(et.desc, x, y);  y+=lineHeight
   }
+
+  if (state===states.dead) {
+    ctx.font="64px Verdana"
+    ctx.fillStyle="white"
+    ctx.textAlign="center"
+    ctx.fillText("YOU HAVE DIED", (col2X + col3X)/2, 100)
+
+    ctx.font="32px Verdana"
+    ctx.fillText("Press R to restart", (col2X + col3X)/2, viewSizeY - 20)
+    ctx.textAlign="left"
+  }
+
+  if (state===states.start) {
+    ctx.font="64px Verdana"
+    ctx.fillStyle="white"
+    ctx.textAlign="center"
+    ctx.fillText("DUNGEON OF DEEP", (col2X + col3X)/2, 100)
+
+    ctx.font="32px Verdana"
+    ctx.fillText("Press [spacebar] to start", (col2X + col3X)/2, viewSizeY - 20)
+    ctx.textAlign="left"
+  }
+  
 }
 
-let flipped = false
 function draw3D(viewX, viewY, viewSize, dir) {
   const viewSizeX = viewSize
   const viewSizeY = Math.floor(viewSize / 1.5)
@@ -297,7 +338,7 @@ function draw3D(viewX, viewY, viewSize, dir) {
           const eSize = viewSizeY/(Math.pow(depthFactor,i-0.4))
           const left = viewXCentre - eSize/2 + j*eSize
           const top = viewYCentre - eSize/2+eSize*0.2
-          tCtx.drawImage(spriteImage, 256*et.sprite, et.tileSet*256, 256, 256, left, top, eSize, eSize)
+          tCtx.drawImage(spriteImage, 256*et.sprite+1, et.tileSet*256, 255, 256, left, top, eSize, eSize)
         }
 
       } 
@@ -412,7 +453,15 @@ window.addEventListener("keyup", function (e) {
   doKey(e.keyCode)
 })
 
-function doKey(keyCode, state) {
+function doKey(keyCode) {
+  if (!loaded) return
+  if (state === states.start) {
+    if (keyCode===32) {
+      state = states.main
+      draw()
+    }
+    return
+  }
   switch (keyCode) {
     case 37: turnLeft()
       break
@@ -428,9 +477,16 @@ function doKey(keyCode, state) {
       break
     case 85: up()
       break
+    case 82: restartIfDead()
+      break
     case 77: showMap()
       break
   }
+}
+
+function restartIfDead() {
+  if (state !== states.dead) return
+  restart()
 }
 
 function up() {
@@ -454,25 +510,30 @@ function changeLevelTo(newLevel)
 }
 
 function wait() {
+  if (!inGame()) return
   timePasses(100/playerStats.speed)
 }
 
 function turnBack() {
+  if (!inGame()) return
   flipped = !flipped
   playerPos.dir = playerPos.dir.reverse
   draw()
 }
 function turnLeft() {
+  if (!inGame()) return
   flipped = !flipped
   playerPos.dir = playerPos.dir.ccw
   draw()
 }
 function turnRight() {
+  if (!inGame()) return
   flipped = !flipped
   playerPos.dir = playerPos.dir.cw
   draw()
 }
 function forward() {
+  if (!inGame()) return
   const dest = move(playerPos, playerPos.dir)
   if (enemies.some(e => e.x == dest.x && e.y == dest.y)) {
     fight(enemies.find(e => e.x == dest.x && e.y == dest.y))
@@ -487,6 +548,7 @@ function forward() {
 }
 
 function fight(e) {
+  if (!inGame()) return
   const damage = playerStats.attack
   e.hp -= damage
   playerCombatMessage1 = "You hit the monster!"
@@ -521,7 +583,7 @@ function moveEnemy(e) {
   if (distanceFromTo(e, playerPos) == 1) {
     //enemy attack
     const damage = getType(e).attack
-    playerStats.hp -= damage
+    hitPlayer(damage)
     enemyCombatMessage.push("The " + getType(e).name + " does " + damage + " points of damage")
     return
   }
@@ -549,10 +611,6 @@ function move(pos, move) {
 }
 function times(n,f) {while(n-->0)f()}
 
-const states = { main:{}, map:{}}
-
-let state = states.main
-
 function anyAtPos(list, pos)
 {
   return list.some(el => el.x == pos.x && el.y == pos.y)
@@ -563,6 +621,9 @@ function findAtPos(list, pos)
   return list.find(el => el.x == pos.x && el.y == pos.y)
 }
 
+function inGame() {
+  return state === states.main
+}
 
 function drawWall(ctx, tileSet, left, top, width, leftSize, rightSize)
 {
@@ -589,4 +650,12 @@ function drawWall(ctx, tileSet, left, top, width, leftSize, rightSize)
     ctx.drawImage(img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
   }
 
+}
+
+function hitPlayer(amount)
+{
+  playerStats.hp -= amount
+  if (playerStats.hp <= 0) {
+    state = states.dead
+  }
 }
