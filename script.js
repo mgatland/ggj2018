@@ -94,7 +94,7 @@ function makeLadders(n) {
 function addLadderDown() {
   let x = -1
   let y = -1
-  while (x == -1 || ladders.some(l => l.x == x && l.y == y)) {
+  while (x == -1 || anyAtPos(ladders, {x:x, y:y})) {
     x = rnd(mapSize)
     y = rnd(mapSize)
     
@@ -173,6 +173,9 @@ function draw() {
     ctx.fillText(`Health points: ${playerStats.hp} of ${playerStats.maxHp}`, x, y);  y+=lineHeight
     y+=lineHeight
     ctx.fillText(`Arrow keys move and attack. Spacebar to wait.`, x, y);  y+=lineHeight
+    if (anyAtPos(ladders, playerPos)) {
+      ctx.fillText(`[d] or [u] to go down or up a ladder.`, x, y);  y+=lineHeight
+    }
   }
 
   const x = rearViewX + smallColWidth + 20
@@ -266,6 +269,17 @@ function draw3D(viewX, viewY, viewSize, dir) {
       } 
     }
   }
+
+  //special: draw ladder in current square
+  const l = ladders.find(e => e.x == playerPos.x && e.y == playerPos.y)
+  if (l != undefined)
+  {
+    const eSize = viewSizeY/(Math.pow(depthFactor,0-0.4))
+    const left = viewXCentre - eSize/2 + 0*eSize
+    const top = viewYCentre - eSize/2+eSize*0.4
+    tCtx.drawImage(spriteImage, 0, 6*256, 256, 256, left, top, eSize, eSize)
+  }
+
   ctx.drawImage(tempCanvas, 0, 0, viewSizeX, viewSizeY, viewX, viewY, viewSizeX, viewSizeY)
   ctx.strokeStyle = "darkblue"
   ctx.lineWidth = 4
@@ -339,8 +353,12 @@ function drawCell(x, y) {
   if (cellAt(x, y+1) == 0) {
     tCtx.fillRect(x*cellSize,(y+1)*cellSize-1,edgeLength,1)
   }
-  if (enemies.some(e => e.x == x && e.y == y)) {
+  if (anyAtPos(enemies, {x:x, y:y})) {
     tCtx.fillStyle = "red"
+    tCtx.fillRect(x*cellSize+2, y*cellSize+2, cellSize - 4, cellSize - 4)
+  }
+  if (anyAtPos(ladders, {x:x, y:y})) {
+    tCtx.fillStyle = "yellow"
     tCtx.fillRect(x*cellSize+2, y*cellSize+2, cellSize - 4, cellSize - 4)
   }
 }
@@ -360,7 +378,7 @@ function cellAt(x, y) { //or {x,y} object
 function cellIsEmpty(pos) {
   return (cellAt(pos) != 0) 
     && (playerPos.x != pos.x || playerPos.y != pos.y) 
-    && !enemies.some(e => e.x == pos.x && e.y == pos.y)
+    && !anyAtPos(enemies, pos)
 }
 
 window.addEventListener("keyup", function (e) {
@@ -486,6 +504,11 @@ function times(n,f) {while(n-->0)f()}
 const states = { main:{}, map:{}}
 
 let state = states.main
+
+function anyAtPos(list, pos)
+{
+  return list.some(el => el.x == pos.x && el.y == pos.y)
+}
 
 function drawWall(ctx, tileSet, left, top, width, leftSize, rightSize)
 {
