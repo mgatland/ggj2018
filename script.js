@@ -43,7 +43,7 @@ function setDirs(dirs) {
   }
 }
 
-const pos = {x: 16, y: 1, dir: dir.right}
+const pos = {x: 28, y: 4, dir: dir.down}
 let depth = 0
 let tileSet = 0
 const map = []
@@ -140,27 +140,13 @@ function draw3D(viewX, viewY, viewSize, dir) {
         const top = viewYCentre - size/2
         const behindSize = size / depthFactor
         if (j > 0) {
-          tCtx.fillStyle = "darkgreen"
-          tCtx.beginPath()
-          tCtx.moveTo(left, top)
-          tCtx.lineTo(left, top+size)
-          tCtx.lineTo(viewXCentre - behindSize/2 + j*behindSize, viewYCentre + behindSize/2) //back top
-          tCtx.lineTo(viewXCentre - behindSize/2 + j*behindSize, viewYCentre - behindSize/2) //back bottom
-          tCtx.closePath()
-          tCtx.fill()
-          tCtx.strokeStyle = "green"
-          tCtx.stroke()
+          const backLeft = viewXCentre - behindSize/2 + j*behindSize
+          const backTop = viewYCentre - behindSize/2
+          const pixelWidth = (left) - (viewXCentre - behindSize/2 + j*behindSize)
+          drawWall(tCtx, tileSet, backLeft, backTop, pixelWidth, behindSize, size)          
         } else if (j < 0) {
-          tCtx.fillStyle = "darkgreen"
-          tCtx.beginPath()
-          tCtx.moveTo(left+size, top)
-          tCtx.lineTo(left+size, top+size)
-          tCtx.lineTo(viewXCentre - behindSize/2 + (j+1)*behindSize, viewYCentre + behindSize/2) //back top
-          tCtx.lineTo(viewXCentre - behindSize/2 + (j+1)*behindSize, viewYCentre - behindSize/2) //back bottom
-          tCtx.closePath()
-          tCtx.fill()
-          tCtx.strokeStyle = "green"
-          tCtx.stroke()
+          const pixelWidth = (viewXCentre - behindSize/2 + (j+1)*behindSize) - (left+size)
+          drawWall(tCtx, tileSet, left+size, top, pixelWidth, size, behindSize)
         }
       }
     }
@@ -314,44 +300,29 @@ const states = { main:{}, map:{}}
 
 let state = states.main
 
-function keystoneAndDisplayImage(ctx, img, x, y, pixelWidth, 
-                 scalingFactor) {
-  var h = img.height,
-       w = img.width,
-        
-      // The number of slices to draw.
-      numSlices = Math.abs(pixelWidth),
-        
-      // The width of each source slice.
-      sliceWidth = w / numSlices,
-        
-      // Whether to draw the slices in reverse order or not.
-      polarity = (pixelWidth > 0) ? 1 : -1,
+function drawWall(ctx, tileSet, left, top, width, leftSize, rightSize)
+{
+  const img = spriteImage
+  const h = 256
+  const w = 256
+  const numSlices = width
+  const widthScale = width / w
 
-      // How much should we scale the width of the slice 
-      // before drawing?
-      widthScale = Math.abs(pixelWidth) / w,
-        
-      // How much should we scale the height of the slice 
-      // before drawing? 
-      heightScale = (1 - scalingFactor) / numSlices;
+  // The width of each source slice.
+  const sliceWidth = w / numSlices
 
-      for(var n = 0; n < numSlices; n++) {
-
-    // Source: where to take the slice from.
+  for(var n = 0; n < numSlices; n++) {
     var sx = sliceWidth * n,
-        sy = 0,
+        sy = tileSet * 256,
         sWidth = sliceWidth,
         sHeight = h;
-    
-    // Destination: where to draw the slice to 
-    // (the transformation happens here).
-    var dx = x + (sliceWidth * n * widthScale * polarity),
-        dy = y + ((h * heightScale * n) / 2),
-        dWidth = sliceWidth * widthScale,
-        dHeight = h * (1 - (heightScale * n));
 
-    ctx.drawImage(img, sx, sy, sWidth, sHeight, 
-                dx, dy, dWidth, dHeight);
+    const progress = n / numSlices
+    var dx = left + (sliceWidth * n * widthScale)
+    var dWidth = sliceWidth * widthScale
+    var dHeight = leftSize * (1 - progress) + rightSize * progress;
+    var dy = top + (leftSize - dHeight) / 2
+    ctx.drawImage(img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
   }
+
 }
