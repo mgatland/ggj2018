@@ -103,18 +103,20 @@ function draw() {
   drawMap()
   const smallViewSize = 186
   const viewSize = canvas.width - smallViewSize*2
-  draw3D(0, 0, smallViewSize)
-  draw3D(smallViewSize + viewSize, 0, smallViewSize)
-  draw3D(smallViewSize, 0, viewSize)
+  const smallViewY = Math.floor(viewSize/1.5)-Math.floor(smallViewSize/1.5)
+  draw3D(0, smallViewY, smallViewSize, pos.dir.ccw)
+  draw3D(smallViewSize + viewSize, smallViewY, smallViewSize, pos.dir.cw)
+  draw3D(smallViewSize + viewSize/2-smallViewSize/2, Math.floor(viewSize/1.5), smallViewSize, pos.dir.reverse)
+  draw3D(smallViewSize, 0, viewSize, pos.dir)
   ctx.font="12px Verdana"
   ctx.fillStyle="black"
   ctx.fillText("position: " + pos.x + ":" + pos.y + ":" + pos.dir.name, 12, 748)
   
 }
 
-function draw3D(viewX, viewY, viewSize) {
+function draw3D(viewX, viewY, viewSize, dir) {
   const viewSizeX = viewSize
-  const viewSizeY = viewSize//Math.floor(viewSize / 1.5)
+  const viewSizeY = Math.floor(viewSize / 1.5)
   const viewXCentre = viewSizeX / 2
   const viewYCentre = viewSizeY / 2
   const depthFactor = 3
@@ -127,7 +129,7 @@ function draw3D(viewX, viewY, viewSize) {
     const size = viewSizeX/(Math.pow(depthFactor,i-1))
     //draw edges
     for (let j of across) {
-      const cellPos = viewCellPos(pos, i, j)
+      const cellPos = viewCellPos(pos, dir, i, j)
       const cell = cellAt(cellPos)
       if (cell == 0) {
         const left = viewXCentre - size/2 + j*size
@@ -160,7 +162,7 @@ function draw3D(viewX, viewY, viewSize) {
     }
     //draw fronts and enemies
     for (let j of across) {
-      const cellPos = viewCellPos(pos, i, j)
+      const cellPos = viewCellPos(pos, dir, i, j)
       const cell = cellAt(cellPos)
       if (cell == 0) {
         const left = viewXCentre - size/2 + j*size
@@ -184,18 +186,18 @@ function draw3D(viewX, viewY, viewSize) {
   ctx.drawImage(tempCanvas, 0, 0, viewSizeX, viewSizeY, viewX, viewY, viewSizeX, viewSizeY)
 }
 
-function viewCellPos(pos, i, j)
+function viewCellPos(pos, viewDir, i, j)
 {
-  if (pos.dir == dir.down) {
+  if (viewDir == dir.down) {
     return {x:pos.x-j, y:pos.y + i}
   }
-  if (pos.dir == dir.up) {
+  if (viewDir == dir.up) {
     return {x:pos.x+j, y:pos.y - i}
   }
-  if (pos.dir == dir.right) {
+  if (viewDir == dir.right) {
     return {x:pos.x+i, y:pos.y + j}
   }
-  if (pos.dir == dir.left) {
+  if (viewDir == dir.left) {
     return {x:pos.x-i, y:pos.y - j}
   }
 }
