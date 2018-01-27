@@ -58,11 +58,11 @@ const enemyType = []
 enemyType.push({tileSet:0, sprite:1, maxHp:20, speed:7, attack:5, name: "Sporangium Warrior", desc:"It smells angry"})
 enemyType.push({tileSet:0, sprite:2, maxHp:15, speed:5, attack:6, name: "Aspergillus Philosopher", desc:"It quivers threateningly"})
 enemyType.push({tileSet:0, sprite:3, maxHp:30, speed:3, attack:7, name: "Elder Shroom", desc:"It doesn't want you here"})
-enemyType.push({tileSet:0, sprite:4, maxHp:40, speed:2, attack:8, name: "Earthstar", desc:"It seems to be waiting for something"})
-enemyType.push({tileSet:1, sprite:1, maxHp:20, speed:7, attack:5, name: "bottle", desc:"It smells angry"})
-enemyType.push({tileSet:1, sprite:2, maxHp:15, speed:5, attack:6, name: "cig", desc:"It quivers threateningly"})
-enemyType.push({tileSet:1, sprite:3, maxHp:30, speed:3, attack:7, name: "trapped", desc:"It doesn't want you here"})
-enemyType.push({tileSet:1, sprite:4, maxHp:40, speed:2, attack:8, name: "can", desc:"It seems to be waiting for something"})
+enemyType.push({tileSet:0, sprite:4, maxHp:40, speed:2, attack:8, name: "Earthstar", desc:"It stares expectantly"})
+enemyType.push({tileSet:1, sprite:1, maxHp:20, speed:7, attack:5, name: "Broken One", desc:"It looks fragile"})
+enemyType.push({tileSet:1, sprite:2, maxHp:15, speed:5, attack:6, name: "Smoke Elemental", desc:"It seems to be slowly burning away"})
+enemyType.push({tileSet:1, sprite:3, maxHp:30, speed:3, attack:7, name: "Sewer Wyrm", desc:"It thrashes around to no avail"})
+enemyType.push({tileSet:1, sprite:4, maxHp:40, speed:2, attack:8, name: "Canbion", desc:"It shuffles back and forth"})
 
 
 const playerPos = {x: 27, y: 11, dir: dirs.down}
