@@ -70,7 +70,8 @@ let depth = 0
 let tileSet = 0
 const map = []
 const enemies = []
-const ladders = []
+const laddersUp = []
+const laddersDown = []
 
 makeMap()
 
@@ -91,21 +92,35 @@ function makeMap() {
 }
 
 function makeLadders(n) {
-  ladders.length = 0
+  laddersUp.length = 0
+  if (n > 0) {
+    rngSeed = n - 1
+    times(100, () => addLadderUp())
+  }
+  laddersDown.length = 0
   rngSeed = n
   times(100, () => addLadderDown())
 }
 
 function addLadderDown() {
-  let x = -1
-  let y = -1
-  while (x == -1 || anyAtPos(ladders, {x:x, y:y})) {
-    x = rnd(mapSize)
-    y = rnd(mapSize)
-    
+  addLadder(false)
+}
+
+function addLadderUp() {
+  addLadder(true)
+}
+
+function addLadder(isUp) {
+  let type = isUp ? "up" : "down"
+  let list = isUp ? laddersUp : laddersDown
+  let x = rnd(mapSize)
+  let y = rnd(mapSize)
+  if (anyAtPos(list, {x:x, y:y})) {
+    return //don't add duplicates
   }
-  var ladder = {x:x, y:y, type:"down"}
-  ladders.push(ladder)
+  var ladder = {x:x, y:y, type: isUp ? "up" : "down"}
+  map[x][y] = 1 //clear the space
+  list.push(ladder)
 }
 
 function makeEnemies() {
@@ -179,7 +194,7 @@ function draw() {
     ctx.fillText(`Health points: ${playerStats.hp} of ${playerStats.maxHp}`, x, y);  y+=lineHeight
     y+=lineHeight
     ctx.fillText(`Arrow keys move and attack. Spacebar to wait.`, x, y);  y+=lineHeight
-    if (anyAtPos(ladders, playerPos)) {
+    if (anyAtPos(laddersUp, playerPos) || anyAtPos(laddersDown, playerPos)) {
       ctx.fillText(`[d] or [u] to go down or up a ladder.`, x, y);  y+=lineHeight
     }
   }
@@ -255,13 +270,25 @@ function draw3D(viewX, viewY, viewSize, dir) {
         const top = viewYCentre - size/2
         tCtx.drawImage(spriteImage, 0, 256*tileSet, 256, 256, left, top, size, size)
       } else {
-        const l = ladders.find(e => e.x == cellPos.x && e.y == cellPos.y)
-        if (l != undefined)
         {
-          const eSize = viewSizeY/(Math.pow(depthFactor,i-0.4))
-          const left = viewXCentre - eSize/2 + j*eSize
-          const top = viewYCentre - eSize/2+eSize*0.2
-          tCtx.drawImage(spriteImage, 0, 6*256, 256, 256, left, top, eSize, eSize)
+          const l = findAtPos(laddersUp, cellPos)
+          if (l != undefined)
+          {
+            const eSize = viewSizeY/(Math.pow(depthFactor,i-0.4))
+            const left = viewXCentre - eSize/2 + j*eSize
+            const top = viewYCentre - eSize/2-eSize*0.2
+            tCtx.drawImage(spriteImage, 0, 5*256, 256, 256, left, top, eSize, eSize)
+          }
+        }
+        {
+          const l = findAtPos(laddersDown, cellPos)
+          if (l != undefined)
+          {
+            const eSize = viewSizeY/(Math.pow(depthFactor,i-0.4))
+            const left = viewXCentre - eSize/2 + j*eSize
+            const top = viewYCentre - eSize/2+eSize*0.2
+            tCtx.drawImage(spriteImage, 0, 6*256, 256, 256, left, top, eSize, eSize)
+          }
         }
         const e = enemies.find(e => e.x == cellPos.x && e.y == cellPos.y)
         if (e != undefined) {
@@ -277,14 +304,26 @@ function draw3D(viewX, viewY, viewSize, dir) {
   }
 
   //special: draw ladder in current square
-  const l = ladders.find(e => e.x == playerPos.x && e.y == playerPos.y)
-  if (l != undefined)
   {
-    const eSize = viewSizeY/(Math.pow(depthFactor,0-0.4))
-    const left = viewXCentre - eSize/2 + 0*eSize
-    const top = viewYCentre - eSize/2+eSize*0.4
-    tCtx.drawImage(spriteImage, 0, 6*256, 256, 256, left, top, eSize, eSize)
+    const l = findAtPos(laddersDown, playerPos)
+    if (l != undefined)
+    {
+      const eSize = viewSizeY/(Math.pow(depthFactor,0-0.4))
+      const left = viewXCentre - eSize/2 + 0*eSize
+      const top = viewYCentre - eSize/2+eSize*0.4
+      tCtx.drawImage(spriteImage, 0, 6*256, 256, 256, left, top, eSize, eSize)
+    }
   }
+  {
+    const l = findAtPos(laddersUp, playerPos)
+    if (l != undefined)
+    {
+      const eSize = viewSizeY/(Math.pow(depthFactor,0-0.4))
+      const left = viewXCentre - eSize/2 + 0*eSize
+      const top = viewYCentre - eSize/2-eSize*0.4
+      tCtx.drawImage(spriteImage, 0, 5*256, 256, 256, left, top, eSize, eSize)
+    }
+}
 
   ctx.drawImage(tempCanvas, 0, 0, viewSizeX, viewSizeY, viewX, viewY, viewSizeX, viewSizeY)
   ctx.strokeStyle = "darkblue"
@@ -363,8 +402,12 @@ function drawCell(x, y) {
     tCtx.fillStyle = "red"
     tCtx.fillRect(x*cellSize+2, y*cellSize+2, cellSize - 4, cellSize - 4)
   }
-  if (anyAtPos(ladders, {x:x, y:y})) {
+  if (anyAtPos(laddersUp, {x:x, y:y})) {
     tCtx.fillStyle = "yellow"
+    tCtx.fillRect(x*cellSize+2, y*cellSize+2, cellSize - 4, cellSize - 4)
+  }
+  if (anyAtPos(laddersDown, {x:x, y:y})) {
+    tCtx.fillStyle = "gold"
     tCtx.fillRect(x*cellSize+2, y*cellSize+2, cellSize - 4, cellSize - 4)
   }
 }
@@ -413,12 +456,14 @@ function doKey(keyCode, state) {
 }
 
 function up() {
-
+  const ladder = findAtPos(laddersUp, playerPos)
+  if (ladder == undefined) return
+  changeLevelTo(depth-1)
 }
 
 function down() {
-  const ladder = findAtPos(ladders, playerPos)
-  if (ladder == undefined || ladder.type != "down") return
+  const ladder = findAtPos(laddersDown, playerPos)
+  if (ladder == undefined) return
   changeLevelTo(depth+1)
 }
 
