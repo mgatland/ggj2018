@@ -36,10 +36,11 @@ function rnd(n) {
   return Math.floor(random() * n)
 }
 
+const player = {speed:10}
 const mapSize = 100
 const cellSize = 7
-const dir = {up:{name:"up", y:-1}, right:{name:"right",x:1}, down:{name:"down",y:1}, left:{name:"left",x:-1}}
-setDirs([dir.up, dir.right, dir.down, dir.left])
+const dirs = {up:{name:"up", y:-1}, right:{name:"right",x:1}, down:{name:"down",y:1}, left:{name:"left",x:-1}}
+setDirs([dirs.up, dirs.right, dirs.down, dirs.left])
 function setDirs(dirs) {
   for(let i = 0; i < dirs.length; i++) {
     dirs[i].cw = dirs[(i+1)%dirs.length]
@@ -51,12 +52,12 @@ function setDirs(dirs) {
 }
 
 const enemyType = []
-enemyType.push({tileSet:0, sprite:1, maxHp:20, name: "Sporangium Warrior", desc:"It smells angry"})
-enemyType.push({tileSet:0, sprite:2, maxHp:15, name: "Aspergillus Philosopher", desc:""}) //mould
-enemyType.push({tileSet:0, sprite:3, maxHp:30, name: "Elder Shroom", desc:""})
-enemyType.push({tileSet:0, sprite:4, maxHp:40, name: "Earthstar", desc:""})
+enemyType.push({tileSet:0, sprite:1, maxHp:20, speed:7, name: "Sporangium Warrior", desc:"It smells angry"})
+enemyType.push({tileSet:0, sprite:2, maxHp:15, speed:5, name: "Aspergillus Philosopher", desc:""})
+enemyType.push({tileSet:0, sprite:3, maxHp:30, speed:3, name: "Elder Shroom", desc:""})
+enemyType.push({tileSet:0, sprite:4, maxHp:40, speed:2, name: "Earthstar", desc:""})
 
-const pos = {x: 27, y: 11, dir: dir.down}
+const playerPos = {x: 27, y: 11, dir: dirs.down}
 let depth = 0
 let tileSet = 0
 const map = []
@@ -78,18 +79,19 @@ function makeMap() {
 }
 
 function makeEnemies() {
-  times(300, makeEnemy)
+  times(100, makeEnemy)
 }
 
 function makeEnemy() {
   let x = -1
   let y = -1
-  while (cellAt(x, y) == 0) {
+  while (!cellIsEmpty({x:x, y:y})) {
     x = rnd(mapSize)
     y = rnd(mapSize)
   }
   var enemy = {x:x, y:y, type:rnd(4)}
   enemy.hp = enemyType[enemy.type].maxHp
+  enemy.timer = 0
   enemies.push(enemy)
 }
 
@@ -122,18 +124,18 @@ function draw() {
   const col1X = 0
   const col2X = smallColWidth
   const col3X = smallColWidth + viewSize
-  draw3D(col1X, smallViewY, smallColWidth, pos.dir.ccw)
-  draw3D(col2X, 0, viewSize, pos.dir)
-  draw3D(col3X, smallViewY, smallColWidth, pos.dir.cw)
+  draw3D(col1X, smallViewY, smallColWidth, playerPos.dir.ccw)
+  draw3D(col2X, 0, viewSize, playerPos.dir)
+  draw3D(col3X, smallViewY, smallColWidth, playerPos.dir.cw)
   const rearViewX = smallColWidth + viewSize/2-smallColWidth/2
-  draw3D(rearViewX, Math.floor(viewSize/1.5), smallColWidth, pos.dir.reverse)
+  draw3D(rearViewX, Math.floor(viewSize/1.5), smallColWidth, playerPos.dir.reverse)
   
   drawMap(col3X, 0, canvas.width - col3X, smallViewY)
   ctx.font="16px Verdana"
   ctx.fillStyle="white"
-  ctx.fillText("position: " + pos.x + ":" + pos.y + ":" + pos.dir.name, 12, 748)
+  ctx.fillText("position: " + playerPos.x + ":" + playerPos.y + ":" + playerPos.dir.name, 12, 748)
 
-  const ahead = move(pos, pos.dir)
+  const ahead = move(playerPos, playerPos.dir)
   const target = enemyAt(ahead)
   if (target != null)
   {
@@ -164,7 +166,7 @@ function draw3D(viewX, viewY, viewSize, dir) {
     const size = viewSizeX/(Math.pow(depthFactor,i-1))
     //draw edges
     for (let j of across) {
-      const cellPos = viewCellPos(pos, dir, i, j)
+      const cellPos = viewCellPos(playerPos, dir, i, j)
       const cell = cellAt(cellPos)
       if (cell == 0) {
         const left = viewXCentre - size/2 + j*size
@@ -183,7 +185,7 @@ function draw3D(viewX, viewY, viewSize, dir) {
     }
     //draw fronts and enemies
     for (let j of across) {
-      const cellPos = viewCellPos(pos, dir, i, j)
+      const cellPos = viewCellPos(playerPos, dir, i, j)
       const cell = cellAt(cellPos)
       if (cell == 0) {
         const left = viewXCentre - size/2 + j*size
@@ -215,16 +217,16 @@ function enemyAt(cellPos)
 
 function viewCellPos(pos, viewDir, i, j)
 {
-  if (viewDir == dir.down) {
+  if (viewDir == dirs.down) {
     return {x:pos.x-j, y:pos.y + i}
   }
-  if (viewDir == dir.up) {
+  if (viewDir == dirs.up) {
     return {x:pos.x+j, y:pos.y - i}
   }
-  if (viewDir == dir.right) {
+  if (viewDir == dirs.right) {
     return {x:pos.x+i, y:pos.y + j}
   }
-  if (viewDir == dir.left) {
+  if (viewDir == dirs.left) {
     return {x:pos.x-i, y:pos.y - j}
   }
 }
@@ -241,11 +243,11 @@ function drawMap(viewX, viewY, viewSizeX, viewSizeY) {
     }
   }
   tCtx.fillStyle = "white"
-  tCtx.fillRect(pos.x * cellSize, pos.y*cellSize, cellSize-1, cellSize-1)
+  tCtx.fillRect(playerPos.x * cellSize, playerPos.y*cellSize, cellSize-1, cellSize-1)
 
   //centre map on player
-  var cropX = pos.x * cellSize - viewSizeX / 2
-  var cropY = pos.y * cellSize - viewSizeY / 2
+  var cropX = playerPos.x * cellSize - viewSizeX / 2
+  var cropY = playerPos.y * cellSize - viewSizeY / 2
 
   ctx.fillStyle = "grey"
   ctx.fillRect(viewX, viewY, viewSizeX, viewSizeY)
@@ -293,6 +295,10 @@ function cellAt(x, y) { //or {x,y} object
   return 0
 }
 
+function cellIsEmpty(pos) {
+  return (cellAt(pos) != 0) && !enemies.some(e => e.x == pos.x && e.y == pos.y)
+}
+
 window.addEventListener("keyup", function (e) {
   doKey(e.keyCode)
 })
@@ -316,25 +322,67 @@ function doKey(keyCode, state) {
 }
 
 function turnBack() {
-  pos.dir = pos.dir.reverse
+  playerPos.dir = playerPos.dir.reverse
   draw()
 }
 function turnLeft() {
-  pos.dir = pos.dir.ccw
+  playerPos.dir = playerPos.dir.ccw
   draw()
 }
 function turnRight() {
-  pos.dir = pos.dir.cw
+  playerPos.dir = playerPos.dir.cw
   draw()
 }
 function forward() {
-  const dest = move(pos, pos.dir)
+  const dest = move(playerPos, playerPos.dir)
   if (cellAt(dest.x, dest.y) == 1 && !enemies.some(e => e.x == dest.x && e.y == dest.y)) {
-    pos.x += pos.dir.x
-    pos.y += pos.dir.y
+    playerPos.x += playerPos.dir.x
+    playerPos.y += playerPos.dir.y
+    timePasses(100/player.speed)
   }
   draw()
 }
+
+function timePasses(amount)
+{
+  console.log("time passes: " + amount)
+  for (let e of enemies) {
+    if (e.timer == undefined) e.timer = 0
+    e.timer += amount
+    const et = getType(e)
+    if (e.timer > 100/et.speed) {
+      e.timer -= 100/et.speed
+      moveEnemy(e)
+    }
+  }
+}
+
+function getType(e) {
+  return enemyType[e.type]
+}
+
+function moveEnemy(e) {
+  const moves = []
+  const options = [dirs.up, dirs.down, dirs.left, dirs.right]
+  for(let dir of options) {
+    const newPos = move(e, dir)
+    const score = distanceFromTo(newPos, playerPos)
+    if (cellIsEmpty(newPos)) {
+      moves.push({pos:newPos, score:score})
+    }
+  }
+  moves.sort((a,b) => a.score > b.score)
+  if (moves.length > 0) {
+    console.log("moved")
+    e.x = moves[0].pos.x
+    e.y = moves[0].pos.y
+  }
+}
+
+function distanceFromTo(start, end) {
+  return Math.abs(start.x - end.x) + Math.abs(start.y - end.y)
+}
+
 function move(pos, move) {
   return {x: pos.x + move.x, y: pos.y + move.y}
 }
