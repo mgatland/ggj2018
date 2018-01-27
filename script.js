@@ -156,16 +156,26 @@ function draw() {
   }
 }
 
+let flipped = false
 function draw3D(viewX, viewY, viewSize, dir) {
   const viewSizeX = viewSize
   const viewSizeY = Math.floor(viewSize / 1.5)
   const viewXCentre = viewSizeX / 2
   const viewYCentre = viewSizeY / 2
   const depthFactor = 2
-  tCtx.fillStyle = "darkgrey"
-  tCtx.fillRect(0, 0, viewSizeX, viewSizeY/2)
-  tCtx.fillStyle = "brown"
-  tCtx.fillRect(0, 0+viewSizeY/2, viewSizeX, viewSizeY/2)
+
+  //floor and ceiling
+
+  if (flipped) {
+    console.log("a")
+    tCtx.scale(-1,1)
+    tCtx.drawImage(spriteImage, 256*6, 512*tileSet, 512, 512, 0, 0, viewSizeX*-1, viewSizeY)
+    tCtx.scale(-1,1)    
+  } else {
+    console.log("b")
+    tCtx.drawImage(spriteImage, 256*6, 512*tileSet, 512, 512, 0, 0, viewSizeX, viewSizeY)
+  }
+
   const across = [-8,-7,-6,-5,-4,-3,-2,-1,7,6,5,4,3,2,1,0]
   for (let i = 15; i > 0; i--) { //depth
     const size = viewSizeX/(Math.pow(depthFactor,i-1))
@@ -329,14 +339,17 @@ function doKey(keyCode, state) {
 }
 
 function turnBack() {
+  flipped = !flipped
   playerPos.dir = playerPos.dir.reverse
   draw()
 }
 function turnLeft() {
+  flipped = !flipped
   playerPos.dir = playerPos.dir.ccw
   draw()
 }
 function turnRight() {
+  flipped = !flipped
   playerPos.dir = playerPos.dir.cw
   draw()
 }
@@ -347,6 +360,7 @@ function forward() {
     return
   }
   if (cellAt(dest.x, dest.y) == 1) {
+    flipped = !flipped
     playerPos.x += playerPos.dir.x
     playerPos.y += playerPos.dir.y
     timePasses(100/playerStats.speed)
