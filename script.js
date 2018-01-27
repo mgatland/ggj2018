@@ -240,7 +240,8 @@ function draw3D(viewX, viewY, viewSize, dir) {
   }
 
   const across = [-8,-7,-6,-5,-4,-3,-2,-1,7,6,5,4,3,2,1,0]
-  for (let i = 15; i > 0; i--) { //depth
+  for (let i = 15; i >= 0; i--) { //depth
+    const isHomeRow = (i == 0)
     const size = viewSizeY/(Math.pow(depthFactor,i-1))
     //draw edges
     for (let j of across) {
@@ -276,7 +277,7 @@ function draw3D(viewX, viewY, viewSize, dir) {
           {
             const eSize = viewSizeY/(Math.pow(depthFactor,i-0.4))
             const left = viewXCentre - eSize/2 + j*eSize
-            const top = viewYCentre - eSize/2-eSize*0.2
+            const top = viewYCentre - eSize/2-eSize*(isHomeRow ? 0.4:0.2)
             tCtx.drawImage(spriteImage, 0, 5*256, 256, 256, left, top, eSize, eSize)
           }
         }
@@ -286,7 +287,7 @@ function draw3D(viewX, viewY, viewSize, dir) {
           {
             const eSize = viewSizeY/(Math.pow(depthFactor,i-0.4))
             const left = viewXCentre - eSize/2 + j*eSize
-            const top = viewYCentre - eSize/2+eSize*0.2
+            const top = viewYCentre - eSize/2+eSize*(isHomeRow ? 0.4:0.2)
             tCtx.drawImage(spriteImage, 0, 6*256, 256, 256, left, top, eSize, eSize)
           }
         }
@@ -302,29 +303,6 @@ function draw3D(viewX, viewY, viewSize, dir) {
       } 
     }
   }
-
-  //special: draw ladder in current square
-  {
-    const l = findAtPos(laddersDown, playerPos)
-    if (l != undefined)
-    {
-      const eSize = viewSizeY/(Math.pow(depthFactor,0-0.4))
-      const left = viewXCentre - eSize/2 + 0*eSize
-      const top = viewYCentre - eSize/2+eSize*0.4
-      tCtx.drawImage(spriteImage, 0, 6*256, 256, 256, left, top, eSize, eSize)
-    }
-  }
-  {
-    const l = findAtPos(laddersUp, playerPos)
-    if (l != undefined)
-    {
-      const eSize = viewSizeY/(Math.pow(depthFactor,0-0.4))
-      const left = viewXCentre - eSize/2 + 0*eSize
-      const top = viewYCentre - eSize/2-eSize*0.4
-      tCtx.drawImage(spriteImage, 0, 5*256, 256, 256, left, top, eSize, eSize)
-    }
-}
-
   ctx.drawImage(tempCanvas, 0, 0, viewSizeX, viewSizeY, viewX, viewY, viewSizeX, viewSizeY)
   ctx.strokeStyle = "darkblue"
   ctx.lineWidth = 4
