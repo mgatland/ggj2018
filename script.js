@@ -660,8 +660,11 @@ function getType(e) {
 function moveEnemy(e) {
   const moves = []
   const options = [dirs.up, dirs.down, dirs.left, dirs.right]
+  const dist = distanceFromTo(e, playerPos)
 
-  if (distanceFromTo(e, playerPos) == 1) {
+  if (dist > 10) return //distant enemies just stand there
+
+  if (dist == 1) {
     //enemy attack
     monsterAttack(e)
     return
