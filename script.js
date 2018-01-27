@@ -39,7 +39,7 @@ function setDirs(dirs) {
   }
 }
 
-const pos = {x: 13, y: 1, dir: dir.left}
+const pos = {x: 15, y: 3, dir: dir.left}
 const depth = 0
 const map = []
 makeMap()
@@ -90,18 +90,59 @@ function draw() {
 function draw3D() {
   const viewX = 700
   const viewY = 0
-  const viewSize = 300
+  const viewSize = 1024-700
+  const viewXCentre = viewX + viewSize / 2
+  const viewYCentre = viewY + viewSize / 2
+  const depthFactor = 3
   ctx.fillStyle = "darkgrey"
   ctx.fillRect(viewX, viewY, viewSize, viewSize/2)
   ctx.fillStyle = "darkblue"
   ctx.fillRect(viewX, viewY+viewSize/2, viewSize, viewSize/2)
-  ctx.fillStyle = "darkgreen"
+  const across = [-8,-7,-6,-5,-4,-3,-2,-1,7,6,5,4,3,2,1,0]
   for (let i = 15; i > 0; i--) { //depth
-    const size = viewSize/(Math.pow(3,i-1))
-    for (let j = -5; j < 5; j++) { //across
+    const size = viewSize/(Math.pow(depthFactor,i-1))
+    //draw edges
+    for (let j of across) {
       const cell = cellAt(viewCellPos(pos, i, j))
       if (cell == 0) {
-        ctx.fillRect(viewX+viewSize/2-size/2+j*size, viewY+viewSize/2-size/2, size-1, size-1)
+        const left = viewXCentre - size/2 + j*size
+        const top = viewYCentre - size/2
+        const behindSize = size / depthFactor
+        if (j > 0) {
+          ctx.fillStyle = "darkgreen"
+          ctx.beginPath()
+          ctx.moveTo(left, top)
+          ctx.lineTo(left, top+size)
+          ctx.lineTo(viewXCentre - behindSize/2 + j*behindSize, viewYCentre + behindSize/2) //back top
+          ctx.lineTo(viewXCentre - behindSize/2 + j*behindSize, viewYCentre - behindSize/2) //back bottom
+          ctx.closePath()
+          ctx.fill()
+          ctx.strokeStyle = "green"
+          ctx.stroke()
+        } else if (j < 0) {
+          ctx.fillStyle = "darkgreen"
+          ctx.beginPath()
+          ctx.moveTo(left+size, top)
+          ctx.lineTo(left+size, top+size)
+          ctx.lineTo(viewXCentre - behindSize/2 + (j+1)*behindSize, viewYCentre + behindSize/2) //back top
+          ctx.lineTo(viewXCentre - behindSize/2 + (j+1)*behindSize, viewYCentre - behindSize/2) //back bottom
+          ctx.closePath()
+          ctx.fill()
+          ctx.strokeStyle = "green"
+          ctx.stroke()
+        }
+      }
+    }
+    //draw fronts
+    for (let j of across) {
+      const cell = cellAt(viewCellPos(pos, i, j))
+      if (cell == 0) {
+        const left = viewXCentre - size/2 + j*size
+        const top = viewYCentre - size/2
+        ctx.fillStyle = "lightblue" //"darkgreen"
+        ctx.fillRect(left, top, size, size)
+        ctx.strokeStyle = "green"
+        ctx.strokeRect(left, top, size, size)
       }
     }
   }
