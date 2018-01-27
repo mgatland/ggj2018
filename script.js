@@ -167,12 +167,10 @@ function draw3D(viewX, viewY, viewSize, dir) {
   //floor and ceiling
 
   if (flipped) {
-    console.log("a")
     tCtx.scale(-1,1)
     tCtx.drawImage(spriteImage, 256*6, 512*tileSet, 512, 512, 0, 0, viewSizeX*-1, viewSizeY)
     tCtx.scale(-1,1)    
   } else {
-    console.log("b")
     tCtx.drawImage(spriteImage, 256*6, 512*tileSet, 512, 512, 0, 0, viewSizeX, viewSizeY)
   }
 
