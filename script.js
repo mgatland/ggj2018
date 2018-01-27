@@ -100,18 +100,21 @@ function addRoom(minSize, maxSize, hallway) {
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
-  drawMap()
-  const smallViewSize = 186
-  const viewSize = canvas.width - smallViewSize*2
-  const smallViewY = Math.floor(viewSize/1.5)-Math.floor(smallViewSize/1.5)
-  draw3D(0, smallViewY, smallViewSize, pos.dir.ccw)
-  draw3D(smallViewSize + viewSize, smallViewY, smallViewSize, pos.dir.cw)
-  draw3D(smallViewSize + viewSize/2-smallViewSize/2, Math.floor(viewSize/1.5), smallViewSize, pos.dir.reverse)
-  draw3D(smallViewSize, 0, viewSize, pos.dir)
+  const smallColWidth = 186
+  const viewSize = canvas.width - smallColWidth*2
+  const smallViewY = Math.floor(viewSize/1.5)-Math.floor(smallColWidth/1.5)
+  const col1X = 0
+  const col2X = smallColWidth
+  const col3X = smallColWidth + viewSize
+  draw3D(col1X, smallViewY, smallColWidth, pos.dir.ccw)
+  draw3D(col2X, 0, viewSize, pos.dir)
+  draw3D(col3X, smallViewY, smallColWidth, pos.dir.cw)
+  draw3D(smallColWidth + viewSize/2-smallColWidth/2, Math.floor(viewSize/1.5), smallColWidth, pos.dir.reverse)
+  
+  drawMap(col3X, 0, canvas.width - col3X, smallViewY)
   ctx.font="12px Verdana"
   ctx.fillStyle="black"
   ctx.fillText("position: " + pos.x + ":" + pos.y + ":" + pos.dir.name, 12, 748)
-  
 }
 
 function draw3D(viewX, viewY, viewSize, dir) {
@@ -202,9 +205,9 @@ function viewCellPos(pos, viewDir, i, j)
   }
 }
 
-function drawMap() {
-  ctx.fillStyle = "grey"
-  ctx.fillRect(0, 0, mapSize*cellSize, mapSize*cellSize)
+function drawMap(viewX, viewY, viewSizeX, viewSizeY) {
+  tCtx.fillStyle = "grey"
+  tCtx.fillRect(0, 0, mapSize*cellSize, mapSize*cellSize)
   for (let x = 0; x < mapSize; x++) {
     for (let y = 0; y < mapSize; y++) {
       const cell = cellAt(x, y)
@@ -213,32 +216,40 @@ function drawMap() {
       }
     }
   }
-  ctx.fillStyle = "white"
-  ctx.fillRect(pos.x * cellSize, pos.y*cellSize, cellSize-1, cellSize-1)
+  tCtx.fillStyle = "white"
+  tCtx.fillRect(pos.x * cellSize, pos.y*cellSize, cellSize-1, cellSize-1)
+
+  //centre map on player
+  var cropX = pos.x * cellSize - viewSizeX / 2
+  var cropY = pos.y * cellSize - viewSizeY / 2
+
+  ctx.fillStyle = "grey"
+  ctx.fillRect(viewX, viewY, viewSizeX, viewSizeY)
+  ctx.drawImage(tempCanvas, cropX, cropY, viewSizeX, viewSizeY, viewX, viewY, viewSizeX, viewSizeY)
 }
 
 draw()
 
 function drawCell(x, y) {
   const edgeLength = cellSize - 1
-  ctx.fillStyle = "black"
-  ctx.fillRect(x*cellSize,y*cellSize,cellSize-1,cellSize-1)
-  ctx.fillStyle = "white"
+  tCtx.fillStyle = "black"
+  tCtx.fillRect(x*cellSize,y*cellSize,cellSize-1,cellSize-1)
+  tCtx.fillStyle = "white"
   if (cellAt(x-1, y) == 0) {
-    ctx.fillRect(x*cellSize-1,y*cellSize,1,edgeLength)
+    tCtx.fillRect(x*cellSize-1,y*cellSize,1,edgeLength)
   }
   if (cellAt(x+1, y) == 0) {
-    ctx.fillRect((x+1)*cellSize-1,y*cellSize,1,edgeLength)
+    tCtx.fillRect((x+1)*cellSize-1,y*cellSize,1,edgeLength)
   }
   if (cellAt(x, y-1) == 0) {
-    ctx.fillRect(x*cellSize,y*cellSize-1,edgeLength,1)
+    tCtx.fillRect(x*cellSize,y*cellSize-1,edgeLength,1)
   }
   if (cellAt(x, y+1) == 0) {
-    ctx.fillRect(x*cellSize,(y+1)*cellSize-1,edgeLength,1)
+    tCtx.fillRect(x*cellSize,(y+1)*cellSize-1,edgeLength,1)
   }
   if (enemies.some(e => e.x == x && e.y == y)) {
-    ctx.fillStyle = "red"
-    ctx.fillRect(x*cellSize+2, y*cellSize+2, cellSize - 4, cellSize - 4)
+    tCtx.fillStyle = "red"
+    tCtx.fillRect(x*cellSize+2, y*cellSize+2, cellSize - 4, cellSize - 4)
   }
 }
 
