@@ -20,6 +20,7 @@ const height = canvas.height
 let loaded = false
 let playerCombatMessage1 = ""
 let playerCombatMessage2 = ""
+let enemyCombatMessage = []
 
 const spriteImage = new Image()
 spriteImage.src = 'sprites.png'
@@ -38,7 +39,7 @@ function rnd(n) {
   return Math.floor(random() * n)
 }
 
-const playerStats = {speed:10, attack:10}
+const playerStats = {speed:10, attack:10, level:0, exp:0, sp:5, maxSp:5, hp:10, maxHp:10}
 const mapSize = 100
 const cellSize = 7
 const dirs = {up:{name:"up", y:-1}, right:{name:"right",x:1}, down:{name:"down",y:1}, left:{name:"left",x:-1}}
@@ -54,10 +55,10 @@ function setDirs(dirs) {
 }
 
 const enemyType = []
-enemyType.push({tileSet:0, sprite:1, maxHp:20, speed:7, name: "Sporangium Warrior", desc:"It smells angry"})
-enemyType.push({tileSet:0, sprite:2, maxHp:15, speed:5, name: "Aspergillus Philosopher", desc:"It quivers threateningly"})
-enemyType.push({tileSet:0, sprite:3, maxHp:30, speed:3, name: "Elder Shroom", desc:"It doesn't want you here"})
-enemyType.push({tileSet:0, sprite:4, maxHp:40, speed:2, name: "Earthstar", desc:"It seems to be waiting for something"})
+enemyType.push({tileSet:0, sprite:1, maxHp:20, speed:7, attack:5, name: "Sporangium Warrior", desc:"It smells angry"})
+enemyType.push({tileSet:0, sprite:2, maxHp:15, speed:5, attack:6, name: "Aspergillus Philosopher", desc:"It quivers threateningly"})
+enemyType.push({tileSet:0, sprite:3, maxHp:30, speed:3, attack:7, name: "Elder Shroom", desc:"It doesn't want you here"})
+enemyType.push({tileSet:0, sprite:4, maxHp:40, speed:2, attack:8, name: "Earthstar", desc:"It seems to be waiting for something"})
 
 const playerPos = {x: 27, y: 11, dir: dirs.down}
 let depth = 0
@@ -139,12 +140,30 @@ function draw() {
 
   const ahead = move(playerPos, playerPos.dir)
   const target = enemyAt(ahead)
+
+  {
+    const x = col1X + 20
+    let y = viewSize/1.5+20
+    const lineHeight = 20
+    ctx.fillText("Armour: clothes    weapon: fist ", x, y);  y+=lineHeight
+    ctx.fillText(`Level: ${playerStats.level}     Exp: ${playerStats.exp}`, x, y);  y+=lineHeight
+    ctx.fillText(`Spell points: ${playerStats.sp} of ${playerStats.maxSp}`, x, y);  y+=lineHeight
+    ctx.fillText(`Health points: ${playerStats.hp} of ${playerStats.maxHp}`, x, y);  y+=lineHeight
+    y+=lineHeight
+    ctx.fillText(`Arrow keys move and attack. Spacebar to wait.`, x, y);  y+=lineHeight
+  }
+
+  const x = rearViewX + smallColWidth + 20
+  let y = viewSize/1.5+20
+  const lineHeight = 20
+  for (let i = 0; i < enemyCombatMessage.length; i++) {
+    ctx.fillText(enemyCombatMessage[i], x, y); y+=lineHeight
+  }
   if (target != null)
   {
     const et = enemyType[target.type]
-    const x = rearViewX + smallColWidth + 20
-    let y = viewSize/1.5+20
-    const lineHeight = 20
+
+    y+=lineHeight
     ctx.fillText("You are fighting a level 1 " + et.name, x, y);  y+=lineHeight
     ctx.fillText("It has " + target.hp + " health points left", x, y);  y+=lineHeight
     y+=lineHeight
@@ -328,12 +347,18 @@ function doKey(keyCode, state) {
       break
     case 40: turnBack()
       break
+    case 32: wait()
+      break
     case 77: showMap()
     break
      case 32: /*space */p0.shoot = state
       break
       break
   }
+}
+
+function wait() {
+  timePasses(100/playerStats.speed)
 }
 
 function turnBack() {
@@ -363,7 +388,6 @@ function forward() {
     playerPos.y += playerPos.dir.y
     timePasses(100/playerStats.speed)
   }
-  draw()
 }
 
 function fight(e) {
@@ -377,7 +401,7 @@ function fight(e) {
 
 function timePasses(amount)
 {
-  console.log("time passes: " + amount)
+  enemyCombatMessage.length = 0
   for (let e of enemies) {
     if (e.timer == undefined) e.timer = 0
     e.timer += amount
@@ -387,6 +411,7 @@ function timePasses(amount)
       moveEnemy(e)
     }
   }
+  draw()
 }
 
 function getType(e) {
@@ -396,6 +421,15 @@ function getType(e) {
 function moveEnemy(e) {
   const moves = []
   const options = [dirs.up, dirs.down, dirs.left, dirs.right]
+
+  if (distanceFromTo(e, playerPos) == 1) {
+    //enemy attack
+    const damage = getType(e).attack
+    playerStats.hp -= damage
+    enemyCombatMessage.push("The " + getType(e).name + " does " + damage + " points of damage")
+    return
+  }
+
   for(let dir of options) {
     const newPos = move(e, dir)
     const score = distanceFromTo(newPos, playerPos)
@@ -405,7 +439,6 @@ function moveEnemy(e) {
   }
   moves.sort((a,b) => a.score > b.score)
   if (moves.length > 0) {
-    console.log("moved")
     e.x = moves[0].pos.x
     e.y = moves[0].pos.y
   }
