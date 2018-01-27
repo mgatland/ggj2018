@@ -1,10 +1,14 @@
 "use strict"
 //DOM stuff
 const canvas = document.querySelector(".gameCanvas")
+
 const ctx = canvas.getContext('2d')
-ctx.webkitImageSmoothingEnabled = false
-ctx.mozImageSmoothingEnabled = false
-ctx.imageSmoothingEnabled = false
+
+const tempCanvas = document.createElement("canvas")
+const tCtx = tempCanvas.getContext("2d")
+tempCanvas.width = 1024
+tempCanvas.height = 768
+
 const width = canvas.width
 const height = canvas.height
 let loaded = false
@@ -99,13 +103,9 @@ function draw() {
   drawMap()
   const smallViewSize = 186
   const viewSize = canvas.width - smallViewSize*2
-  //draw3D(0, 0, smallViewSize)
-  //draw3D(smallViewSize + viewSize, 0, smallViewSize)
+  draw3D(0, 0, smallViewSize)
+  draw3D(smallViewSize + viewSize, 0, smallViewSize)
   draw3D(smallViewSize, 0, viewSize)
-  ctx.fillStyle = "black"
-  ctx.fillRect(0, 0, smallViewSize, canvas.height)
-  ctx.fillRect(smallViewSize+viewSize, 0, canvas.width-smallViewSize-viewSize, canvas.height)
-  ctx.fillRect(smallViewSize, viewSize, viewSize, canvas.height - viewSize)
   ctx.font="12px Verdana"
   ctx.fillStyle="black"
   ctx.fillText("position: " + pos.x + ":" + pos.y + ":" + pos.dir.name, 12, 748)
@@ -115,13 +115,13 @@ function draw() {
 function draw3D(viewX, viewY, viewSize) {
   const viewSizeX = viewSize
   const viewSizeY = viewSize//Math.floor(viewSize / 1.5)
-  const viewXCentre = viewX + viewSizeX / 2
-  const viewYCentre = viewY + viewSizeY / 2
+  const viewXCentre = viewSizeX / 2
+  const viewYCentre = viewSizeY / 2
   const depthFactor = 3
-  ctx.fillStyle = "darkgrey"
-  ctx.fillRect(viewX, viewY, viewSizeX, viewSizeY/2)
-  ctx.fillStyle = "darkblue"
-  ctx.fillRect(viewX, viewY+viewSizeY/2, viewSizeX, viewSizeY/2)
+  tCtx.fillStyle = "darkgrey"
+  tCtx.fillRect(0, 0, viewSizeX, viewSizeY/2)
+  tCtx.fillStyle = "darkblue"
+  tCtx.fillRect(0, 0+viewSizeY/2, viewSizeX, viewSizeY/2)
   const across = [-8,-7,-6,-5,-4,-3,-2,-1,7,6,5,4,3,2,1,0]
   for (let i = 15; i > 0; i--) { //depth
     const size = viewSizeX/(Math.pow(depthFactor,i-1))
@@ -134,27 +134,27 @@ function draw3D(viewX, viewY, viewSize) {
         const top = viewYCentre - size/2
         const behindSize = size / depthFactor
         if (j > 0) {
-          ctx.fillStyle = "darkgreen"
-          ctx.beginPath()
-          ctx.moveTo(left, top)
-          ctx.lineTo(left, top+size)
-          ctx.lineTo(viewXCentre - behindSize/2 + j*behindSize, viewYCentre + behindSize/2) //back top
-          ctx.lineTo(viewXCentre - behindSize/2 + j*behindSize, viewYCentre - behindSize/2) //back bottom
-          ctx.closePath()
-          ctx.fill()
-          ctx.strokeStyle = "green"
-          ctx.stroke()
+          tCtx.fillStyle = "darkgreen"
+          tCtx.beginPath()
+          tCtx.moveTo(left, top)
+          tCtx.lineTo(left, top+size)
+          tCtx.lineTo(viewXCentre - behindSize/2 + j*behindSize, viewYCentre + behindSize/2) //back top
+          tCtx.lineTo(viewXCentre - behindSize/2 + j*behindSize, viewYCentre - behindSize/2) //back bottom
+          tCtx.closePath()
+          tCtx.fill()
+          tCtx.strokeStyle = "green"
+          tCtx.stroke()
         } else if (j < 0) {
-          ctx.fillStyle = "darkgreen"
-          ctx.beginPath()
-          ctx.moveTo(left+size, top)
-          ctx.lineTo(left+size, top+size)
-          ctx.lineTo(viewXCentre - behindSize/2 + (j+1)*behindSize, viewYCentre + behindSize/2) //back top
-          ctx.lineTo(viewXCentre - behindSize/2 + (j+1)*behindSize, viewYCentre - behindSize/2) //back bottom
-          ctx.closePath()
-          ctx.fill()
-          ctx.strokeStyle = "green"
-          ctx.stroke()
+          tCtx.fillStyle = "darkgreen"
+          tCtx.beginPath()
+          tCtx.moveTo(left+size, top)
+          tCtx.lineTo(left+size, top+size)
+          tCtx.lineTo(viewXCentre - behindSize/2 + (j+1)*behindSize, viewYCentre + behindSize/2) //back top
+          tCtx.lineTo(viewXCentre - behindSize/2 + (j+1)*behindSize, viewYCentre - behindSize/2) //back bottom
+          tCtx.closePath()
+          tCtx.fill()
+          tCtx.strokeStyle = "green"
+          tCtx.stroke()
         }
       }
     }
@@ -165,22 +165,23 @@ function draw3D(viewX, viewY, viewSize) {
       if (cell == 0) {
         const left = viewXCentre - size/2 + j*size
         const top = viewYCentre - size/2
-        ctx.fillStyle = "lightblue" //"darkgreen"
-        ctx.fillRect(left, top, size, size)
-        ctx.strokeStyle = "green"
-        ctx.strokeRect(left, top, size, size)
+        tCtx.fillStyle = "lightblue" //"darkgreen"
+        tCtx.fillRect(left, top, size, size)
+        tCtx.strokeStyle = "green"
+        tCtx.strokeRect(left, top, size, size)
       } else {
         const e = enemies.find(e => e.x == cellPos.x && e.y == cellPos.y)
         if (e != undefined) {
-          ctx.fillStyle = "red"
+          tCtx.fillStyle = "red"
           const eSize = viewSizeX/(Math.pow(depthFactor,i-0.5))
           const left = viewXCentre - size/2 + j*size
           const top = viewYCentre - size/2
-          ctx.drawImage(spriteImage, 0, 0, 256, 256, left+(size-eSize)/2, top+(size-eSize)/2, eSize, eSize)
+          tCtx.drawImage(spriteImage, 0, 0, 256, 256, left+(size-eSize)/2, top+(size-eSize)/2, eSize, eSize)
         }
       } 
     }
   }
+  ctx.drawImage(tempCanvas, 0, 0, viewSizeX, viewSizeY, viewX, viewY, viewSizeX, viewSizeY)
 }
 
 function viewCellPos(pos, i, j)
