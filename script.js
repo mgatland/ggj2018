@@ -50,6 +50,12 @@ function setDirs(dirs) {
   }
 }
 
+const enemyType = []
+enemyType.push({tileSet:0, sprite:1, maxHp:20, name: "Sporangium Warrior", desc:"It smells angry"})
+enemyType.push({tileSet:0, sprite:2, maxHp:15, name: "Aspergillus Philosopher", desc:""}) //mould
+enemyType.push({tileSet:0, sprite:3, maxHp:30, name: "Elder Shroom", desc:""})
+enemyType.push({tileSet:0, sprite:4, maxHp:40, name: "Earthstar", desc:""})
+
 const pos = {x: 27, y: 11, dir: dir.down}
 let depth = 0
 let tileSet = 0
@@ -82,7 +88,9 @@ function makeEnemy() {
     x = rnd(mapSize)
     y = rnd(mapSize)
   }
-  enemies.push({x:x, y:y})
+  var enemy = {x:x, y:y, type:rnd(4)}
+  enemy.hp = enemyType[enemy.type].maxHp
+  enemies.push(enemy)
 }
 
 function addRoom(minSize, maxSize, hallway) {
@@ -117,12 +125,28 @@ function draw() {
   draw3D(col1X, smallViewY, smallColWidth, pos.dir.ccw)
   draw3D(col2X, 0, viewSize, pos.dir)
   draw3D(col3X, smallViewY, smallColWidth, pos.dir.cw)
-  draw3D(smallColWidth + viewSize/2-smallColWidth/2, Math.floor(viewSize/1.5), smallColWidth, pos.dir.reverse)
+  const rearViewX = smallColWidth + viewSize/2-smallColWidth/2
+  draw3D(rearViewX, Math.floor(viewSize/1.5), smallColWidth, pos.dir.reverse)
   
   drawMap(col3X, 0, canvas.width - col3X, smallViewY)
-  ctx.font="12px Verdana"
+  ctx.font="16px Verdana"
   ctx.fillStyle="white"
   ctx.fillText("position: " + pos.x + ":" + pos.y + ":" + pos.dir.name, 12, 748)
+
+  const ahead = move(pos, pos.dir)
+  const target = enemyAt(ahead)
+  if (target != null)
+  {
+    const et = enemyType[target.type]
+    const x = rearViewX + smallColWidth + 20
+    let y = viewSize/1.5+20
+    const lineHeight = 20
+    ctx.fillText("You are fighting a level 1 " + et.name, x, y);  y+=lineHeight
+    ctx.fillText("It has " + target.hp + " health points left", x, y);  y+=lineHeight
+    y+=lineHeight*3
+    ctx.fillText("Experience value: " + target.hp*5, x, y);  y+=lineHeight
+    ctx.fillText(et.desc, x, y);  y+=lineHeight
+  }
 }
 
 function draw3D(viewX, viewY, viewSize, dir) {
@@ -168,11 +192,12 @@ function draw3D(viewX, viewY, viewSize, dir) {
       } else {
         const e = enemies.find(e => e.x == cellPos.x && e.y == cellPos.y)
         if (e != undefined) {
+          const et = enemyType[e.type]
           tCtx.fillStyle = "red"
           const eSize = viewSizeX/(Math.pow(depthFactor,i-0.4))
           const left = viewXCentre - eSize/2 + j*eSize
           const top = viewYCentre - eSize/2
-          tCtx.drawImage(spriteImage, 256*1, 0, 256, 256, left, top, eSize, eSize)
+          tCtx.drawImage(spriteImage, 256*et.sprite, et.tileSet*256, 256, 256, left, top, eSize, eSize)
         }
       } 
     }
@@ -181,6 +206,11 @@ function draw3D(viewX, viewY, viewSize, dir) {
   ctx.strokeStyle = "darkblue"
   ctx.lineWidth = 4
   ctx.strokeRect(viewX, viewY, viewSizeX, viewSizeY)
+}
+
+function enemyAt(cellPos)
+{
+  return enemies.find(e => e.x == cellPos.x && e.y == cellPos.y)
 }
 
 function viewCellPos(pos, viewDir, i, j)
@@ -299,7 +329,7 @@ function turnRight() {
 }
 function forward() {
   const dest = move(pos, pos.dir)
-  if (cellAt(dest.x, dest.y) == 1) {
+  if (cellAt(dest.x, dest.y) == 1 && !enemies.some(e => e.x == dest.x && e.y == dest.y)) {
     pos.x += pos.dir.x
     pos.y += pos.dir.y
   }
