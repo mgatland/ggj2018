@@ -94,7 +94,6 @@ function restart() {
 
 
 function makeMap() {
-  rngSeed = depth
   for(let x = 0; x < mapSize; x++) {
     map[x] = [];
     for (let y = 0; y < mapSize; y++) {
@@ -102,6 +101,7 @@ function makeMap() {
     }
   }
   //rooms
+  rngSeed = depth
   times(100, () => addRoom(2, 12))
   times(160, () => addRoom(1, 20, true))
 
@@ -137,8 +137,34 @@ function addLadder(isUp) {
     return //don't add duplicates
   }
   var ladder = {x:x, y:y, type: isUp ? "up" : "down"}
-  map[x][y] = 1 //clear the space
   list.push(ladder)
+
+  map[x][y] = 1 //clear the space
+
+  const pos = {x:x, y:y}
+  
+  if (cellAt(move(pos, dirs.up)) === 0
+    && cellAt(move(pos, dirs.down)) === 0
+    && cellAt(move(pos, dirs.left)) === 0
+    && cellAt(move(pos, dirs.right)) === 0) {
+    //ladder needs more room
+    //careful not to call rnd in here
+    let width = 1
+    let height = 1
+    if ((x+y) % 2 == 0) width++
+    if (y % 2 == 0) height++
+
+    for(let x = pos.x-width; x <= pos.x + width; x++) {
+      for (let y = pos.y - height; y <= pos.y + height; y++) {
+        if (x >= 0 && y >= 0 && x< mapSize && y < mapSize) {
+          map[x][y] = 1
+        }
+      }
+    }
+  }
+
+
+  
 }
 
 function makeEnemies() {
