@@ -52,9 +52,9 @@ function setDirs(dirs) {
 
 const enemyType = []
 enemyType.push({tileSet:0, sprite:1, maxHp:20, name: "Sporangium Warrior", desc:"It smells angry"})
-enemyType.push({tileSet:0, sprite:2, maxHp:15, name: "Aspergillus Philosopher", desc:""}) //mould
-enemyType.push({tileSet:0, sprite:3, maxHp:30, name: "Elder Shroom", desc:""})
-enemyType.push({tileSet:0, sprite:4, maxHp:40, name: "Earthstar", desc:""})
+enemyType.push({tileSet:0, sprite:2, maxHp:15, name: "Aspergillus Philosopher", desc:"It quivers threateningly"})
+enemyType.push({tileSet:0, sprite:3, maxHp:30, name: "Elder Shroom", desc:"It doesn't want you here"})
+enemyType.push({tileSet:0, sprite:4, maxHp:40, name: "Earthstar", desc:"It seems to be waiting for something"})
 
 const pos = {x: 27, y: 11, dir: dir.down}
 let depth = 0
