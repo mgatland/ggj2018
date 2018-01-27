@@ -96,28 +96,35 @@ function addRoom(minSize, maxSize, hallway) {
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
-  draw3D()
   drawMap()
+  const smallViewSize = 186
+  const viewSize = canvas.width - smallViewSize*2
+  //draw3D(0, 0, smallViewSize)
+  //draw3D(smallViewSize + viewSize, 0, smallViewSize)
+  draw3D(smallViewSize, 0, viewSize)
+  ctx.fillStyle = "black"
+  ctx.fillRect(0, 0, smallViewSize, canvas.height)
+  ctx.fillRect(smallViewSize+viewSize, 0, canvas.width-smallViewSize-viewSize, canvas.height)
+  ctx.fillRect(smallViewSize, viewSize, viewSize, canvas.height - viewSize)
   ctx.font="12px Verdana"
   ctx.fillStyle="black"
   ctx.fillText("position: " + pos.x + ":" + pos.y + ":" + pos.dir.name, 12, 748)
   
 }
 
-function draw3D() {
-  const viewX = 700
-  const viewY = 0
-  const viewSize = 1024-700
-  const viewXCentre = viewX + viewSize / 2
-  const viewYCentre = viewY + viewSize / 2
+function draw3D(viewX, viewY, viewSize) {
+  const viewSizeX = viewSize
+  const viewSizeY = viewSize//Math.floor(viewSize / 1.5)
+  const viewXCentre = viewX + viewSizeX / 2
+  const viewYCentre = viewY + viewSizeY / 2
   const depthFactor = 3
   ctx.fillStyle = "darkgrey"
-  ctx.fillRect(viewX, viewY, viewSize, viewSize/2)
+  ctx.fillRect(viewX, viewY, viewSizeX, viewSizeY/2)
   ctx.fillStyle = "darkblue"
-  ctx.fillRect(viewX, viewY+viewSize/2, viewSize, viewSize/2)
+  ctx.fillRect(viewX, viewY+viewSizeY/2, viewSizeX, viewSizeY/2)
   const across = [-8,-7,-6,-5,-4,-3,-2,-1,7,6,5,4,3,2,1,0]
   for (let i = 15; i > 0; i--) { //depth
-    const size = viewSize/(Math.pow(depthFactor,i-1))
+    const size = viewSizeX/(Math.pow(depthFactor,i-1))
     //draw edges
     for (let j of across) {
       const cellPos = viewCellPos(pos, i, j)
@@ -166,7 +173,7 @@ function draw3D() {
         const e = enemies.find(e => e.x == cellPos.x && e.y == cellPos.y)
         if (e != undefined) {
           ctx.fillStyle = "red"
-          const eSize = viewSize/(Math.pow(depthFactor,i-0.5))
+          const eSize = viewSizeX/(Math.pow(depthFactor,i-0.5))
           const left = viewXCentre - size/2 + j*size
           const top = viewYCentre - size/2
           ctx.drawImage(spriteImage, 0, 0, 256, 256, left+(size-eSize)/2, top+(size-eSize)/2, eSize, eSize)
@@ -258,6 +265,8 @@ function doKey(keyCode, state) {
       break
     case 40: turnBack()
       break
+    case 77: showMap()
+    break
      case 32: /*space */p0.shoot = state
       break
       break
@@ -289,7 +298,7 @@ function move(pos, move) {
 }
 function times(n,f) {while(n-->0)f()}
 
-const states = { main:{}}
+const states = { main:{}, map:{}}
 
 let state = states.main
 
