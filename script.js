@@ -7,7 +7,7 @@ ctx.mozImageSmoothingEnabled = false
 ctx.imageSmoothingEnabled = false
 const width = canvas.width
 const height = canvas.height
-const loaded = false
+let loaded = false
 
 const spriteImage = new Image()
 spriteImage.src = 'sprites.png'
@@ -39,9 +39,10 @@ function setDirs(dirs) {
   }
 }
 
-const pos = {x: 15, y: 3, dir: dir.left}
+const pos = {x: 16, y: 1, dir: dir.right}
 const depth = 0
 const map = []
+const enemies = []
 makeMap()
 function makeMap() {
   rngSeed = depth
@@ -54,6 +55,22 @@ function makeMap() {
   //rooms
   times(100, () => addRoom(2, 12))
   times(160, () => addRoom(1, 20, true))
+
+  makeEnemies()
+}
+
+function makeEnemies() {
+  times(300, makeEnemy)
+}
+
+function makeEnemy() {
+  let x = -1
+  let y = -1
+  while (cellAt(x, y) == 0) {
+    x = rnd(mapSize)
+    y = rnd(mapSize)
+  }
+  enemies.push({x:x, y:y})
 }
 
 function addRoom(minSize, maxSize, hallway) {
@@ -103,7 +120,8 @@ function draw3D() {
     const size = viewSize/(Math.pow(depthFactor,i-1))
     //draw edges
     for (let j of across) {
-      const cell = cellAt(viewCellPos(pos, i, j))
+      const cellPos = viewCellPos(pos, i, j)
+      const cell = cellAt(cellPos)
       if (cell == 0) {
         const left = viewXCentre - size/2 + j*size
         const top = viewYCentre - size/2
@@ -133,9 +151,10 @@ function draw3D() {
         }
       }
     }
-    //draw fronts
+    //draw fronts and enemies
     for (let j of across) {
-      const cell = cellAt(viewCellPos(pos, i, j))
+      const cellPos = viewCellPos(pos, i, j)
+      const cell = cellAt(cellPos)
       if (cell == 0) {
         const left = viewXCentre - size/2 + j*size
         const top = viewYCentre - size/2
@@ -143,7 +162,16 @@ function draw3D() {
         ctx.fillRect(left, top, size, size)
         ctx.strokeStyle = "green"
         ctx.strokeRect(left, top, size, size)
-      }
+      } else {
+        const e = enemies.find(e => e.x == cellPos.x && e.y == cellPos.y)
+        if (e != undefined) {
+          ctx.fillStyle = "red"
+          const eSize = viewSize/(Math.pow(depthFactor,i-0.5))
+          const left = viewXCentre - size/2 + j*size
+          const top = viewYCentre - size/2
+          ctx.drawImage(spriteImage, 0, 0, 256, 256, left+(size-eSize)/2, top+(size-eSize)/2, eSize, eSize)
+        }
+      } 
     }
   }
 }
@@ -197,6 +225,10 @@ function drawCell(x, y) {
   }
   if (cellAt(x, y+1) == 0) {
     ctx.fillRect(x*cellSize,(y+1)*cellSize-1,edgeLength,1)
+  }
+  if (enemies.some(e => e.x == x && e.y == y)) {
+    ctx.fillStyle = "red"
+    ctx.fillRect(x*cellSize+2, y*cellSize+2, cellSize - 4, cellSize - 4)
   }
 }
 
