@@ -1,13 +1,14 @@
 thing to do:
 
+[x] you can die
+[x] enemies fight back during combat
 
-
-you can die
-enemies fight back during combat
 enemies only follow you if they can see you \ have seen you recently \ are close
 
 fewer dead-end ladders
 fog of war
+
+spells
 
 nice error messages on invalid actions
 enemies level up as you go deeper

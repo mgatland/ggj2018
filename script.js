@@ -60,14 +60,14 @@ function setDirs(dirs) {
 }
 
 const enemyType = []
-enemyType.push({tileSet:0, sprite:1, maxHp:20, speed:7, attack:5, name: "Sporangium Warrior", desc:"It smells angry"})
-enemyType.push({tileSet:0, sprite:2, maxHp:15, speed:5, attack:6, name: "Aspergillus Philosopher", desc:"It quivers threateningly"})
-enemyType.push({tileSet:0, sprite:3, maxHp:30, speed:3, attack:7, name: "Elder Shroom", desc:"It doesn't want you here"})
-enemyType.push({tileSet:0, sprite:4, maxHp:40, speed:2, attack:8, name: "Earthstar", desc:"It stares expectantly"})
-enemyType.push({tileSet:1, sprite:1, maxHp:20, speed:7, attack:5, name: "Broken One", desc:"It looks fragile"})
-enemyType.push({tileSet:1, sprite:2, maxHp:15, speed:5, attack:6, name: "Smoke Elemental", desc:"It seems to be slowly burning away"})
-enemyType.push({tileSet:1, sprite:3, maxHp:30, speed:3, attack:7, name: "Sewer Wyrm", desc:"It thrashes around to no avail"})
-enemyType.push({tileSet:1, sprite:4, maxHp:40, speed:2, attack:8, name: "Canbion", desc:"It shuffles back and forth"})
+enemyType.push({tileSet:0, sprite:1, maxHp:20, speed:7, power:5, name: "Sporangium Warrior", desc:"It smells angry"})
+enemyType.push({tileSet:0, sprite:2, maxHp:15, speed:5, power:6, name: "Aspergillus Philosopher", desc:"It quivers threateningly"})
+enemyType.push({tileSet:0, sprite:3, maxHp:30, speed:3, power:7, name: "Elder Shroom", desc:"It doesn't want you here"})
+enemyType.push({tileSet:0, sprite:4, maxHp:40, speed:2, power:8, name: "Earthstar", desc:"It stares expectantly"})
+enemyType.push({tileSet:1, sprite:1, maxHp:20, speed:7, power:5, name: "Broken One", desc:"It looks fragile"})
+enemyType.push({tileSet:1, sprite:2, maxHp:15, speed:5, power:6, name: "Smoke Elemental", desc:"It seems to be slowly burning away"})
+enemyType.push({tileSet:1, sprite:3, maxHp:30, speed:3, power:7, name: "Sewer Wyrm", desc:"It thrashes around to no avail"})
+enemyType.push({tileSet:1, sprite:4, maxHp:40, speed:2, power:8, name: "Canbion", desc:"It shuffles back and forth"})
 
 
 let playerPos = {}
@@ -83,10 +83,10 @@ restart()
 
 function restart() {
   state = states.start
-  playerStats = {speed:10, attack:10, level:0, exp:0, sp:5, maxSp:5, hp:10, maxHp:10}
+  playerStats = {speed:10, strength: 10, luck: 10, level:0, exp:0, sp:5, maxSp:5, hp:10, maxHp:10}
   depth = 0
   playerPos = {x: 27, y: 11, dir: dirs.down}
-  enemyCombatMessage.length = 0
+  clearMessages()
   makeMap()
   draw()
 }
@@ -154,8 +154,13 @@ function makeEnemy() {
     y = rnd(mapSize)
   }
   var enemy = {x:x, y:y, type:rnd(4)+tileSet*4}
-  enemy.hp = enemyType[enemy.type].maxHp
+  const et = getType(enemy)
+  enemy.hp = et.maxHp
   enemy.timer = 0
+  enemy.level = 1
+  enemy.defence = 10
+  enemy.speed = 10
+  enemy.power = et.power
   enemies.push(enemy)
 }
 
@@ -490,12 +495,18 @@ function restartIfDead() {
 }
 
 function up() {
+  if (!inGame()) return
+  clearMessages()
+
   const ladder = findAtPos(laddersUp, playerPos)
   if (ladder == undefined) return
   changeLevelTo(depth-1)
 }
 
 function down() {
+  if (!inGame()) return
+  clearMessages()
+
   const ladder = findAtPos(laddersDown, playerPos)
   if (ladder == undefined) return
   changeLevelTo(depth+1)
@@ -511,29 +522,39 @@ function changeLevelTo(newLevel)
 
 function wait() {
   if (!inGame()) return
+  clearMessages()
+  
   timePasses(100/playerStats.speed)
 }
 
 function turnBack() {
   if (!inGame()) return
+  clearMessages()
+
   flipped = !flipped
   playerPos.dir = playerPos.dir.reverse
   draw()
 }
 function turnLeft() {
   if (!inGame()) return
+  clearMessages()
+
   flipped = !flipped
   playerPos.dir = playerPos.dir.ccw
   draw()
 }
 function turnRight() {
   if (!inGame()) return
+  clearMessages()
+
   flipped = !flipped
   playerPos.dir = playerPos.dir.cw
   draw()
 }
 function forward() {
   if (!inGame()) return
+  clearMessages()
+
   const dest = move(playerPos, playerPos.dir)
   if (enemies.some(e => e.x == dest.x && e.y == dest.y)) {
     fight(enemies.find(e => e.x == dest.x && e.y == dest.y))
@@ -547,19 +568,79 @@ function forward() {
   }
 }
 
+function clearMessages() {
+  enemyCombatMessage.length = 0
+  playerCombatMessage1 = ""
+  playerCombatMessage2 = ""
+}
+
 function fight(e) {
   if (!inGame()) return
-  const damage = playerStats.attack
-  e.hp -= damage
-  playerCombatMessage1 = "You hit the monster!"
-  playerCombatMessage2 = "It takes " + damage + " points of damage!"
-  if (e.hp <= 0) enemies.splice(enemies.indexOf(e), 1)
+  clearMessages()
+
+  playerAttack(e)
+  monsterAttack(e) //FIXME: all adjacent monsters get initiative
   draw()
+}
+
+function playerAttack(e) {
+  const attackRoll = rnd(80) + playerStats.level * 2 
+  + playerStats.strength * 2 + playerStats.luck //+ weapon hit bonus + prep and permanent weapon enchants
+  const defenceRoll = 40 + e.level * 2 + e.defence + e.speed
+  const result = attackRoll - defenceRoll
+  let damage = 0
+  if (result > 0) {
+    times(Math.floor(result/40)+1, () => damage += playerDamageRoll())
+    hitMonster(damage, e)
+    //bonus damage
+    damage += rnd(Math.floor(playerStats.strength / 3)) + rnd(playerStats.level)
+  }
+
+  if (damage > 0) {
+    hitMonster(damage, e)
+    playerCombatMessage1 = "You hit the monster!"
+    playerCombatMessage2 = "It takes " + damage + " points of damage!"
+  } else {
+    playerCombatMessage1 = "You missed!"
+    playerCombatMessage2 = ""    
+  }
+}
+
+function monsterAttack(e) {
+  if (e.hp <= 0) return
+  const et = getType(e)
+  const attackRoll = rnd(80) + 20 + e.level * 2 
+  const defenceRoll = 32 + playerStats.level * 2 
+  + playerStats.speed * 3/2 + playerStats.luck
+  //protection spells, body armour, armour enchantment
+  const result = attackRoll - defenceRoll
+  let damage = 0
+  if (result > 0) {
+    times(Math.floor(result/40)+1, () => damage += rnd(e.power))
+    //add bonus damage
+  }
+
+  if (damage > 0) {
+    hitPlayer(damage)
+    enemyCombatMessage.push("The " + getType(e).name + " does " + damage + " points of damage")
+  } else {
+    enemyCombatMessage.push("The " + getType(e).name + " missed!")
+  }
+}
+
+function hitMonster(damage, e)
+{
+  e.hp -= damage
+  if (e.hp <= 0) enemies.splice(enemies.indexOf(e), 1)
+}
+
+function playerDamageRoll() {
+  return rnd(10) //should be weapon power
 }
 
 function timePasses(amount)
 {
-  enemyCombatMessage.length = 0
+  clearMessages()
   for (let e of enemies) {
     if (e.timer == undefined) e.timer = 0
     e.timer += amount
@@ -582,9 +663,7 @@ function moveEnemy(e) {
 
   if (distanceFromTo(e, playerPos) == 1) {
     //enemy attack
-    const damage = getType(e).attack
-    hitPlayer(damage)
-    enemyCombatMessage.push("The " + getType(e).name + " does " + damage + " points of damage")
+    monsterAttack(e)
     return
   }
 
