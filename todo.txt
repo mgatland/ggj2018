@@ -1,4 +1,6 @@
 thing to do:
+fewer dead-end ladders
+fog of war
 enemies fight back during combat
 you can die
 nice error messages on invalid actions
