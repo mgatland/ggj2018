@@ -59,6 +59,11 @@ enemyType.push({tileSet:0, sprite:1, maxHp:20, speed:7, attack:5, name: "Sporang
 enemyType.push({tileSet:0, sprite:2, maxHp:15, speed:5, attack:6, name: "Aspergillus Philosopher", desc:"It quivers threateningly"})
 enemyType.push({tileSet:0, sprite:3, maxHp:30, speed:3, attack:7, name: "Elder Shroom", desc:"It doesn't want you here"})
 enemyType.push({tileSet:0, sprite:4, maxHp:40, speed:2, attack:8, name: "Earthstar", desc:"It seems to be waiting for something"})
+enemyType.push({tileSet:1, sprite:1, maxHp:20, speed:7, attack:5, name: "bottle", desc:"It smells angry"})
+enemyType.push({tileSet:1, sprite:2, maxHp:15, speed:5, attack:6, name: "cig", desc:"It quivers threateningly"})
+enemyType.push({tileSet:1, sprite:3, maxHp:30, speed:3, attack:7, name: "trapped", desc:"It doesn't want you here"})
+enemyType.push({tileSet:1, sprite:4, maxHp:40, speed:2, attack:8, name: "can", desc:"It seems to be waiting for something"})
+
 
 const playerPos = {x: 27, y: 11, dir: dirs.down}
 let depth = 0
@@ -104,6 +109,7 @@ function addLadderDown() {
 }
 
 function makeEnemies() {
+  enemies.length = 0
   times(100, makeEnemy)
 }
 
@@ -114,7 +120,7 @@ function makeEnemy() {
     x = rnd(mapSize)
     y = rnd(mapSize)
   }
-  var enemy = {x:x, y:y, type:rnd(4)}
+  var enemy = {x:x, y:y, type:rnd(4)+tileSet*4}
   enemy.hp = enemyType[enemy.type].maxHp
   enemy.timer = 0
   enemies.push(enemy)
@@ -212,10 +218,10 @@ function draw3D(viewX, viewY, viewSize, dir) {
 
   if (flipped) {
     tCtx.scale(-1,1)
-    tCtx.drawImage(spriteImage, 256*6, 512*tileSet, 512, 512, 0, 0, viewSizeX*-1, viewSizeY)
+    tCtx.drawImage(spriteImage, 256*6, 512*tileSet*0, 512, 512, 0, 0, viewSizeX*-1, viewSizeY)
     tCtx.scale(-1,1)    
   } else {
-    tCtx.drawImage(spriteImage, 256*6, 512*tileSet, 512, 512, 0, 0, viewSizeX, viewSizeY)
+    tCtx.drawImage(spriteImage, 256*6, 512*tileSet*0, 512, 512, 0, 0, viewSizeX, viewSizeY)
   }
 
   const across = [-8,-7,-6,-5,-4,-3,-2,-1,7,6,5,4,3,2,1,0]
@@ -397,12 +403,31 @@ function doKey(keyCode, state) {
       break
     case 32: wait()
       break
-    case 77: showMap()
-    break
-     case 32: /*space */p0.shoot = state
+    case 68: down()
       break
+    case 85: up()
+      break
+    case 77: showMap()
       break
   }
+}
+
+function up() {
+
+}
+
+function down() {
+  const ladder = findAtPos(ladders, playerPos)
+  if (ladder == undefined || ladder.type != "down") return
+  changeLevelTo(depth+1)
+}
+
+function changeLevelTo(newLevel)
+{
+  depth = newLevel
+  tileSet = depth % 2
+  makeMap()
+  draw()
 }
 
 function wait() {
@@ -509,6 +534,12 @@ function anyAtPos(list, pos)
 {
   return list.some(el => el.x == pos.x && el.y == pos.y)
 }
+
+function findAtPos(list, pos)
+{
+  return list.find(el => el.x == pos.x && el.y == pos.y)
+}
+
 
 function drawWall(ctx, tileSet, left, top, width, leftSize, rightSize)
 {
