@@ -18,6 +18,8 @@ tCtx.imageSmoothingEnabled = false
 const width = canvas.width
 const height = canvas.height
 let loaded = false
+let playerCombatMessage1 = ""
+let playerCombatMessage2 = ""
 
 const spriteImage = new Image()
 spriteImage.src = 'sprites.png'
@@ -36,7 +38,7 @@ function rnd(n) {
   return Math.floor(random() * n)
 }
 
-const player = {speed:10}
+const playerStats = {speed:10, attack:10}
 const mapSize = 100
 const cellSize = 7
 const dirs = {up:{name:"up", y:-1}, right:{name:"right",x:1}, down:{name:"down",y:1}, left:{name:"left",x:-1}}
@@ -145,8 +147,11 @@ function draw() {
     const lineHeight = 20
     ctx.fillText("You are fighting a level 1 " + et.name, x, y);  y+=lineHeight
     ctx.fillText("It has " + target.hp + " health points left", x, y);  y+=lineHeight
-    y+=lineHeight*3
-    ctx.fillText("Experience value: " + target.hp*5, x, y);  y+=lineHeight
+    y+=lineHeight
+    ctx.fillText(playerCombatMessage1, x, y); y+=lineHeight
+    ctx.fillText(playerCombatMessage2, x, y); y+=lineHeight
+    y+=lineHeight
+    ctx.fillText("Experience value: " + et.maxHp*5, x, y);  y+=lineHeight
     ctx.fillText(et.desc, x, y);  y+=lineHeight
   }
 }
@@ -296,7 +301,9 @@ function cellAt(x, y) { //or {x,y} object
 }
 
 function cellIsEmpty(pos) {
-  return (cellAt(pos) != 0) && !enemies.some(e => e.x == pos.x && e.y == pos.y)
+  return (cellAt(pos) != 0) 
+    && (playerPos.x != pos.x || playerPos.y != pos.y) 
+    && !enemies.some(e => e.x == pos.x && e.y == pos.y)
 }
 
 window.addEventListener("keyup", function (e) {
@@ -335,11 +342,24 @@ function turnRight() {
 }
 function forward() {
   const dest = move(playerPos, playerPos.dir)
-  if (cellAt(dest.x, dest.y) == 1 && !enemies.some(e => e.x == dest.x && e.y == dest.y)) {
+  if (enemies.some(e => e.x == dest.x && e.y == dest.y)) {
+    fight(enemies.find(e => e.x == dest.x && e.y == dest.y))
+    return
+  }
+  if (cellAt(dest.x, dest.y) == 1) {
     playerPos.x += playerPos.dir.x
     playerPos.y += playerPos.dir.y
-    timePasses(100/player.speed)
+    timePasses(100/playerStats.speed)
   }
+  draw()
+}
+
+function fight(e) {
+  const damage = playerStats.attack
+  e.hp -= damage
+  playerCombatMessage1 = "You hit the monster!"
+  playerCombatMessage2 = "It takes " + damage + " points of damage!"
+  if (e.hp <= 0) enemies.splice(enemies.indexOf(e))
   draw()
 }
 
