@@ -217,7 +217,7 @@ function draw3D(viewX, viewY, viewSize, dir) {
 
   const across = [-8,-7,-6,-5,-4,-3,-2,-1,7,6,5,4,3,2,1,0]
   for (let i = 15; i > 0; i--) { //depth
-    const size = viewSizeX/(Math.pow(depthFactor,i-1))
+    const size = viewSizeY/(Math.pow(depthFactor,i-1))
     //draw edges
     for (let j of across) {
       const cellPos = viewCellPos(playerPos, dir, i, j)
@@ -246,22 +246,23 @@ function draw3D(viewX, viewY, viewSize, dir) {
         const top = viewYCentre - size/2
         tCtx.drawImage(spriteImage, 0, 256*tileSet, 256, 256, left, top, size, size)
       } else {
-        const e = enemies.find(e => e.x == cellPos.x && e.y == cellPos.y)
-        if (e != undefined) {
-          const et = enemyType[e.type]
-          const eSize = viewSizeX/(Math.pow(depthFactor,i-0.4))
-          const left = viewXCentre - eSize/2 + j*eSize
-          const top = viewYCentre - eSize/2
-          tCtx.drawImage(spriteImage, 256*et.sprite, et.tileSet*256, 256, 256, left, top, eSize, eSize)
-        }
         const l = ladders.find(e => e.x == cellPos.x && e.y == cellPos.y)
         if (l != undefined)
         {
-          const eSize = viewSizeX/(Math.pow(depthFactor,i-0.4))
+          const eSize = viewSizeY/(Math.pow(depthFactor,i-0.4))
           const left = viewXCentre - eSize/2 + j*eSize
           const top = viewYCentre - eSize/2+eSize*0.2
           tCtx.drawImage(spriteImage, 0, 6*256, 256, 256, left, top, eSize, eSize)
         }
+        const e = enemies.find(e => e.x == cellPos.x && e.y == cellPos.y)
+        if (e != undefined) {
+          const et = enemyType[e.type]
+          const eSize = viewSizeY/(Math.pow(depthFactor,i-0.4))
+          const left = viewXCentre - eSize/2 + j*eSize
+          const top = viewYCentre - eSize/2+eSize*0.2
+          tCtx.drawImage(spriteImage, 256*et.sprite, et.tileSet*256, 256, 256, left, top, eSize, eSize)
+        }
+
       } 
     }
   }
