@@ -133,19 +133,16 @@ const laddersDown = []
 
 function restart() {
   state = states.start
-  //Strength, Intelligence, Wisdom, Constitution=ENDurance, Agility, and Luck
-  playerStats = {speed:10, strength: 10, luck: 10, /*unused->*/ int:10, end:10, 
+  playerStats = {speed:10, strength: 10, luck: 10, int:10, end:10, 
                   level:1, sp:0, maxSp:0, hp:0, maxHp:0, exp:0, gold: 50}
   deriveMaxHpAndSp()
   playerStats.hp = playerStats.maxHp
   playerStats.sp = playerStats.maxSp
-  depth = 0
   playerPos = {x: 27, y: 11, dir: dirs.down}
   playerStats.spellKnown = [true,false,false,false,false,false,false,false,false,false]
 
   clearMessages()
-  makeMap()
-  draw()
+  changeLevelTo(0)
 }
 
 function deriveMaxHpAndSp() {
