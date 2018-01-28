@@ -357,9 +357,17 @@ function draw() {
 
   if (state===states.start) {
     ctx.font="64px Verdana"
-    ctx.fillStyle="white"
+    ctx.fillStyle="black"
     ctx.textAlign="center"
-    ctx.fillText("DUNGEON OF DEEP", (col2X + col3X)/2, 100)
+    ctx.fillText("MATTHEW'S", (col2X + col3X)/2, 100)
+    ctx.fillText("DUNGEONS OF", (col2X + col3X)/2, 170)
+    ctx.fillText("THE UNFORGIVEN", (col2X + col3X)/2, 170+70)
+
+    ctx.fillStyle="red"
+    ctx.textAlign="center"
+    ctx.fillText("MATTHEW'S", 3+(col2X + col3X)/2, 100)
+    ctx.fillText("DUNGEONS OF", 3+(col2X + col3X)/2, 170)
+    ctx.fillText("THE UNFORGIVEN", 3+(col2X + col3X)/2, 170+70)
 
     ctx.font="32px Verdana"
     ctx.fillText("Press [spacebar] to start", (col2X + col3X)/2, viewSizeY - 20)
