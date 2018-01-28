@@ -81,10 +81,10 @@ enemyType.push({tileSet:0, sprite:2, maxHp:15, speed:5, defence: 3, power:6, nam
 enemyType.push({tileSet:0, sprite:3, maxHp:30, speed:3, defence: 3, power:7, name: "Sewer Wyrm", desc:"It thrashes around to no avail"})
 enemyType.push({tileSet:0, sprite:4, maxHp:40, speed:2, defence: 3, power:8, name: "Canbion", desc:"It shuffles back and forth"})
 
-enemyType.push({tileSet:1, sprite:1, maxHp:20, speed:7, defence: 3, power:5, name: "Killer Prawn", desc:"It sees you and snarls"})
-enemyType.push({tileSet:1, sprite:2, maxHp:15, speed:5, defence: 3, power:6, name: "Island Mimic", desc:"Its sandy shore has claimed many victims"})
-enemyType.push({tileSet:1, sprite:3, maxHp:30, speed:3, defence: 3, power:7, name: "Purple Tentacle", desc:"Does it belong to something bigger?"})
-enemyType.push({tileSet:1, sprite:4, maxHp:40, speed:2, defence: 3, power:8, name: "Iron Giant", desc:"You hear grinding gears from the depths"})
+enemyType.push({tileSet:0, sprite:1, maxHp:20, speed:7, defence: 3, power:5, name: "Killer Prawn", desc:"It sees you and snarls"})
+enemyType.push({tileSet:0, sprite:2, maxHp:15, speed:5, defence: 3, power:6, name: "Island Mimic", desc:"Its sandy shore has claimed many victims"})
+enemyType.push({tileSet:0, sprite:3, maxHp:30, speed:3, defence: 3, power:7, name: "Purple Tentacle", desc:"Does it belong to something bigger?"})
+enemyType.push({tileSet:0, sprite:4, maxHp:40, speed:2, defence: 3, power:8, name: "Iron Giant", desc:"You hear grinding gears from the depths"})
 
 enemyType.push({tileSet:2, sprite:1, maxHp:5, speed:7, defence: 3, power:3, name: "Sporangium Warrior", desc:"A cloud of intoxicating spores surrounds it"})
 enemyType.push({tileSet:2, sprite:2, maxHp:10, speed:5, defence: 3, power:4, name: "Aspergillus Philosopher", desc:"It quivers threateningly"})
@@ -92,9 +92,9 @@ enemyType.push({tileSet:2, sprite:3, maxHp:12, speed:3, defence: 3, power:5, nam
 enemyType.push({tileSet:2, sprite:4, maxHp:30, speed:2, defence: 3, power:6, name: "Earthstar", desc:"It stares expectantly"})
 
 enemyType.push({tileSet:3, sprite:1, maxHp:5, speed:7, defence: 3, power:3, name: "Triffid", desc:"It smells angry"})
-enemyType.push({tileSet:3, sprite:2, maxHp:10, speed:5, defence: 3, power:4, name: "Dumble-Dor", desc:"It clutches a crude spear"})
-enemyType.push({tileSet:3, sprite:3, maxHp:12, speed:3, defence: 3, power:5, name: "Honey Golem", desc:"It looks delicious"})
-enemyType.push({tileSet:3, sprite:4, maxHp:30, speed:2, defence: 3, power:6, name: "Larva", desc:"It writhes with ecstasy"})
+enemyType.push({tileSet:2, sprite:2, maxHp:10, speed:5, defence: 3, power:4, name: "Dumble-Dor", desc:"It clutches a crude spear"})
+enemyType.push({tileSet:2, sprite:3, maxHp:12, speed:3, defence: 3, power:5, name: "Honey Golem", desc:"It looks delicious"})
+enemyType.push({tileSet:2, sprite:4, maxHp:30, speed:2, defence: 3, power:6, name: "Larva", desc:"It writhes with ecstasy"})
 
 
 //potions
@@ -492,10 +492,10 @@ function draw3D(viewX, viewY, viewSize, dir) {
 
   if (flipped) {
     tCtx.scale(-1,1)
-    tCtx.drawImage(spriteImage, 256*6, 512*tileSet*0, 512, 512, 0, 0, viewSizeX*-1, viewSizeY)
+    tCtx.drawImage(spriteImage, 256*6, 512*tileSet, 512, 512, 0, 0, viewSizeX*-1, viewSizeY)
     tCtx.scale(-1,1)    
   } else {
-    tCtx.drawImage(spriteImage, 256*6, 512*tileSet*0, 512, 512, 0, 0, viewSizeX, viewSizeY)
+    tCtx.drawImage(spriteImage, 256*6, 512*tileSet, 512, 512, 0, 0, viewSizeX, viewSizeY)
   }
 
   const across = [-8,-7,-6,-5,-4,-3,-2,-1,7,6,5,4,3,2,1,0]
