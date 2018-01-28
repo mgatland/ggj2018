@@ -73,7 +73,6 @@ function rnd(n) {
 const states = { main:"main", dead:"dead", start:"start", town:"town", healer:"healer", foundSomething:"foundSomething", spellNotes:"spellNotes" }
 let state = states.start
 
-
 let playerStats = {}
 const mapSize = 100
 const cellSize = 7
@@ -284,25 +283,28 @@ const col2X = smallColWidth
 const col3X = smallColWidth + viewSize
 const lowerHudY = viewSizeY + 30
 const centerX = Math.floor(canvas.width/2)
-
+const rearViewX = Math.floor(centerX-smallColWidth/2)
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
-  draw3D(col1X, smallViewY, smallColWidth, playerPos.dir.ccw)
-  draw3D(col2X, 0, viewSize, playerPos.dir)
-  draw3D(col3X, smallViewY, smallColWidth, playerPos.dir.cw)
-  const rearViewX = smallColWidth + viewSize/2-smallColWidth/2
-  draw3D(rearViewX, viewSizeY, smallColWidth, playerPos.dir.reverse)
   
-  drawMap(col3X, 0, canvas.width - col3X, smallViewY)
+  if (state !== states.start) {
+    draw3D(col1X, smallViewY, smallColWidth, playerPos.dir.ccw)
+    draw3D(col3X, smallViewY, smallColWidth, playerPos.dir.cw)
+    
+    draw3D(rearViewX, viewSizeY, smallColWidth, playerPos.dir.reverse)
+    drawMap(col3X, 0, canvas.width - col3X, smallViewY)
+  }
+  draw3D(col2X, 0, viewSize, playerPos.dir)
 
   const ahead = move(playerPos, playerPos.dir)
   const target = enemyAt(ahead)
 
-  if (state === states.main || state === states.foundSomething || state === states.spellNotes) {
+  if (state !== states.start) {
     drawSpellUi(0, 0, smallColWidth, smallViewY)
   }
 
-  {
+  //lower left HUD
+  if (state !== states.start) {
     ctx.fillStyle="white"
     ctx.font=mediumFont
     const lineHeight = 24
@@ -332,36 +334,39 @@ function draw() {
     }
   }
 
-  const x = rearViewX + smallColWidth + 20
-  let y = lowerHudY
-  const lineHeight = 20
-  for (let i = 0; i < enemyCombatMessage.length; i++) {
-    ctx.fillText(enemyCombatMessage[i], x, y); y+=lineHeight
-  }
-  if (enemyCombatMessage.length==0) y+=lineHeight
-  if (target != null)
-  {
-    const et = enemyType[target.type]
-
-    y+=lineHeight
-    ctx.fillText("A level " + target.level + " " + et.name, x, y);  y+=lineHeight
-    ctx.fillText("It has " + target.hp + " health points left", x, y);  y+=lineHeight
-    y+=lineHeight
-    for (let i = 0; i < playerCombatMessage.length; i++) {
-      ctx.fillText(playerCombatMessage[i], x, y); y+=lineHeight
+  //lower rightHUD
+  if (state !== states.start) {
+    const x = rearViewX + smallColWidth + 20
+    let y = lowerHudY
+    const lineHeight = 20
+    for (let i = 0; i < enemyCombatMessage.length; i++) {
+      ctx.fillText(enemyCombatMessage[i], x, y); y+=lineHeight
     }
-    if (playerCombatMessage.length < 2) times(2-playerCombatMessage.length, () => {y+=lineHeight})
-    y+=lineHeight
-    y+=lineHeight
-    ctx.fillText("Experience value: " + target.exp, x, y);  y+=lineHeight
-    ctx.fillText(et.desc, x, y);  y+=lineHeight
-  } else {
-    y+=lineHeight
-    y+=lineHeight
-    y+=lineHeight
-    y+=lineHeight
-    for (let i = 0; i < playerCombatMessage.length; i++) {
-      ctx.fillText(playerCombatMessage[i], x, y); y+=lineHeight
+    if (enemyCombatMessage.length==0) y+=lineHeight
+    if (target != null)
+    {
+      const et = enemyType[target.type]
+
+      y+=lineHeight
+      ctx.fillText("A level " + target.level + " " + et.name, x, y);  y+=lineHeight
+      ctx.fillText("It has " + target.hp + " health points left", x, y);  y+=lineHeight
+      y+=lineHeight
+      for (let i = 0; i < playerCombatMessage.length; i++) {
+        ctx.fillText(playerCombatMessage[i], x, y); y+=lineHeight
+      }
+      if (playerCombatMessage.length < 2) times(2-playerCombatMessage.length, () => {y+=lineHeight})
+      y+=lineHeight
+      y+=lineHeight
+      ctx.fillText("Experience value: " + target.exp, x, y);  y+=lineHeight
+      ctx.fillText(et.desc, x, y);  y+=lineHeight
+    } else {
+      y+=lineHeight
+      y+=lineHeight
+      y+=lineHeight
+      y+=lineHeight
+      for (let i = 0; i < playerCombatMessage.length; i++) {
+        ctx.fillText(playerCombatMessage[i], x, y); y+=lineHeight
+      }
     }
   }
 
@@ -376,6 +381,21 @@ function draw() {
     drawTitle("DUNGEONS OF", centerX, 80+70)
     drawTitle("THE UNFORGIVEN", centerX, 80+70+70)
     drawMedium("Press [spacebar] to start", centerX, viewSizeY - 20)
+    let y = viewSizeY + 50
+    const lineHeight = 30
+    drawMedium("Life in the citadel is hard but fair.", centerX, y); y += lineHeight
+    drawMedium("There is only enough air for one thousand and twenty-two people.", centerX, y); y += lineHeight
+    drawMedium("When a baby is born, the oldest citizen is sent into the Depths.", centerX, y); y += lineHeight
+    y += lineHeight
+    drawMedium("Today is your turn to be exiled.", centerX, y); y += lineHeight
+    y += lineHeight
+    drawMedium("You have 50 coins and know 1 spell.", centerX, y); y += lineHeight
+    drawMedium("You are 22 years old.", centerX, y); y += lineHeight
+    drawMedium(" Good luck!", centerX, y); y += lineHeight
+    drawMedium("", centerX, y); y += lineHeight
+    drawMedium("", centerX, y); y += lineHeight
+    drawMedium("", centerX, y); y += lineHeight
+
     ctx.textAlign="left"
   }
 
@@ -407,7 +427,8 @@ function draw() {
         t.print(townMessage[i])
       }
     } else {
-      t.print("Dungeoneering can be stressful! I can heal you with words.")
+      t.print("Dungeoneering can be stressful!")
+      t.print("I can heal you with my words.")
     }
     t.print()
     t.print("Press [1] to heal 10 hp for " + healCost(10))
@@ -1113,7 +1134,7 @@ function buyHealing(n) {
   const cost = healCost(n)
   if (playerStats.gold < cost) {
     townMessage.push("You can't afford that!")
-    townMessage.push("I don't work for free! You shouldn't either.")
+    townMessage.push("I don't work for free! (You shouldn't either.)")
   } else {
     playerStats.gold -= cost
     playerStats.hp += n
