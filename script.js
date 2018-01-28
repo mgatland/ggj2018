@@ -134,7 +134,7 @@ const laddersDown = []
 function restart() {
   state = states.start
   playerStats = {speed:10, strength: 10, luck: 10, int:10, end:10, 
-                  level:1, sp:0, maxSp:0, hp:0, maxHp:0, exp:0, gold: 50}
+                  level:1, sp:0, maxSp:0, hp:0, maxHp:0, exp:0, gold: 50, age:22}
   deriveMaxHpAndSp()
   playerStats.hp = playerStats.maxHp
   playerStats.sp = playerStats.maxSp
@@ -463,7 +463,7 @@ function draw() {
       if (canLevelUp()) {
         if (playerStats.gold >= goldNeededToLevel()) {
           t.print("You're ready to study here!")
-          t.print(`Press [S] to study for a year, paying ${goldNeededToLevel()}`)
+          t.print(`Press [S] to study, paying ${goldNeededToLevel()}`)
         } else {
           t.print("You're ready to study here!")
           t.print(`But you need ${goldNeededToLevel()}! Come back when you've earned more.`)
@@ -1148,9 +1148,10 @@ function levelUp() {
   deriveMaxHpAndSp()
   playerStats.hp = playerStats.maxHp
   playerStats.sp = playerStats.maxSp
+  playerStats.age += 3
   townMessage.length = 0
-  townMessage.push("You study for a year.")
-  townMessage.push(`You are now level ${playerStats.level}`)
+  townMessage.push("You study for three years.")
+  townMessage.push(`You are now level ${playerStats.level}. You are ${playerStats.age} years old.`)
 }
 
 function buyHealing(n) {
