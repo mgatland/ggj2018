@@ -70,6 +70,10 @@ function rnd(n) {
   return Math.floor(random() * n)
 }
 
+function trueRnd(n) {
+  return Math.floor(Math.random() * n)
+}
+
 const states = { main:"main", dead:"dead", start:"start", town:"town", healer:"healer", foundSomething:"foundSomething", spellNotes:"spellNotes" }
 let state = states.start
 
@@ -229,18 +233,18 @@ function makeEnemy() {
   let x = -1
   let y = -1
   while (!cellIsEmpty({x:x, y:y})) {
-    x = rnd(mapSize)
-    y = rnd(mapSize)
+    x = trueRnd(mapSize)
+    y = trueRnd(mapSize)
   }
-  var enemy = {x:x, y:y, type:rnd(4)+tileSet*4}
+  var enemy = {x:x, y:y, type:trueRnd(4)+tileSet*4}
 
-  if (rnd(100)<10) {
+  if (trueRnd(100)<10) {
     //potion!
-    enemy.type = normalEnemyCount+rnd(10)
+    enemy.type = normalEnemyCount+trueRnd(10)
   }
 
   const et = getType(enemy)
-  enemy.level = depth + rnd(2)
+  enemy.level = depth + trueRnd(2)
   enemy.maxHp = et.maxHp + Math.floor(enemy.level * et.maxHp / 2)
   enemy.hp = enemy.maxHp
   enemy.timer = 0
