@@ -307,9 +307,9 @@ function draw() {
   if (state !== states.start) {
     ctx.fillStyle="white"
     ctx.font=mediumFont
-    const lineHeight = 24
+    let lineHeight = 24
     const x = col1X + 20
-    const rightX = x + 300
+    const rightX = x + 290
     let y = lowerHudY
     ctx.fillText(`Health points: ${playerStats.hp} of ${playerStats.maxHp}`, x, y)
     ctx.fillText(`Gold: ${playerStats.gold}`, rightX, y);  y+=lineHeight
@@ -320,17 +320,16 @@ function draw() {
     
     y+=lineHeight
     y+=lineHeight
-    ctx.fillText(`Str: ${playerStats.strength}   Spd: ${playerStats.speed}   Int: ${playerStats.int}   End: ${playerStats.end}   Luc: ${playerStats.luck}`, x, y);  y+=lineHeight
+    ctx.fillText(`Str: ${playerStats.strength}   Spd: ${playerStats.speed}   Int: ${playerStats.int}`, x, y);  y+=lineHeight
+    ctx.fillText(`End: ${playerStats.end}   Luc: ${playerStats.luck}`, x, y);  y+=lineHeight
     
     y+=lineHeight
+
+    ctx.font=smallFont
+    lineHeight = 16
     ctx.fillText(`Arrow keys move and attack. Spacebar to wait.`, x, y);  y+=lineHeight
     if (anyAtPos(laddersUp, playerPos) || anyAtPos(laddersDown, playerPos)) {
       ctx.fillText(`[d] or [u] to go down or up a ladder.`, x, y);  y+=lineHeight
-    }
-    y+=lineHeight
-    if (playerStats.exp >= expNeeded()) {
-      ctx.fillText(`You have enough experience to level up!`, x, y);  y+=lineHeight
-      ctx.fillText(`Return to the top level. But it will cost you!`, x, y);  y+=lineHeight
     }
   }
 
@@ -338,7 +337,8 @@ function draw() {
   if (state !== states.start) {
     const x = rearViewX + smallColWidth + 20
     let y = lowerHudY
-    const lineHeight = 20
+    ctx.font=mediumFont
+    let lineHeight = 24
     for (let i = 0; i < enemyCombatMessage.length; i++) {
       ctx.fillText(enemyCombatMessage[i], x, y); y+=lineHeight
     }
@@ -360,13 +360,24 @@ function draw() {
       ctx.fillText("Experience value: " + target.exp, x, y);  y+=lineHeight
       ctx.fillText(et.desc, x, y);  y+=lineHeight
     } else {
-      y+=lineHeight
-      y+=lineHeight
-      y+=lineHeight
-      y+=lineHeight
-      for (let i = 0; i < playerCombatMessage.length; i++) {
-        ctx.fillText(playerCombatMessage[i], x, y); y+=lineHeight
+      if (playerCombatMessage.length>0) {
+        //treasure reveal. Move text to same position as before
+        y+=lineHeight*4
+        for (let i = 0; i < playerCombatMessage.length; i++) {
+          ctx.fillText(playerCombatMessage[i], x, y); y+=lineHeight
+        }
+      } else {
+        //misc notices
+        if (playerStats.exp >= expNeeded()) {
+          y+=lineHeight
+          ctx.fillText(`You have enough experience to go`, x, y);  y+=lineHeight
+          const amount = howManyLevelsCanIGet()
+          const msg = (amount == 1) ? "a level" : amount + " levels"
+          ctx.fillText(`up ${msg}! Return to the top of`, x, y);  y+=lineHeight
+          ctx.fillText(`the dungeon. But it will cost you!`, x, y);  y+=lineHeight
+        }         
       }
+   
     }
   }
 
@@ -406,14 +417,15 @@ function draw() {
     //t.print()
     for (let i = 0; i < spellNames.length; i++) {
       if (playerStats.spellKnown[i]) {
-        t.print(spellNames[i].fullName != undefined ? spellNames[i].fullName : spellNames[i].name)
+        t.print((i+1) + " " + (spellNames[i].fullName != undefined ? spellNames[i].fullName : spellNames[i].name))
         t.print("    " + spellNames[i].desc)
       } else {
-        t.print("???")
+        t.print((i+1) + " " + "???")
         t.print()
       }
     }
     t.print()
+    t.print("Each spell costs as many spell points as its number")
     t.print("Press any key to close")
   }
 
@@ -540,9 +552,6 @@ function drawSpellUi(x, y, width, height) {
   tY += lineHeight
   ctx.fillText("[1-9] Cast Spell", tX, tY); tY += lineHeight
   ctx.fillText("[S] Show spell notes", tX, tY); tY += lineHeight
-  tY += lineHeight
-  ctx.fillText("A spell's cost is the", tX, tY); tY += lineHeight
-  ctx.fillText("same as its number.", tX, tY); tY += lineHeight
 }
 
 function draw3D(viewX, viewY, viewSize, dir) {
@@ -1104,13 +1113,26 @@ function drawWall(ctx, tileSet, left, top, width, leftSize, rightSize)
   }
 }
 
-function expNeeded()
+function expNeeded(levelOrBlank)
 {
-  return 125*(Math.pow(2, playerStats.level - 1))
+  const level = levelOrBlank == undefined ? playerStats.level : levelOrBlank
+  return 125*(Math.pow(2, level - 1))
 }
 
 function canLevelUp() {
   return playerStats.exp >= expNeeded()
+}
+
+function howManyLevelsCanIGet() {
+  let temp = playerStats.exp
+  let n = 0
+  let level = playerStats.level
+  while (expNeeded(level) <= temp) {
+    temp -= expNeeded(level)
+    level++
+    n++
+  }
+  return n
 }
 
 function levelUp() {
