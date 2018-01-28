@@ -23,6 +23,19 @@ let enemyCombatMessage = []
 let townMessage = []
 let flipped = false
 
+const spellNames = []
+spellNames.push({name:"Never out of problems", fullName:"As long as we have each other, we will never run out of problems", desc:""}) //instakill
+spellNames.push({name:"Deception", desc:""}) // enemies stop hunting you
+spellNames.push({name:"Extinction", desc:""}) //destroy all enemies of this type (op?)
+spellNames.push({name:"Ouroboros", desc:""}) //enemy attacks itself
+spellNames.push({name:"Heartbeat", desc:""}) //heal (better)
+spellNames.push({name:"We don't see things…", fullName: "We don't see things as they are, we see them as we are.", desc:""}) // see enemies on map
+spellNames.push({name:"What do we do now?", desc:""}) //teleport
+spellNames.push({name:"Ritual", desc:""}) //heal (small)
+spellNames.push({name:"Waves", desc:""}) //damage
+spellNames.push({name:"Transmission", desc:""}) //speed
+spellNames.reverse()
+
 const spriteImage = new Image()
 spriteImage.src = 'sprites.png'
 spriteImage.addEventListener('load', function() {
@@ -40,7 +53,7 @@ function rnd(n) {
   return Math.floor(random() * n)
 }
 
-const states = { main:{}, dead:{}, start:{}, town:{}, healer:{}, foundSomething:{} }
+const states = { main:"main", dead:"dead", start:"start", town:"town", healer:"healer", foundSomething:"foundSomething", spellNotes:"spellNotes" }
 let state = states.start
 
 
@@ -86,9 +99,6 @@ let enemies = []
 const laddersUp = []
 const laddersDown = []
 
-
-restart()
-
 function restart() {
   state = states.start
   //Strength, Intelligence, Wisdom, Constitution=ENDurance, Agility, and Luck
@@ -99,6 +109,7 @@ function restart() {
   playerStats.sp = playerStats.maxSp
   depth = 0
   playerPos = {x: 27, y: 11, dir: dirs.down}
+  playerStats.spellKnown = [true,false,false,false,false,false,false,false,false,false]
 
   clearMessages()
   makeMap()
@@ -179,9 +190,6 @@ function addLadder(isUp) {
       }
     }
   }
-
-
-  
 }
 
 function makeEnemies() {
@@ -237,15 +245,17 @@ function addRoom(minSize, maxSize, hallway) {
   }
 }
 
+
+const smallColWidth = 186
+const viewSize = canvas.width - smallColWidth*2
+const viewSizeY = Math.floor(viewSize/1.5)
+const smallViewY = viewSizeY-Math.floor(smallColWidth/1.5)
+const col1X = 0
+const col2X = smallColWidth
+const col3X = smallColWidth + viewSize
+
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
-  const smallColWidth = 186
-  const viewSize = canvas.width - smallColWidth*2
-  const viewSizeY = Math.floor(viewSize/1.5)
-  const smallViewY = viewSizeY-Math.floor(smallColWidth/1.5)
-  const col1X = 0
-  const col2X = smallColWidth
-  const col3X = smallColWidth + viewSize
   draw3D(col1X, smallViewY, smallColWidth, playerPos.dir.ccw)
   draw3D(col2X, 0, viewSize, playerPos.dir)
   draw3D(col3X, smallViewY, smallColWidth, playerPos.dir.cw)
@@ -260,7 +270,12 @@ function draw() {
   const ahead = move(playerPos, playerPos.dir)
   const target = enemyAt(ahead)
 
+  if (state === states.main || state === states.foundSomething || state === states.spellNotes) {
+    drawSpellUi(0, 0, smallColWidth, smallViewY)
+  }
+
   {
+    ctx.font="16px Verdana"
     const x = col1X + 20
     let y = viewSize/1.5+20
     const lineHeight = 20
@@ -339,64 +354,119 @@ function draw() {
     ctx.textAlign="left"
   }
 
+  if (state===states.spellNotes) {
+    const t = getMainWindowTextTool()
+    t.print("Spell Notes")
+    t.setFontSize(12)
+    t.print()
+    for (let i = 0; i < spellNames.length; i++) {
+      if (playerStats.spellKnown[i]) {
+        t.print('"' + (spellNames[i].fullName != undefined ? spellNames[i].fullName : spellNames[i].name) + '"')
+        t.print(spellNames[i].desc)
+      } else {
+        t.print("???")
+        t.print()
+      }
+    }
+    t.print()
+    t.print("Press any key to close")
+  }
+
   if (state===states.healer) {
-    ctx.fillStyle = "black"
-    ctx.fillRect(col2X, 0, viewSize, viewSizeY)
-    ctx.font="32px Verdana"
-    ctx.fillStyle="white"
-    let x = col2X + 20
-    let y = 40
-    const lineHeight = 32
-    ctx.fillText("The Therapist", x, y); y += lineHeight
-    ctx.font="16px Verdana"
-    y += lineHeight
+    const t = getMainWindowTextTool()
+    t.print("The Therapist")
+    t.setFontSize(16)
+    t.print()
     if (townMessage.length > 0) {
       for (let i = 0; i < townMessage.length; i++) {
-        ctx.fillText(townMessage[i], x, y); y+=lineHeight
+        t.print(townMessage[i])
       }
     } else {
-      ctx.fillText("Dungeoneering can be stressful! I can heal you with my words.", x, y); y += lineHeight  
+      t.print("Dungeoneering can be stressful! I can heal you with my words.")
     }
-      y += lineHeight;
-      ctx.fillText("Press [1] to heal 10 hp for " + healCost(10), x, y); y += lineHeight  
-      ctx.fillText(`Press [2] to heal 100 for ${healCost(100)}`, x, y); y += lineHeight
-      ; y += lineHeight
-    ctx.fillText("Press [D] to go back to the dungeon", x, y); y += lineHeight
+    t.print()
+    t.print("Press [1] to heal 10 hp for " + healCost(10))
+    t.print(`Press [2] to heal 100 for ${healCost(100)}`)
+    t.print()
+    t.print("Press [D] to go back to the dungeon")
   }
 
   if (state===states.town) {
-    ctx.fillStyle = "black"
-    ctx.fillRect(col2X, 0, viewSize, viewSizeY)
-    ctx.font="32px Verdana"
-    ctx.fillStyle="white"
-    let x = col2X + 20
-    let y = 40
-    const lineHeight = 32
-    ctx.fillText("Survivor's Technical College", x, y); y += lineHeight
-    ctx.font="16px Verdana"
-    y += lineHeight
+    const t = getMainWindowTextTool()
+    t.print("Survivor's Technical College")
+    t.setFontSize(16)
+    t.print()
     if (townMessage.length > 0) {
       for (let i = 0; i < townMessage.length; i++) {
-        ctx.fillText(townMessage[i], x, y); y+=lineHeight
+        t.print(townMessage[i])
       }
     } else {
       if (canLevelUp()) {
         if (playerStats.gold >= goldNeededToLevel()) {
-          ctx.fillText("You're ready to study here!", x, y); y += lineHeight  
-          ctx.fillText(`Press [S] to study for a year, paying ${goldNeededToLevel()}`, x, y); y += lineHeight
+          t.print("You're ready to study here!")
+          t.print(`Press [S] to study for a year, paying ${goldNeededToLevel()}`)
         } else {
-          ctx.fillText("You're ready to study here!", x, y); y += lineHeight  
-          ctx.fillText(`But you need ${goldNeededToLevel()}! Come back when you've earned more.`, x, y); y += lineHeight  
+          t.print("You're ready to study here!")
+          t.print(`But you need ${goldNeededToLevel()}! Come back when you've earned more.`)
         }
       } else {
-        ctx.fillText("You don't have enough life experience to study here.", x, y); y += lineHeight
-        ctx.fillText("Come back when you've done more murder!", x, y); y += lineHeight
+        t.print("You don't have enough life experience to study here.")
+        t.print("Come back when you've done more murder!")
       }
-      ; y += lineHeight
+      t.print()
     }
-    ctx.fillText("Press [D] to go back to the dungeon", x, y); y += lineHeight
+    t.print("Press [D] to go back to the dungeon")
   }
   
+}
+
+function getMainWindowTextTool() {
+    ctx.fillStyle = "black"
+    ctx.fillRect(col2X, 0, viewSize, viewSizeY)
+    ctx.font="32px Verdana"
+    ctx.fillStyle="white"
+    let me = {}
+    me.x = col2X + 20
+    me.y = 40
+    me.lineHeight = 32
+    me.setFontSize = function(size) {
+      ctx.font= ""+size+"px Verdana"
+      me.lineHeight = size
+    }
+    me.print = function (text) {
+      if (text) {
+        ctx.fillText(text, me.x, me.y)  
+      }
+      me.y += me.lineHeight
+    }
+    return me
+}
+
+function drawSpellUi(x, y, width, height) {
+  ctx.fillStyle = "black"
+  ctx.fillRect(x,y,width,height)
+  ctx.font="12px Verdana"
+  ctx.fillStyle="white"
+  let tX = x + 7
+  let tY = y + 20
+  const lineHeight = 16
+  const costX = x + 164
+  ctx.fillText("Spell", tX, tY);
+  ctx.fillText("Cost", costX-9, tY); tY += lineHeight
+  tY += lineHeight
+  for (var i = 0; i < 10; i++) {
+    if (playerStats.spellKnown[i]) {
+      ctx.fillText(((i+1)%10)+": " + spellNames[i].name, tX, tY);
+      ctx.textAlign = "center"
+      ctx.fillText((i+1), costX+10, tY);
+      ctx.textAlign = "left"
+      tY += lineHeight
+    } else {
+      ctx.fillText("------", tX, tY); tY += lineHeight
+    }
+  }
+  tY += lineHeight
+  ctx.fillText("[s] Read spell instructions", tX, tY); tY += lineHeight
 }
 
 function draw3D(viewX, viewY, viewSize, dir) {
@@ -537,7 +607,6 @@ function drawMap(viewX, viewY, viewSizeX, viewSizeY) {
   ctx.strokeRect(viewX, viewY, viewSizeX, viewSizeY)
 }
 
-draw()
 
 function drawCell(x, y) {
   const edgeLength = cellSize - 1
@@ -601,6 +670,11 @@ function doKey(keyCode) {
     }
     return
   }
+  if (state === states.spellNotes) {
+    state = states.main
+    draw()
+    return
+  }
   if (state === states.healer) {
     switch (keyCode) {
       case 68: //down
@@ -634,7 +708,18 @@ function doKey(keyCode) {
   if (state === states.foundSomething) {
     state = states.main
     cleanDeadEnemies()
-    playerCombatMessage.push("nothing!")
+    if (rnd(100) < 10) {
+      var spellToGet = playerStats.spellKnown.indexOf(false)
+      console.log(spellToGet)
+      if (spellToGet >= 0) {
+        playerCombatMessage.push("A spell: " + spellNames[spellToGet].name + "!")
+        playerStats.spellKnown[spellToGet] = true
+      } else {
+        playerCombatMessage.push("A spell, but you already knew it.")  
+      }
+    } else {
+      playerCombatMessage.push("nothing!")
+    }
     draw()
     return
   }
@@ -655,6 +740,10 @@ function doKey(keyCode) {
       break
     case 82: restartIfDead()
       break
+    case 83: //s
+        state = states.spellNotes
+        draw()
+        break
     case 77: showMap()
       break
   }
@@ -1029,3 +1118,5 @@ function specialHitEffect(effect) {
   }
   
 }
+
+restart()

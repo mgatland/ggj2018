@@ -15,8 +15,10 @@ definitely:
 	and show what loot you got
 
 [ ] spells
-	spell UI
-	unlock different spells
+[x] spell UI
+[x] unlock different spells
+[x] spell details screen [s]
+
 [ ] color pallete swapper
 
 maybe:
