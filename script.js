@@ -815,7 +815,8 @@ function monsterAttack(e) {
     enemyCombatMessage.push("The " + getType(e).name + " does " + damage + " points of damage")
     if (getType(e).special != undefined) {
       specialHitEffect(getType(e).special)
-      enemyDie(e)
+      e.hp = 0
+      //FIXME: this should go to a 'press any key' state that makes the enemy disappear
     }
   } else {
     enemyCombatMessage.push("The " + getType(e).name + " missed!")
@@ -826,14 +827,9 @@ function hitMonster(damage, e)
 {
   e.hp -= damage
   if (e.hp <= 0) {
-    enemyDie(e)
     playerStats.exp += e.exp
     playerStats.gold += e.gold
   }
-}
-
-function enemyDie(e) {
-  //enemies.splice(enemies.indexOf(e), 1)
 }
 
 function cleanDeadEnemies() {
