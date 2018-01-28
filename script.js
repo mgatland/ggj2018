@@ -79,8 +79,8 @@ let state = states.start
 
 let playerStats = {}
 const mapSize = 100
-const cellSize = 7
-const dirs = {up:{name:"up", y:-1}, right:{name:"right",x:1}, down:{name:"down",y:1}, left:{name:"left",x:-1}}
+const cellSize = 10
+const dirs = {up:{name:"up", y:-1,i:0}, right:{name:"right",x:1,i:1}, down:{name:"down",y:1,i:2}, left:{name:"left",x:-1,i:3}}
 setDirs([dirs.up, dirs.right, dirs.down, dirs.left])
 function setDirs(dirs) {
   for(let i = 0; i < dirs.length; i++) {
@@ -677,8 +677,8 @@ function drawMap(viewX, viewY, viewSizeX, viewSizeY) {
       }
     }
   }
-  tCtx.fillStyle = "white"
-  tCtx.fillRect(playerPos.x * cellSize, playerPos.y*cellSize, cellSize-1, cellSize-1)
+  const dir = playerPos.dir
+  tCtx.drawImage(spriteImage, 10*dir.i, 2038, 10, 10, playerPos.x*cellSize, playerPos.y*cellSize, 10, 10)
 
   //centre map on player
   var cropX = playerPos.x * cellSize - viewSizeX / 2
