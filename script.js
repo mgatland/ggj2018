@@ -83,15 +83,26 @@ restart()
 
 function restart() {
   state = states.start
-  playerStats = {speed:10, strength: 10, luck: 10, level:0, exp:0, sp:5, maxSp:5, hp:10, maxHp:10}
+  //Strength, Intelligence, Wisdom, Constitution=ENDurance, Agility, and Luck
+  playerStats = {speed:10, strength: 10, luck: 10, /*unused->*/ int:10, end:10, wis:10,
+                  level:1, sp:0, maxSp:0, hp:0, maxHp:0, exp:0}
+  deriveMaxHpAndSp()
+  playerStats.hp = playerStats.maxHp
+  playerStats.sp = playerStats.maxSp
   depth = 0
   playerPos = {x: 27, y: 11, dir: dirs.down}
+
   clearMessages()
   makeMap()
   draw()
 }
 
-
+function deriveMaxHpAndSp() {
+  playerStats.maxHp = 15 + Math.floor(playerStats.end/2)*playerStats.level
+  playerStats.maxSp = Math.floor((playerStats.int*2+playerStats.wis)/5)*playerStats.level
+  if (playerStats.hp > playerStats.maxHp) playerStats.hp = playerStats.maxHp
+  if (playerStats.sp > playerStats.maxSp) playerStats.sp = playerStats.mapSp
+}
 
 function makeMap() {
   for(let x = 0; x < mapSize; x++) {
@@ -187,6 +198,7 @@ function makeEnemy() {
   enemy.defence = 10
   enemy.speed = 10
   enemy.power = et.power
+  enemy.exp = enemy.level + et.maxHp + enemy.power + enemy.defence
   enemies.push(enemy)
 }
 
@@ -239,14 +251,20 @@ function draw() {
     let y = viewSize/1.5+20
     const lineHeight = 20
     ctx.fillText("Armour: clothes    weapon: fist ", x, y);  y+=lineHeight
-    ctx.fillText(`Level: ${playerStats.level}     Exp: ${playerStats.exp}`, x, y);  y+=lineHeight
+    ctx.fillText(`Level: ${playerStats.level}     Exp: ${playerStats.exp} of ${expNeeded()}`, x, y);  y+=lineHeight
     ctx.fillText(`Spell points: ${playerStats.sp} of ${playerStats.maxSp}`, x, y);  y+=lineHeight
     ctx.fillText(`Health points: ${playerStats.hp} of ${playerStats.maxHp}`, x, y);  y+=lineHeight
     y+=lineHeight
     ctx.fillText(`Arrow keys move and attack. Spacebar to wait.`, x, y);  y+=lineHeight
     if (anyAtPos(laddersUp, playerPos) || anyAtPos(laddersDown, playerPos)) {
-      ctx.fillText(`[d] or [u] to go down or up a ladder.`, x, y);  y+=lineHeight
+      ctx.fillText(`[d] or [u] to go down or up a ladder.`, x, y);  
     }
+    y+=lineHeight
+    y+=lineHeight
+    ctx.fillText(`Str: ${playerStats.strength}   Spd: ${playerStats.speed}`, x, y);  y+=lineHeight
+    ctx.fillText(`Int: ${playerStats.int}   End: ${playerStats.end}`, x, y);  y+=lineHeight
+    ctx.fillText(`Luc: ${playerStats.luck}  Wis: ${playerStats.wis}`, x, y);  y+=lineHeight //and no Wisdom
+    
   }
 
   const x = rearViewX + smallColWidth + 20
@@ -266,7 +284,7 @@ function draw() {
     ctx.fillText(playerCombatMessage1, x, y); y+=lineHeight
     ctx.fillText(playerCombatMessage2, x, y); y+=lineHeight
     y+=lineHeight
-    ctx.fillText("Experience value: " + et.maxHp*5, x, y);  y+=lineHeight
+    ctx.fillText("Experience value: " + target.exp, x, y);  y+=lineHeight
     ctx.fillText(et.desc, x, y);  y+=lineHeight
   }
 
@@ -657,7 +675,10 @@ function monsterAttack(e) {
 function hitMonster(damage, e)
 {
   e.hp -= damage
-  if (e.hp <= 0) enemies.splice(enemies.indexOf(e), 1)
+  if (e.hp <= 0) {
+    enemies.splice(enemies.indexOf(e), 1)
+    playerStats.exp += e.exp
+  }
 }
 
 function playerDamageRoll() {
@@ -758,6 +779,11 @@ function drawWall(ctx, tileSet, left, top, width, leftSize, rightSize)
     ctx.drawImage(img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
   }
 
+}
+
+function expNeeded()
+{
+  return 125*(Math.pow(2, playerStats.level - 1))
 }
 
 function hitPlayer(amount)

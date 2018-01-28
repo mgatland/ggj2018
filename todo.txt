@@ -2,13 +2,16 @@ thing to do:
 
 [x] you can die
 [x] enemies fight back during combat
+[x] enemies only follow you if they can see you \ have seen you recently \ are close
+[x] fewer dead-end ladders
 
-enemies only follow you if they can see you \ have seen you recently \ are close
-
-fewer dead-end ladders
-fog of war
+character advancement
+show stats
+potions
 
 spells
+
+fog of war
 
 nice error messages on invalid actions
 enemies level up as you go deeper
