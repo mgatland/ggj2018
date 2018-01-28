@@ -60,16 +60,24 @@ function setDirs(dirs) {
   }
 }
 
+const tileSetCount = 2
+const normalEnemyCount = tileSetCount * 4
 const enemyType = []
 enemyType.push({tileSet:0, sprite:1, maxHp:5, speed:7, defence: 3, power:3, name: "Sporangium Warrior", desc:"It smells angry"})
 enemyType.push({tileSet:0, sprite:2, maxHp:10, speed:5, defence: 3, power:4, name: "Aspergillus Philosopher", desc:"It quivers threateningly"})
 enemyType.push({tileSet:0, sprite:3, maxHp:12, speed:3, defence: 3, power:5, name: "Elder Shroom", desc:"It doesn't want you here"})
 enemyType.push({tileSet:0, sprite:4, maxHp:30, speed:2, defence: 3, power:6, name: "Earthstar", desc:"It stares expectantly"})
+
 enemyType.push({tileSet:1, sprite:1, maxHp:20, speed:7, defence: 3, power:5, name: "Broken One", desc:"It looks fragile"})
 enemyType.push({tileSet:1, sprite:2, maxHp:15, speed:5, defence: 3, power:6, name: "Smoke Elemental", desc:"It seems to be slowly burning away"})
 enemyType.push({tileSet:1, sprite:3, maxHp:30, speed:3, defence: 3, power:7, name: "Sewer Wyrm", desc:"It thrashes around to no avail"})
 enemyType.push({tileSet:1, sprite:4, maxHp:40, speed:2, defence: 3, power:8, name: "Canbion", desc:"It shuffles back and forth"})
 
+//potions
+for (var i = 0; i < 5; i++) {
+  enemyType.push({tileSet:5, sprite:1+i, maxHp:5, speed:4, defence: 2, power:3, special: i, name: "Potion Bearer", desc:"This one will change you…"})
+  enemyType.push({tileSet:6, sprite:1+i, maxHp:5, speed:4, defence: 2, power:3, special: i+5, name: "Potion Bearer", desc:"This one will change you…"})
+}
 
 let playerPos = {}
 let depth = 0
@@ -190,6 +198,12 @@ function makeEnemy() {
     y = rnd(mapSize)
   }
   var enemy = {x:x, y:y, type:rnd(4)+tileSet*4}
+
+  if (rnd(100)<10) {
+    //potion!
+    enemy.type = normalEnemyCount+rnd(10)
+  }
+
   const et = getType(enemy)
   enemy.level = depth + rnd(2)
   enemy.maxHp = et.maxHp + Math.floor(enemy.level * et.maxHp / 2)
@@ -724,6 +738,10 @@ function monsterAttack(e) {
   if (damage > 0) {
     hitPlayer(damage)
     enemyCombatMessage.push("The " + getType(e).name + " does " + damage + " points of damage")
+    if (getType(e).special != undefined) {
+      specialHitEffect(getType(e).special)
+      enemyDie(e)
+    }
   } else {
     enemyCombatMessage.push("The " + getType(e).name + " missed!")
   }
@@ -733,10 +751,14 @@ function hitMonster(damage, e)
 {
   e.hp -= damage
   if (e.hp <= 0) {
-    enemies.splice(enemies.indexOf(e), 1)
+    enemyDie(e)
     playerStats.exp += e.exp
     playerStats.gold += e.gold
   }
+}
+
+function enemyDie(e) {
+  enemies.splice(enemies.indexOf(e), 1)
 }
 
 function playerDamageRoll() {
@@ -873,4 +895,40 @@ function hitPlayer(amount)
   if (playerStats.hp <= 0) {
     state = states.dead
   }
+}
+
+function specialHitEffect(effect) {
+  switch (effect) {
+    case 1: playerStats.speed++
+    enemyCombatMessage.push("Speed permanently raised!")
+    break
+    case 2: playerStats.strength++
+    enemyCombatMessage.push("Strength permanently raised!")
+    break
+    case 3: playerStats.Luck++
+    enemyCombatMessage.push("Luck permanently raised!")
+    break
+    case 4: playerStats.int++
+    enemyCombatMessage.push("Intelligence permanently raised!")
+    break
+    case 5: playerStats.end++
+    enemyCombatMessage.push("Endurance permanently raised!")
+    break
+    case 0: playerStats.speed--
+    enemyCombatMessage.push("Speed permanently lowered!")
+    break
+    case 6: playerStats.strength--
+    enemyCombatMessage.push("Strength permanently lowered!")
+    break
+    case 7: playerStats.Luck--
+    enemyCombatMessage.push("Luck permanently lowered!")
+    break
+    case 8: playerStats.int--
+    enemyCombatMessage.push("Intelligence permanently lowered!")
+    break
+    case 9: playerStats.end--
+    enemyCombatMessage.push("Endurance permanently lowered!")
+    break
+  }
+  
 }
