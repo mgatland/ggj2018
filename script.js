@@ -123,11 +123,14 @@ for (var i = 0; i < 5; i++) {
   enemyType.push({tileSet:6, sprite:1+i, maxHp:5, speed:4, defence: 1, power:5, special: i+5, name: "Potion Bearer", desc:"This one will change you…"})
 }
 
+//information you would save
 let playerPos = {}
-let depth = 0
+let depth = -1
 let tileSet = 0
-const map = []
 let enemies = []
+let storedEnemies = []
+
+const map = []
 const laddersUp = []
 const laddersDown = []
 
@@ -142,6 +145,8 @@ function restart() {
   playerStats.spellKnown = [true,false,false,false,false,false,false,false,false,false]
 
   clearMessages()
+  storedEnemies.length = 0
+  depth=-1
   changeLevelTo(0)
 }
 
@@ -222,8 +227,17 @@ function addLadder(isUp) {
 }
 
 function makeEnemies() {
-  enemies.length = 0
-  times(100, makeEnemy)
+  
+  if (storedEnemies[depth] != undefined) {
+    enemies = storedEnemies[depth]
+    storedEnemies[depth] = undefined
+    //spawn more if there aren't many left
+    times(30-enemies.length, makeEnemy)
+  } else {
+    enemies.length = 0
+    times(100, makeEnemy)  
+  }
+  
 }
 
 function makeEnemy() {
@@ -874,6 +888,10 @@ function down() {
 
 function changeLevelTo(newLevel)
 {
+  if (depth != -1) {
+    storedEnemies[depth] = enemies
+    enemies = []
+  }
   depth = newLevel
   tileSet = Math.floor(depth / 3) % tileSetCount
   makeMap()
