@@ -119,8 +119,8 @@ enemyType.push({tileSet:2, sprite:4, maxHp:30, speed:2, defence: 3, power:6, nam
 
 //potions
 for (var i = 0; i < 5; i++) {
-  enemyType.push({tileSet:5, sprite:1+i, maxHp:5, speed:4, defence: 2, power:3, special: i, name: "Potion Bearer", desc:"This one will change you…"})
-  enemyType.push({tileSet:6, sprite:1+i, maxHp:5, speed:4, defence: 2, power:3, special: i+5, name: "Potion Bearer", desc:"This one will change you…"})
+  enemyType.push({tileSet:5, sprite:1+i, maxHp:5, speed:4, defence: 1, power:5, special: i, name: "Potion Bearer", desc:"This one will change you…"})
+  enemyType.push({tileSet:6, sprite:1+i, maxHp:5, speed:4, defence: 1, power:5, special: i+5, name: "Potion Bearer", desc:"This one will change you…"})
 }
 
 let playerPos = {}
@@ -986,12 +986,13 @@ function monsterAttack(e) {
   }
 
   if (damage > 0) {
-    hitPlayer(damage)
-    enemyCombatMessage.push("The " + getType(e).name + " deals " + damage + " damage")
     if (getType(e).special != undefined) {
       specialHitEffect(getType(e).special)
       e.hp = 0
       //FIXME: this should go to a 'press any key' state that makes the enemy disappear
+    } else {
+      hitPlayer(damage)
+      enemyCombatMessage.push("The " + getType(e).name + " deals " + damage + " damage")
     }
   } else {
     enemyCombatMessage.push("The " + getType(e).name + " missed!")
@@ -1185,34 +1186,34 @@ function healCost(amount) {
 function specialHitEffect(effect) {
   switch (effect) {
     case 1: playerStats.speed++
-    enemyCombatMessage.push("Speed permanently raised!")
+    enemyCombatMessage.push("Speed raised by potion!")
     break
     case 2: playerStats.strength++
-    enemyCombatMessage.push("Strength permanently raised!")
+    enemyCombatMessage.push("Strength raised by potion!")
     break
     case 3: playerStats.Luck++
-    enemyCombatMessage.push("Luck permanently raised!")
+    enemyCombatMessage.push("Luck raised by potion!")
     break
     case 4: playerStats.int++
-    enemyCombatMessage.push("Intelligence permanently raised!")
+    enemyCombatMessage.push("Intelligence raised by potion!")
     break
     case 5: playerStats.end++
-    enemyCombatMessage.push("Endurance permanently raised!")
+    enemyCombatMessage.push("Endurance raised by potion!")
     break
     case 0: playerStats.speed--
-    enemyCombatMessage.push("Speed permanently lowered!")
+    enemyCombatMessage.push("Speed lowered by potion!")
     break
     case 6: playerStats.strength--
-    enemyCombatMessage.push("Strength permanently lowered!")
+    enemyCombatMessage.push("Strength lowered by potion!")
     break
     case 7: playerStats.Luck--
-    enemyCombatMessage.push("Luck permanently lowered!")
+    enemyCombatMessage.push("Luck lowered by potion!")
     break
     case 8: playerStats.int--
-    enemyCombatMessage.push("Intelligence permanently lowered!")
+    enemyCombatMessage.push("Intelligence lowered by potion!")
     break
     case 9: playerStats.end--
-    enemyCombatMessage.push("Endurance permanently lowered!")
+    enemyCombatMessage.push("Endurance lowered by potion!")
     break
   }
   
