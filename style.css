@@ -13,3 +13,14 @@ canvas {
 	left: 0;
 	right: 0;
 }
+
+@font-face {
+	font-family: 'dysin4mation';
+	src: 
+	local('dysin4mation'),
+	local('dysin4mation'),
+	url('dysin4mation.ttf')
+	format('truetype');
+}
+
+

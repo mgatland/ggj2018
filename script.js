@@ -2,10 +2,18 @@
 //DOM stuff
 const canvas = document.querySelector(".gameCanvas")
 
+//credit font dysin4mation by Auntie Pixelante
+
 const ctx = canvas.getContext('2d')
 ctx.webkitImageSmoothingEnabled = false
 ctx.mozImageSmoothingEnabled = false
 ctx.imageSmoothingEnabled = false
+
+let smallFont = "24px \"dysin4mation\", monospace"
+let mediumFont = "36px \"dysin4mation\", monospace"
+let largeFont = "48px \"dysin4mation\", monospace"
+let headingFont = "96px \"dysin4mation\", monospace"
+let fontLineHeightScale = 0.6
 
 const tempCanvas = document.createElement("canvas")
 const tCtx = tempCanvas.getContext("2d")
@@ -24,23 +32,32 @@ let townMessage = []
 let flipped = false
 
 const spellNames = []
-spellNames.push({name:"Never out of problems", fullName:"As long as we have each other, we will never run out of problems", desc:""}) //instakill
+spellNames.push({name:"We are together", fullName:"As long as we have each other, we will never run out of problems", desc:""}) //instakill
 spellNames.push({name:"Deception", desc:""}) // enemies stop hunting you
 spellNames.push({name:"Extinction", desc:""}) //destroy all enemies of this type (op?)
 spellNames.push({name:"Ouroboros", desc:""}) //enemy attacks itself
 spellNames.push({name:"Heartbeat", desc:""}) //heal (better)
-spellNames.push({name:"We don't see things…", fullName: "We don't see things as they are, we see them as we are.", desc:""}) // see enemies on map
+spellNames.push({name:"See things as we are", fullName: "We don't see things as they are, we see them as we are.", desc:""}) // see enemies on map
 spellNames.push({name:"What do we do now?", desc:""}) //teleport
 spellNames.push({name:"Ritual", desc:"Heals up to 2 hit point per level"}) //heal (small)
-spellNames.push({name:"Waves", desc:""}) //damage
-spellNames.push({name:"Transmission", desc:""}) //speed
+spellNames.push({name:"Waves", desc:"Does nothing"}) //damage
+spellNames.push({name:"Transmission", desc:"Does nothing"}) //speed
 spellNames.reverse()
 
 const spriteImage = new Image()
 spriteImage.src = 'sprites.png'
 spriteImage.addEventListener('load', function() {
   loaded = true
-  draw()
+
+  var font = new FontFaceObserver('dysin4mation', {});
+
+  font.load().then(function () {
+    console.log('Font is available');
+    restart()
+  }, function () {
+    console.log('Font is not available');
+    restart()
+  });
 }, false)
 
 let rngSeed = 1;
@@ -265,6 +282,8 @@ const smallViewY = viewSizeY-Math.floor(smallColWidth/1.5)
 const col1X = 0
 const col2X = smallColWidth
 const col3X = smallColWidth + viewSize
+const lowerHudY = viewSizeY + 30
+const centerX = Math.floor(canvas.width/2)
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -275,9 +294,6 @@ function draw() {
   draw3D(rearViewX, viewSizeY, smallColWidth, playerPos.dir.reverse)
   
   drawMap(col3X, 0, canvas.width - col3X, smallViewY)
-  ctx.font="16px Verdana"
-  ctx.fillStyle="white"
-  ctx.fillText("position: " + playerPos.x + ":" + playerPos.y + ":" + playerPos.dir.name, 12, 748)
 
   const ahead = move(playerPos, playerPos.dir)
   const target = enemyAt(ahead)
@@ -287,24 +303,28 @@ function draw() {
   }
 
   {
-    ctx.font="16px Verdana"
+    ctx.fillStyle="white"
+    ctx.font=mediumFont
+    const lineHeight = 24
     const x = col1X + 20
-    let y = viewSize/1.5+20
-    const lineHeight = 20
-    ctx.fillText("Armour: clothes    weapon: fist ", x, y);  y+=lineHeight
-    ctx.fillText(`Level: ${playerStats.level}     Exp: ${playerStats.exp} of ${expNeeded()}`, x, y);  y+=lineHeight
-    ctx.fillText(`Spell points: ${playerStats.sp} of ${playerStats.maxSp}`, x, y);  y+=lineHeight
-    ctx.fillText(`Health points: ${playerStats.hp} of ${playerStats.maxHp}              Gold: ${playerStats.gold}`, x, y);  y+=lineHeight
+    const rightX = x + 300
+    let y = lowerHudY
+    ctx.fillText(`Health points: ${playerStats.hp} of ${playerStats.maxHp}`, x, y)
+    ctx.fillText(`Gold: ${playerStats.gold}`, rightX, y);  y+=lineHeight
+    ctx.fillText(`Spell points: ${playerStats.sp} of ${playerStats.maxSp}`, x, y);
+    ctx.fillText(`Level: ${playerStats.level}`, rightX, y);  y+=lineHeight
+    ctx.fillText(`Exp: ${playerStats.exp} of ${expNeeded()}`, x, y);  y+=lineHeight
+    
+    
+    y+=lineHeight
+    y+=lineHeight
+    ctx.fillText(`Str: ${playerStats.strength}   Spd: ${playerStats.speed}   Int: ${playerStats.int}   End: ${playerStats.end}   Luc: ${playerStats.luck}`, x, y);  y+=lineHeight
+    
     y+=lineHeight
     ctx.fillText(`Arrow keys move and attack. Spacebar to wait.`, x, y);  y+=lineHeight
     if (anyAtPos(laddersUp, playerPos) || anyAtPos(laddersDown, playerPos)) {
-      ctx.fillText(`[d] or [u] to go down or up a ladder.`, x, y);  
+      ctx.fillText(`[d] or [u] to go down or up a ladder.`, x, y);  y+=lineHeight
     }
-    y+=lineHeight
-    y+=lineHeight
-    ctx.fillText(`Str: ${playerStats.strength}   Spd: ${playerStats.speed}`, x, y);  y+=lineHeight
-    ctx.fillText(`Int: ${playerStats.int}   End: ${playerStats.end}`, x, y);  y+=lineHeight
-    ctx.fillText(`Luc: ${playerStats.luck}`/*  Wis: ${playerStats.wis}`*/, x, y);  y+=lineHeight
     y+=lineHeight
     if (playerStats.exp >= expNeeded()) {
       ctx.fillText(`You have enough experience to level up!`, x, y);  y+=lineHeight
@@ -313,17 +333,18 @@ function draw() {
   }
 
   const x = rearViewX + smallColWidth + 20
-  let y = viewSize/1.5+20
+  let y = lowerHudY
   const lineHeight = 20
   for (let i = 0; i < enemyCombatMessage.length; i++) {
     ctx.fillText(enemyCombatMessage[i], x, y); y+=lineHeight
   }
+  if (enemyCombatMessage.length==0) y+=lineHeight
   if (target != null)
   {
     const et = enemyType[target.type]
 
     y+=lineHeight
-    ctx.fillText("You are fighting a level " + target.level + " " + et.name, x, y);  y+=lineHeight
+    ctx.fillText("A level " + target.level + " " + et.name, x, y);  y+=lineHeight
     ctx.fillText("It has " + target.hp + " health points left", x, y);  y+=lineHeight
     y+=lineHeight
     for (let i = 0; i < playerCombatMessage.length; i++) {
@@ -345,44 +366,28 @@ function draw() {
   }
 
   if (state===states.dead) {
-    ctx.font="64px Verdana"
-    ctx.fillStyle="white"
-    ctx.textAlign="center"
-    ctx.fillText("YOU HAVE DIED", (col2X + col3X)/2, 100)
-
-    ctx.font="32px Verdana"
-    ctx.fillText("Press R to restart", (col2X + col3X)/2, viewSizeY - 20)
+    drawTitle("YOU HAVE DIED", centerX, 100)
+    drawMedium("Press R to restart", centerX, viewSizeY - 20)
     ctx.textAlign="left"
   }
 
   if (state===states.start) {
-    ctx.font="64px Verdana"
-    ctx.fillStyle="black"
-    ctx.textAlign="center"
-    ctx.fillText("MATTHEW'S", (col2X + col3X)/2, 100)
-    ctx.fillText("DUNGEONS OF", (col2X + col3X)/2, 170)
-    ctx.fillText("THE UNFORGIVEN", (col2X + col3X)/2, 170+70)
-
-    ctx.fillStyle="red"
-    ctx.textAlign="center"
-    ctx.fillText("MATTHEW'S", 3+(col2X + col3X)/2, 100)
-    ctx.fillText("DUNGEONS OF", 3+(col2X + col3X)/2, 170)
-    ctx.fillText("THE UNFORGIVEN", 3+(col2X + col3X)/2, 170+70)
-
-    ctx.font="32px Verdana"
-    ctx.fillText("Press [spacebar] to start", (col2X + col3X)/2, viewSizeY - 20)
+    drawTitle("MATTHEW'S", centerX, 80)
+    drawTitle("DUNGEONS OF", centerX, 80+70)
+    drawTitle("THE UNFORGIVEN", centerX, 80+70+70)
+    drawMedium("Press [spacebar] to start", centerX, viewSizeY - 20)
     ctx.textAlign="left"
   }
 
   if (state===states.spellNotes) {
     const t = getMainWindowTextTool()
     t.print("Spell Notes")
-    t.setFontSize(12)
-    t.print()
+    t.setFont(smallFont)
+    //t.print()
     for (let i = 0; i < spellNames.length; i++) {
       if (playerStats.spellKnown[i]) {
-        t.print('"' + (spellNames[i].fullName != undefined ? spellNames[i].fullName : spellNames[i].name) + '"')
-        t.print(spellNames[i].desc)
+        t.print(spellNames[i].fullName != undefined ? spellNames[i].fullName : spellNames[i].name)
+        t.print("    " + spellNames[i].desc)
       } else {
         t.print("???")
         t.print()
@@ -395,14 +400,14 @@ function draw() {
   if (state===states.healer) {
     const t = getMainWindowTextTool()
     t.print("The Therapist")
-    t.setFontSize(16)
+    t.setFont(mediumFont)
     t.print()
     if (townMessage.length > 0) {
       for (let i = 0; i < townMessage.length; i++) {
         t.print(townMessage[i])
       }
     } else {
-      t.print("Dungeoneering can be stressful! I can heal you with my words.")
+      t.print("Dungeoneering can be stressful! I can heal you with words.")
     }
     t.print()
     t.print("Press [1] to heal 10 hp for " + healCost(10))
@@ -414,7 +419,7 @@ function draw() {
   if (state===states.town) {
     const t = getMainWindowTextTool()
     t.print("Survivor's Technical College")
-    t.setFontSize(16)
+    t.setFont(mediumFont)
     t.print()
     if (townMessage.length > 0) {
       for (let i = 0; i < townMessage.length; i++) {
@@ -440,18 +445,47 @@ function draw() {
   
 }
 
+function drawMedium(text, x, y) {
+  ctx.font=largeFont
+  ctx.textAlign="center"
+  ctx.fillStyle="black"
+  for (let xi = -1; xi <=1; xi++)
+  {
+    for (let yi = -1; yi <=1; yi++) 
+    {
+      ctx.fillText(text, x+xi*2, y+yi*2)
+    }
+  }
+  ctx.fillStyle="white"
+  ctx.fillText(text, x, y)
+}
+
+function drawTitle(text, x, y) {
+  ctx.font=headingFont
+  ctx.textAlign="center"
+  ctx.fillStyle="black"
+  for (let xi = -1; xi <=1; xi++)
+  {
+    for (let yi = -1; yi <=1; yi++) 
+    {
+      ctx.fillText(text, x+xi*4, y+yi*4)
+    }
+  }
+  ctx.fillStyle="white"
+  ctx.fillText(text, x, y)
+}
+
 function getMainWindowTextTool() {
     ctx.fillStyle = "black"
     ctx.fillRect(col2X, 0, viewSize, viewSizeY)
-    ctx.font="32px Verdana"
     ctx.fillStyle="white"
     let me = {}
     me.x = col2X + 20
     me.y = 40
-    me.lineHeight = 32
-    me.setFontSize = function(size) {
-      ctx.font= ""+size+"px Verdana"
-      me.lineHeight = size
+    me.setFont = function(font) {
+      ctx.font= font
+      const fontSize = parseInt(font.substring(0, font.indexOf("px")))
+      me.lineHeight = Math.floor(fontSize*fontLineHeightScale)
     }
     me.print = function (text) {
       if (text) {
@@ -459,34 +493,35 @@ function getMainWindowTextTool() {
       }
       me.y += me.lineHeight
     }
+    me.setFont(largeFont)
     return me
 }
 
 function drawSpellUi(x, y, width, height) {
   ctx.fillStyle = "black"
   ctx.fillRect(x,y,width,height)
-  ctx.font="12px Verdana"
+  ctx.font=smallFont
   ctx.fillStyle="white"
   let tX = x + 7
   let tY = y + 20
   const lineHeight = 16
   const costX = x + 164
-  ctx.fillText("Spell", tX, tY);
-  ctx.fillText("Cost", costX-9, tY); tY += lineHeight
+  ctx.fillText("Spells", tX, tY); tY += lineHeight
   tY += lineHeight
   for (var i = 0; i < 10; i++) {
     if (playerStats.spellKnown[i]) {
-      ctx.fillText(((i+1)%10)+": " + spellNames[i].name, tX, tY);
-      ctx.textAlign = "center"
-      ctx.fillText((i+1), costX+10, tY);
-      ctx.textAlign = "left"
+      ctx.fillText((i+1) + " " + spellNames[i].name, tX, tY);
       tY += lineHeight
     } else {
-      ctx.fillText("------", tX, tY); tY += lineHeight
+      ctx.fillText("  -------------", tX, tY); tY += lineHeight
     }
   }
   tY += lineHeight
-  ctx.fillText("[s] Read spell instructions", tX, tY); tY += lineHeight
+  ctx.fillText("[1-9] Cast Spell", tX, tY); tY += lineHeight
+  ctx.fillText("[S] Show spell notes", tX, tY); tY += lineHeight
+  tY += lineHeight
+  ctx.fillText("A spell's cost is the", tX, tY); tY += lineHeight
+  ctx.fillText("same as its number.", tX, tY); tY += lineHeight
 }
 
 function draw3D(viewX, viewY, viewSize, dir) {
@@ -921,7 +956,7 @@ function monsterAttack(e) {
 
   if (damage > 0) {
     hitPlayer(damage)
-    enemyCombatMessage.push("The " + getType(e).name + " does " + damage + " points of damage")
+    enemyCombatMessage.push("The " + getType(e).name + " deals " + damage + " damage")
     if (getType(e).special != undefined) {
       specialHitEffect(getType(e).special)
       e.hp = 0
@@ -1138,5 +1173,3 @@ function specialHitEffect(effect) {
   }
   
 }
-
-restart()
