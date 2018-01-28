@@ -72,18 +72,30 @@ function setDirs(dirs) {
   }
 }
 
-const tileSetCount = 2
+const tileSetCount = 4
 const normalEnemyCount = tileSetCount * 4
 const enemyType = []
-enemyType.push({tileSet:0, sprite:1, maxHp:5, speed:7, defence: 3, power:3, name: "Sporangium Warrior", desc:"It smells angry"})
-enemyType.push({tileSet:0, sprite:2, maxHp:10, speed:5, defence: 3, power:4, name: "Aspergillus Philosopher", desc:"It quivers threateningly"})
-enemyType.push({tileSet:0, sprite:3, maxHp:12, speed:3, defence: 3, power:5, name: "Elder Shroom", desc:"It doesn't want you here"})
-enemyType.push({tileSet:0, sprite:4, maxHp:30, speed:2, defence: 3, power:6, name: "Earthstar", desc:"It stares expectantly"})
 
-enemyType.push({tileSet:1, sprite:1, maxHp:20, speed:7, defence: 3, power:5, name: "Broken One", desc:"It looks fragile"})
-enemyType.push({tileSet:1, sprite:2, maxHp:15, speed:5, defence: 3, power:6, name: "Smoke Elemental", desc:"It seems to be slowly burning away"})
-enemyType.push({tileSet:1, sprite:3, maxHp:30, speed:3, defence: 3, power:7, name: "Sewer Wyrm", desc:"It thrashes around to no avail"})
-enemyType.push({tileSet:1, sprite:4, maxHp:40, speed:2, defence: 3, power:8, name: "Canbion", desc:"It shuffles back and forth"})
+enemyType.push({tileSet:0, sprite:1, maxHp:20, speed:7, defence: 3, power:5, name: "Broken One", desc:"It looks fragile"})
+enemyType.push({tileSet:0, sprite:2, maxHp:15, speed:5, defence: 3, power:6, name: "Smoke Elemental", desc:"It seems to be slowly burning away"})
+enemyType.push({tileSet:0, sprite:3, maxHp:30, speed:3, defence: 3, power:7, name: "Sewer Wyrm", desc:"It thrashes around to no avail"})
+enemyType.push({tileSet:0, sprite:4, maxHp:40, speed:2, defence: 3, power:8, name: "Canbion", desc:"It shuffles back and forth"})
+
+enemyType.push({tileSet:1, sprite:1, maxHp:20, speed:7, defence: 3, power:5, name: "Killer Prawn", desc:"It sees you and snarls"})
+enemyType.push({tileSet:1, sprite:2, maxHp:15, speed:5, defence: 3, power:6, name: "Island Mimic", desc:"Its sandy shore has claimed many victims"})
+enemyType.push({tileSet:1, sprite:3, maxHp:30, speed:3, defence: 3, power:7, name: "Purple Tentacle", desc:"Does it belong to something bigger?"})
+enemyType.push({tileSet:1, sprite:4, maxHp:40, speed:2, defence: 3, power:8, name: "Iron Giant", desc:"You hear grinding gears from the depths"})
+
+enemyType.push({tileSet:2, sprite:1, maxHp:5, speed:7, defence: 3, power:3, name: "Sporangium Warrior", desc:"A cloud of intoxicating spores surrounds it"})
+enemyType.push({tileSet:2, sprite:2, maxHp:10, speed:5, defence: 3, power:4, name: "Aspergillus Philosopher", desc:"It quivers threateningly"})
+enemyType.push({tileSet:2, sprite:3, maxHp:12, speed:3, defence: 3, power:5, name: "Elder Shroom", desc:"It doesn't want you here"})
+enemyType.push({tileSet:2, sprite:4, maxHp:30, speed:2, defence: 3, power:6, name: "Earthstar", desc:"It stares expectantly"})
+
+enemyType.push({tileSet:3, sprite:1, maxHp:5, speed:7, defence: 3, power:3, name: "Triffid", desc:"It smells angry"})
+enemyType.push({tileSet:3, sprite:2, maxHp:10, speed:5, defence: 3, power:4, name: "Dumble-Dor", desc:"It clutches a crude spear"})
+enemyType.push({tileSet:3, sprite:3, maxHp:12, speed:3, defence: 3, power:5, name: "Honey Golem", desc:"It looks delicious"})
+enemyType.push({tileSet:3, sprite:4, maxHp:30, speed:2, defence: 3, power:6, name: "Larva", desc:"It writhes with ecstasy"})
+
 
 //potions
 for (var i = 0; i < 5; i++) {
