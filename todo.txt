@@ -9,18 +9,24 @@ thing to do:
 [x] enemies level up as you go deeper
 [x] walking potions
 
+definitely:
+[ ] heal in town
+
 [ ] better fx when an enemy is killed - it must stay on screen until the next action
 	and show what loot you got
-
-[ ] heal in town
 [ ] spells
-[ ] end game victory
+	spell UI
+	unlock different spells
 [ ] color pallete swapper
 
-
+maybe:
+[ ] end game victory
+[ ] fog of war
+[ ] player shows as arrow on map
 [ ] bosses
+
+unlikely:
 [ ] cryptocurrencies
-nice error messages on invalid actions
-more gameplay
-fog of war
-mouse controls
+[ ] nice error messages on invalid actions
+[ ] mouse controls
+[ ] full screen map

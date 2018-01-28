@@ -41,7 +41,7 @@ function rnd(n) {
   return Math.floor(random() * n)
 }
 
-const states = { main:{}, dead:{}, start:{}}
+const states = { main:{}, dead:{}, start:{}, town:{}, healer:{}}
 let state = states.start
 
 
@@ -329,6 +329,31 @@ function draw() {
     ctx.textAlign="left"
   }
 
+  if (state===states.healer) {
+    ctx.fillStyle = "black"
+    ctx.fillRect(col2X, 0, viewSize, viewSizeY)
+    ctx.font="32px Verdana"
+    ctx.fillStyle="white"
+    let x = col2X + 20
+    let y = 40
+    const lineHeight = 32
+    ctx.fillText("The Therapist", x, y); y += lineHeight
+    ctx.font="16px Verdana"
+    y += lineHeight
+    if (townMessage.length > 0) {
+      for (let i = 0; i < townMessage.length; i++) {
+        ctx.fillText(townMessage[i], x, y); y+=lineHeight
+      }
+    } else {
+      ctx.fillText("Dungeoneering can be stressful! I can heal you with my words.", x, y); y += lineHeight  
+    }
+      y += lineHeight;
+      ctx.fillText("Press [1] to heal 10 hp for " + healCost(10), x, y); y += lineHeight  
+      ctx.fillText(`Press [2] to heal 100 for ${healCost(100)}`, x, y); y += lineHeight
+      ; y += lineHeight
+    ctx.fillText("Press [D] to go back to the dungeon", x, y); y += lineHeight
+  }
+
   if (state===states.town) {
     ctx.fillStyle = "black"
     ctx.fillRect(col2X, 0, viewSize, viewSizeY)
@@ -563,6 +588,23 @@ function doKey(keyCode) {
     }
     return
   }
+  if (state === states.healer) {
+    switch (keyCode) {
+      case 68: //down
+        state = states.main
+        draw()
+        break
+      case 49: //1 -> buy 10
+        buyHealing(10)
+        draw()
+        break
+      case 50: //2 -> buy 100
+        buyHealing(100)
+        draw()
+        break
+    }
+    return
+  }
   if (state === states.town) {
     switch (keyCode) {
       case 68: //down
@@ -603,6 +645,13 @@ function restartIfDead() {
   restart()
 }
 
+function townLadderType(pos) {
+  if ((pos.x + pos.y) % 2 == 0) {
+    return 0
+  }
+  return 1
+}
+
 function up() {
   if (!inGame()) return
   clearMessages()
@@ -610,7 +659,8 @@ function up() {
   const ladder = findAtPos(laddersUp, playerPos)
   if (ladder == undefined) return
   if (depth == 0) {
-    state = states.town
+    const ladderType = townLadderType(playerPos)
+    state = ladderType == 0 ? states.town : states.healer
     townMessage.length = 0
     draw()
   } else {
@@ -630,7 +680,7 @@ function down() {
 function changeLevelTo(newLevel)
 {
   depth = newLevel
-  tileSet = depth % 2
+  tileSet = Math.floor(depth / 3) % tileSetCount
   makeMap()
   draw()
 }
@@ -885,6 +935,20 @@ function levelUp() {
   townMessage.push(`You are now level ${playerStats.level}`)
 }
 
+function buyHealing(n) {
+  townMessage.length = 0
+  const cost = healCost(n)
+  if (playerStats.gold < cost) {
+    townMessage.push("You can't afford that!")
+    townMessage.push("I don't work for free! You shouldn't either.")
+  } else {
+    playerStats.gold -= cost
+    playerStats.hp += n
+    if (playerStats.hp > playerStats.maxHp) playerStats.hp = playerStats.maxHp
+    townMessage.push("> You feel better after your session.")
+  }
+}
+
 function goldNeededToLevel() {
   return Math.floor(expNeeded() / 6)
 }
@@ -895,6 +959,10 @@ function hitPlayer(amount)
   if (playerStats.hp <= 0) {
     state = states.dead
   }
+}
+
+function healCost(amount) {
+  return playerStats.level * 15 + amount * 4 * Math.floor(1 + playerStats.level/2)
 }
 
 function specialHitEffect(effect) {
