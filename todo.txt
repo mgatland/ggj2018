@@ -4,14 +4,17 @@ thing to do:
 [x] enemies fight back during combat
 [x] enemies only follow you if they can see you \ have seen you recently \ are close
 [x] fewer dead-end ladders
+[x] player can level up somehow (climb a ladder on level 1)
+[x] enemies drop gold, display on hud
+[x] enemies level up as you go deeper
 
-[ ] player can level up somehow (climb a ladder on level 1)
-[ ] enemies drop gold, display on hud
 [ ] better fx when an enemy is killed - it must stay on screen until the next action
-
+	and show what loot you got
 [ ] walking potions
+
+[ ] heal in town
+
 [ ] spells
-[ ] enemies level up as you go deeper
 
 [ ] cryptocurrencies
 

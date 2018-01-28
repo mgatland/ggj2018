@@ -61,14 +61,14 @@ function setDirs(dirs) {
 }
 
 const enemyType = []
-enemyType.push({tileSet:0, sprite:1, maxHp:20, speed:7, power:5, name: "Sporangium Warrior", desc:"It smells angry"})
-enemyType.push({tileSet:0, sprite:2, maxHp:15, speed:5, power:6, name: "Aspergillus Philosopher", desc:"It quivers threateningly"})
-enemyType.push({tileSet:0, sprite:3, maxHp:30, speed:3, power:7, name: "Elder Shroom", desc:"It doesn't want you here"})
-enemyType.push({tileSet:0, sprite:4, maxHp:40, speed:2, power:8, name: "Earthstar", desc:"It stares expectantly"})
-enemyType.push({tileSet:1, sprite:1, maxHp:20, speed:7, power:5, name: "Broken One", desc:"It looks fragile"})
-enemyType.push({tileSet:1, sprite:2, maxHp:15, speed:5, power:6, name: "Smoke Elemental", desc:"It seems to be slowly burning away"})
-enemyType.push({tileSet:1, sprite:3, maxHp:30, speed:3, power:7, name: "Sewer Wyrm", desc:"It thrashes around to no avail"})
-enemyType.push({tileSet:1, sprite:4, maxHp:40, speed:2, power:8, name: "Canbion", desc:"It shuffles back and forth"})
+enemyType.push({tileSet:0, sprite:1, maxHp:5, speed:7, defence: 3, power:3, name: "Sporangium Warrior", desc:"It smells angry"})
+enemyType.push({tileSet:0, sprite:2, maxHp:10, speed:5, defence: 3, power:4, name: "Aspergillus Philosopher", desc:"It quivers threateningly"})
+enemyType.push({tileSet:0, sprite:3, maxHp:12, speed:3, defence: 3, power:5, name: "Elder Shroom", desc:"It doesn't want you here"})
+enemyType.push({tileSet:0, sprite:4, maxHp:30, speed:2, defence: 3, power:6, name: "Earthstar", desc:"It stares expectantly"})
+enemyType.push({tileSet:1, sprite:1, maxHp:20, speed:7, defence: 3, power:5, name: "Broken One", desc:"It looks fragile"})
+enemyType.push({tileSet:1, sprite:2, maxHp:15, speed:5, defence: 3, power:6, name: "Smoke Elemental", desc:"It seems to be slowly burning away"})
+enemyType.push({tileSet:1, sprite:3, maxHp:30, speed:3, defence: 3, power:7, name: "Sewer Wyrm", desc:"It thrashes around to no avail"})
+enemyType.push({tileSet:1, sprite:4, maxHp:40, speed:2, defence: 3, power:8, name: "Canbion", desc:"It shuffles back and forth"})
 
 
 let playerPos = {}
@@ -191,12 +191,13 @@ function makeEnemy() {
   }
   var enemy = {x:x, y:y, type:rnd(4)+tileSet*4}
   const et = getType(enemy)
-  enemy.hp = et.maxHp
+  enemy.level = depth + rnd(2)
+  enemy.maxHp = et.maxHp + Math.floor(enemy.level * et.maxHp / 2)
+  enemy.hp = enemy.maxHp
   enemy.timer = 0
-  enemy.level = 1
-  enemy.defence = 10
-  enemy.speed = 10
-  enemy.power = et.power
+  enemy.defence = et.defence + Math.floor(enemy.level * et.defence / 4)
+  enemy.speed = et.speed + Math.floor(enemy.level * et.defence / 4)
+  enemy.power = et.power + Math.floor(enemy.level * et.defence / 4)
   enemy.exp = enemy.level + et.maxHp + enemy.power + enemy.defence
   enemy.gold = Math.floor(enemy.exp / 4)
   enemies.push(enemy)
@@ -282,7 +283,7 @@ function draw() {
     const et = enemyType[target.type]
 
     y+=lineHeight
-    ctx.fillText("You are fighting a level 1 " + et.name, x, y);  y+=lineHeight
+    ctx.fillText("You are fighting a level " + target.level + " " + et.name, x, y);  y+=lineHeight
     ctx.fillText("It has " + target.hp + " health points left", x, y);  y+=lineHeight
     y+=lineHeight
     ctx.fillText(playerCombatMessage1, x, y); y+=lineHeight
