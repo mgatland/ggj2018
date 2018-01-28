@@ -5,15 +5,17 @@ thing to do:
 [x] enemies only follow you if they can see you \ have seen you recently \ are close
 [x] fewer dead-end ladders
 
-character advancement
-show stats
-potions
+[ ] player can level up somehow (climb a ladder on level 1)
+[ ] enemies drop gold, display on hud
+[ ] better fx when an enemy is killed - it must stay on screen until the next action
 
-spells
+[ ] walking potions
+[ ] spells
+[ ] enemies level up as you go deeper
 
-fog of war
+[ ] cryptocurrencies
 
 nice error messages on invalid actions
-enemies level up as you go deeper
-
 more gameplay
+fog of war
+mouse controls

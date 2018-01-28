@@ -21,6 +21,7 @@ let loaded = false
 let playerCombatMessage1 = ""
 let playerCombatMessage2 = ""
 let enemyCombatMessage = []
+let townMessage = []
 let flipped = false
 
 const spriteImage = new Image()
@@ -85,7 +86,7 @@ function restart() {
   state = states.start
   //Strength, Intelligence, Wisdom, Constitution=ENDurance, Agility, and Luck
   playerStats = {speed:10, strength: 10, luck: 10, /*unused->*/ int:10, end:10, wis:10,
-                  level:1, sp:0, maxSp:0, hp:0, maxHp:0, exp:0}
+                  level:1, sp:0, maxSp:0, hp:0, maxHp:0, exp:0, gold: 50}
   deriveMaxHpAndSp()
   playerStats.hp = playerStats.maxHp
   playerStats.sp = playerStats.maxSp
@@ -122,10 +123,8 @@ function makeMap() {
 
 function makeLadders(n) {
   laddersUp.length = 0
-  if (n > 0) {
-    rngSeed = n - 1
-    times(100, () => addLadderUp())
-  }
+  rngSeed = n - 1
+  times(100, () => addLadderUp())
   laddersDown.length = 0
   rngSeed = n
   times(100, () => addLadderDown())
@@ -199,6 +198,7 @@ function makeEnemy() {
   enemy.speed = 10
   enemy.power = et.power
   enemy.exp = enemy.level + et.maxHp + enemy.power + enemy.defence
+  enemy.gold = Math.floor(enemy.exp / 4)
   enemies.push(enemy)
 }
 
@@ -253,7 +253,7 @@ function draw() {
     ctx.fillText("Armour: clothes    weapon: fist ", x, y);  y+=lineHeight
     ctx.fillText(`Level: ${playerStats.level}     Exp: ${playerStats.exp} of ${expNeeded()}`, x, y);  y+=lineHeight
     ctx.fillText(`Spell points: ${playerStats.sp} of ${playerStats.maxSp}`, x, y);  y+=lineHeight
-    ctx.fillText(`Health points: ${playerStats.hp} of ${playerStats.maxHp}`, x, y);  y+=lineHeight
+    ctx.fillText(`Health points: ${playerStats.hp} of ${playerStats.maxHp}              Gold: ${playerStats.gold}`, x, y);  y+=lineHeight
     y+=lineHeight
     ctx.fillText(`Arrow keys move and attack. Spacebar to wait.`, x, y);  y+=lineHeight
     if (anyAtPos(laddersUp, playerPos) || anyAtPos(laddersDown, playerPos)) {
@@ -263,8 +263,12 @@ function draw() {
     y+=lineHeight
     ctx.fillText(`Str: ${playerStats.strength}   Spd: ${playerStats.speed}`, x, y);  y+=lineHeight
     ctx.fillText(`Int: ${playerStats.int}   End: ${playerStats.end}`, x, y);  y+=lineHeight
-    ctx.fillText(`Luc: ${playerStats.luck}  Wis: ${playerStats.wis}`, x, y);  y+=lineHeight //and no Wisdom
-    
+    ctx.fillText(`Luc: ${playerStats.luck}  Wis: ${playerStats.wis}`, x, y);  y+=lineHeight
+    y+=lineHeight
+    if (playerStats.exp >= expNeeded()) {
+      ctx.fillText(`You have enough experience to level up!`, x, y);  y+=lineHeight
+      ctx.fillText(`Return to the top level. But it will cost you!`, x, y);  y+=lineHeight
+    }
   }
 
   const x = rearViewX + smallColWidth + 20
@@ -308,6 +312,39 @@ function draw() {
     ctx.font="32px Verdana"
     ctx.fillText("Press [spacebar] to start", (col2X + col3X)/2, viewSizeY - 20)
     ctx.textAlign="left"
+  }
+
+  if (state===states.town) {
+    ctx.fillStyle = "black"
+    ctx.fillRect(col2X, 0, viewSize, viewSizeY)
+    ctx.font="32px Verdana"
+    ctx.fillStyle="white"
+    let x = col2X + 20
+    let y = 40
+    const lineHeight = 32
+    ctx.fillText("Survivor's Technical College", x, y); y += lineHeight
+    ctx.font="16px Verdana"
+    y += lineHeight
+    if (townMessage.length > 0) {
+      for (let i = 0; i < townMessage.length; i++) {
+        ctx.fillText(townMessage[i], x, y); y+=lineHeight
+      }
+    } else {
+      if (canLevelUp()) {
+        if (playerStats.gold >= goldNeededToLevel()) {
+          ctx.fillText("You're ready to study here!", x, y); y += lineHeight  
+          ctx.fillText(`Press [S] to study for a year, paying ${goldNeededToLevel()}`, x, y); y += lineHeight
+        } else {
+          ctx.fillText("You're ready to study here!", x, y); y += lineHeight  
+          ctx.fillText(`But you need ${goldNeededToLevel()}! Come back when you've earned more.`, x, y); y += lineHeight  
+        }
+      } else {
+        ctx.fillText("You don't have enough life experience to study here.", x, y); y += lineHeight
+        ctx.fillText("Come back when you've done more murder!", x, y); y += lineHeight
+      }
+      ; y += lineHeight
+    }
+    ctx.fillText("Press [D] to go back to the dungeon", x, y); y += lineHeight
   }
   
 }
@@ -511,6 +548,19 @@ function doKey(keyCode) {
     }
     return
   }
+  if (state === states.town) {
+    switch (keyCode) {
+      case 68: //down
+        state = states.main
+        draw()
+        break
+      case 83: //s
+        levelUp()
+        draw()
+        break
+    }
+    return
+  }
   switch (keyCode) {
     case 37: turnLeft()
       break
@@ -544,7 +594,13 @@ function up() {
 
   const ladder = findAtPos(laddersUp, playerPos)
   if (ladder == undefined) return
-  changeLevelTo(depth-1)
+  if (depth == 0) {
+    state = states.town
+    townMessage.length = 0
+    draw()
+  } else {
+    changeLevelTo(depth-1)
+  }
 }
 
 function down() {
@@ -678,6 +734,7 @@ function hitMonster(damage, e)
   if (e.hp <= 0) {
     enemies.splice(enemies.indexOf(e), 1)
     playerStats.exp += e.exp
+    playerStats.gold += e.gold
   }
 }
 
@@ -778,12 +835,35 @@ function drawWall(ctx, tileSet, left, top, width, leftSize, rightSize)
     var dy = top + (leftSize - dHeight) / 2
     ctx.drawImage(img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
   }
-
 }
 
 function expNeeded()
 {
   return 125*(Math.pow(2, playerStats.level - 1))
+}
+
+function canLevelUp() {
+  return playerStats.exp >= expNeeded()
+}
+
+function levelUp() {
+  if (!canLevelUp()) return
+  if (playerStats.gold < goldNeededToLevel()) return
+  playerStats.gold -= goldNeededToLevel()
+  while (playerStats.exp >= expNeeded()) {
+    playerStats.exp -= expNeeded()
+    playerStats.level++
+  }
+  deriveMaxHpAndSp()
+  playerStats.hp = playerStats.maxHp
+  playerStats.sp = playerStats.maxSp
+  townMessage.length = 0
+  townMessage.push("You study for a year.")
+  townMessage.push(`You are now level ${playerStats.level}`)
+}
+
+function goldNeededToLevel() {
+  return Math.floor(expNeeded() / 6)
 }
 
 function hitPlayer(amount)
