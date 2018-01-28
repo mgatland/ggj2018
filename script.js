@@ -31,7 +31,7 @@ spellNames.push({name:"Ouroboros", desc:""}) //enemy attacks itself
 spellNames.push({name:"Heartbeat", desc:""}) //heal (better)
 spellNames.push({name:"We don't see things…", fullName: "We don't see things as they are, we see them as we are.", desc:""}) // see enemies on map
 spellNames.push({name:"What do we do now?", desc:""}) //teleport
-spellNames.push({name:"Ritual", desc:""}) //heal (small)
+spellNames.push({name:"Ritual", desc:"Heals up to 2 hit point per level"}) //heal (small)
 spellNames.push({name:"Waves", desc:""}) //damage
 spellNames.push({name:"Transmission", desc:""}) //speed
 spellNames.reverse()
@@ -102,7 +102,7 @@ const laddersDown = []
 function restart() {
   state = states.start
   //Strength, Intelligence, Wisdom, Constitution=ENDurance, Agility, and Luck
-  playerStats = {speed:10, strength: 10, luck: 10, /*unused->*/ int:10, end:10, wis:10,
+  playerStats = {speed:10, strength: 10, luck: 10, /*unused->*/ int:10, end:10, 
                   level:1, sp:0, maxSp:0, hp:0, maxHp:0, exp:0, gold: 50}
   deriveMaxHpAndSp()
   playerStats.hp = playerStats.maxHp
@@ -118,7 +118,7 @@ function restart() {
 
 function deriveMaxHpAndSp() {
   playerStats.maxHp = 15 + Math.floor(playerStats.end/2)*playerStats.level
-  playerStats.maxSp = Math.floor((playerStats.int*2+playerStats.wis)/5)*playerStats.level
+  playerStats.maxSp = Math.floor((playerStats.int*3)/5)*playerStats.level
   if (playerStats.hp > playerStats.maxHp) playerStats.hp = playerStats.maxHp
   if (playerStats.sp > playerStats.maxSp) playerStats.sp = playerStats.mapSp
 }
@@ -292,7 +292,7 @@ function draw() {
     y+=lineHeight
     ctx.fillText(`Str: ${playerStats.strength}   Spd: ${playerStats.speed}`, x, y);  y+=lineHeight
     ctx.fillText(`Int: ${playerStats.int}   End: ${playerStats.end}`, x, y);  y+=lineHeight
-    ctx.fillText(`Luc: ${playerStats.luck}  Wis: ${playerStats.wis}`, x, y);  y+=lineHeight
+    ctx.fillText(`Luc: ${playerStats.luck}`/*  Wis: ${playerStats.wis}`*/, x, y);  y+=lineHeight
     y+=lineHeight
     if (playerStats.exp >= expNeeded()) {
       ctx.fillText(`You have enough experience to level up!`, x, y);  y+=lineHeight
