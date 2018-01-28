@@ -18,8 +18,7 @@ tCtx.imageSmoothingEnabled = false
 const width = canvas.width
 const height = canvas.height
 let loaded = false
-let playerCombatMessage1 = ""
-let playerCombatMessage2 = ""
+let playerCombatMessage = []
 let enemyCombatMessage = []
 let townMessage = []
 let flipped = false
@@ -41,7 +40,7 @@ function rnd(n) {
   return Math.floor(random() * n)
 }
 
-const states = { main:{}, dead:{}, start:{}, town:{}, healer:{}}
+const states = { main:{}, dead:{}, start:{}, town:{}, healer:{}, foundSomething:{} }
 let state = states.start
 
 
@@ -83,7 +82,7 @@ let playerPos = {}
 let depth = 0
 let tileSet = 0
 const map = []
-const enemies = []
+let enemies = []
 const laddersUp = []
 const laddersDown = []
 
@@ -300,11 +299,22 @@ function draw() {
     ctx.fillText("You are fighting a level " + target.level + " " + et.name, x, y);  y+=lineHeight
     ctx.fillText("It has " + target.hp + " health points left", x, y);  y+=lineHeight
     y+=lineHeight
-    ctx.fillText(playerCombatMessage1, x, y); y+=lineHeight
-    ctx.fillText(playerCombatMessage2, x, y); y+=lineHeight
+    for (let i = 0; i < playerCombatMessage.length; i++) {
+      ctx.fillText(playerCombatMessage[i], x, y); y+=lineHeight
+    }
+    if (playerCombatMessage.length < 2) times(2-playerCombatMessage.length, () => {y+=lineHeight})
+    y+=lineHeight
     y+=lineHeight
     ctx.fillText("Experience value: " + target.exp, x, y);  y+=lineHeight
     ctx.fillText(et.desc, x, y);  y+=lineHeight
+  } else {
+    y+=lineHeight
+    y+=lineHeight
+    y+=lineHeight
+    y+=lineHeight
+    for (let i = 0; i < playerCombatMessage.length; i++) {
+      ctx.fillText(playerCombatMessage[i], x, y); y+=lineHeight
+    }
   }
 
   if (state===states.dead) {
@@ -465,6 +475,9 @@ function draw3D(viewX, viewY, viewSize, dir) {
           const left = viewXCentre - eSize/2 + j*eSize
           const top = viewYCentre - eSize/2+eSize*0.2
           tCtx.drawImage(spriteImage, 256*et.sprite+1, et.tileSet*256, 255, 256, left, top, eSize, eSize)
+          if (e.hp <= 0) {
+            tCtx.drawImage(spriteImage, 256*5, 1*256, 255, 256, left, top, eSize, eSize)
+          }
         }
 
       } 
@@ -618,6 +631,13 @@ function doKey(keyCode) {
     }
     return
   }
+  if (state === states.foundSomething) {
+    state = states.main
+    cleanDeadEnemies()
+    playerCombatMessage.push("nothing!")
+    draw()
+    return
+  }
   switch (keyCode) {
     case 37: turnLeft()
       break
@@ -735,8 +755,8 @@ function forward() {
 
 function clearMessages() {
   enemyCombatMessage.length = 0
-  playerCombatMessage1 = ""
-  playerCombatMessage2 = ""
+  playerCombatMessage.length = 0
+  cleanDeadEnemies()
 }
 
 function fight(e) {
@@ -763,11 +783,16 @@ function playerAttack(e) {
 
   if (damage > 0) {
     hitMonster(damage, e)
-    playerCombatMessage1 = "You hit the monster!"
-    playerCombatMessage2 = "It takes " + damage + " points of damage!"
+    if (e.hp > 0) {
+      playerCombatMessage.push("You hit the monster!")
+      playerCombatMessage.push("It takes " + damage + " points of damage!")
+    } else {
+      playerCombatMessage.push("You killed it!")
+      playerCombatMessage.push("You found... (PRESS ANY KEY)")
+      state = states.foundSomething
+    }
   } else {
-    playerCombatMessage1 = "You missed!"
-    playerCombatMessage2 = ""    
+    playerCombatMessage.push("You missed!")
   }
 }
 
@@ -808,7 +833,16 @@ function hitMonster(damage, e)
 }
 
 function enemyDie(e) {
-  enemies.splice(enemies.indexOf(e), 1)
+  //enemies.splice(enemies.indexOf(e), 1)
+}
+
+function cleanDeadEnemies() {
+  for (let i = 0; i < enemies.length; i++) {
+    if (enemies[i].hp <= 0) {
+      enemies.splice(i, 1)
+      i--
+    }
+  }
 }
 
 function playerDamageRoll() {
@@ -817,7 +851,6 @@ function playerDamageRoll() {
 
 function timePasses(amount)
 {
-  clearMessages()
   for (let e of enemies) {
     if (e.timer == undefined) e.timer = 0
     e.timer += amount
