@@ -38,7 +38,7 @@ spellNames.push({name:"Deception", desc:"Does nothing"}) // enemies stop hunting
 spellNames.push({name:"Extinction", desc:"Does nothing"}) //destroy all enemies of this type (op?)
 spellNames.push({name:"Ouroboros", desc:"Does nothing"}) //enemy attacks itself
 spellNames.push({name:"Heartbeat", desc:"Heals exactly 10 health points per level"}) //(todo: heal over time for a time)
-spellNames.push({name:"See things as we are", fullName: "We don't see things as they are, we see them as we are.", desc:"Disguise yourself as a monster for a short time. Monsters will ignore you, unless you provoke them."})
+spellNames.push({name:"See things as we are", fullName: "We don't see things as they are, we see them as we are.", desc:"Disguise yourself as a monster. Monsters will ignore you unless provoked."})
 spellNames.push({name:"What do we do now?", desc:"Teleport to a random position on this level.", desc2:"If a Shadow Guardian is present, it will draw you closer!"}) //teleport
 spellNames.push({name:"Ritual", desc:"Heals up to 10 health points per level"}) //heal (small)
 spellNames.push({name:"Waves", desc:"Deals 15-30 health points of damage"}) //damage
