@@ -148,7 +148,8 @@ const laddersDown = []
 function restart() {
   state = states.start
   playerStats = {speed:10, strength: 10, luck: 10, int:10, end:10, 
-                  level:1, sp:0, maxSp:0, hp:0, maxHp:0, exp:0, gold: 50, age:22}
+                  level:1, sp:0, maxSp:0, hp:0, maxHp:0, exp:0, gold: 50, age:22,
+                  surprise:[]}
   deriveMaxHpAndSp()
   playerStats.hp = playerStats.maxHp
   playerStats.sp = playerStats.maxSp
@@ -289,7 +290,7 @@ function makeEnemy(fixedType) {
   enemy.speed = et.speed + Math.floor(enemy.level * et.speed / 4)
   enemy.power = et.power + Math.floor(enemy.level * et.power / 4)
   enemy.exp = enemy.level + et.end + enemy.power + enemy.defence
-  enemy.gold = Math.floor(enemy.exp / 4)
+  enemy.gold = (trueRnd(100) < 25) ? trueRnd(enemy.exp) + 5 : 0
   enemies.push(enemy)
   return enemy
 }
@@ -851,33 +852,42 @@ function doKey(keyCode) {
   if (state === states.foundSomething) {
     state = states.main
     cleanDeadEnemies()
-    if (playerStats.surprise != undefined) {
-      switch (playerStats.surprise) {
-        case 0: playerCombatMessage.push("A Fountain Pen of Luck! +10 Luc")
-        playerStats.luck += 10
-        break
-        case 1: playerCombatMessage.push("A Mobile Phone of Speed! +12 Spd")
-        playerStats.speed += 12
-        break
-        case 2: playerCombatMessage.push("A Poison of Intelligence! +15 Int")
-        playerStats.int += 15
-        break
-        case 3: playerCombatMessage.push("Boots of Endurance! +20 End")
-        playerStats.end += 20
-        break
-      }
-    } else if (rnd(100) < 10) {
-      var spellToGet = playerStats.spellKnown.indexOf(false)
-      console.log(spellToGet)
-      if (spellToGet >= 0) {
-        playerCombatMessage.push("A spell: " + spellNames[spellToGet].name + "!")
-        playerStats.spellKnown[spellToGet] = true
-      } else {
-        playerCombatMessage.push("A spell, but you already knew it.")  
-      }
-    } else {
+    if (playerStats.surprise.length ==0) {
       playerCombatMessage.push("nothing!")
     }
+    for(let thing of playerStats.surprise) {
+      if (thing.type==="boss") {
+        switch (thing.bossId) {
+          case 0: playerCombatMessage.push("A Fountain Pen of Luck! +10 Luc")
+          playerStats.luck += 10
+          break
+          case 1: playerCombatMessage.push("A Mobile Phone of Speed! +12 Spd")
+          playerStats.speed += 12
+          break
+          case 2: playerCombatMessage.push("A Poison of Intelligence! +15 Int")
+          playerStats.int += 15
+          break
+          case 3: playerCombatMessage.push("Boots of Endurance! +20 End")
+          playerStats.end += 20
+          break
+        }
+      }
+      if (thing.type==="spell") {
+        var spellToGet = playerStats.spellKnown.indexOf(false)
+        console.log(spellToGet)
+        if (spellToGet >= 0) {
+          playerCombatMessage.push("A spell: " + spellNames[spellToGet].name + "!")
+          playerStats.spellKnown[spellToGet] = true
+        } else {
+          playerCombatMessage.push("A spell, but you already knew it.")  
+        }
+      }
+      if (thing.type==="gold") {
+        playerCombatMessage.push(thing.amount + " gold coins!")
+        playerStats.gold += thing.amount
+      }
+    }
+    playerStats.surprise.length=0
     draw()
     return
   }
@@ -1235,17 +1245,22 @@ function hitMonster(damage, e, text)
     playerCombatMessage.push("It takes " + damage + " points of damage!")
   } else {
     playerStats.exp += e.exp
-    playerStats.gold += e.gold
     state = states.foundSomething
-    const boss = getType(e).boss
-    playerStats.surprise = boss
-    if (boss != undefined) {
-      playerStats.bossesKilled[boss] = true
+    if (e.gold > 0) {
+      playerStats.surprise.push({type:"gold", amount:e.gold})
+    }
+    const bossId = getType(e).boss
+    if (bossId != undefined) {
+      playerStats.bossesKilled[bossId] = true
+      playerStats.surprise.push({type:"boss", bossId:bossId})
       playerCombatMessage.push("The mighty Shadow Guardian is dead!")
       playerCombatMessage.push("You take its treasure... (PRESS A KEY)")
     } else {
       playerCombatMessage.push("You killed it!")
       playerCombatMessage.push("You found... (PRESS ANY KEY)")
+      if (rnd(100) < 10) {
+        playerStats.surprise.push({type:"spell"})
+      }
     }
   }
 }
