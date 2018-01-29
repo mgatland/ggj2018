@@ -567,7 +567,7 @@ function draw() {
     }
     t.print()
     t.print("Press [1] to heal 10 hp for " + healCost(10))
-    t.print(`Press [2] to heal 100 for ${healCost(100)}`)
+    t.print(`Press [2] to heal 50 for ${healCost(50)}`)
     t.print()
     t.print("Press [D] to go back to the dungeon")
   }
@@ -905,8 +905,8 @@ function doKey(keyCode) {
         buyHealing(10)
         draw()
         break
-      case 50: //2 -> buy 100
-        buyHealing(100)
+      case 50: //2 -> buy 50
+        buyHealing(50)
         draw()
         break
     }
@@ -1523,7 +1523,7 @@ function buyHealing(n) {
 }
 
 function goldNeededToLevel() {
-  return Math.floor(expNeeded() / 6)
+  return Math.floor(expNeeded() / 5)
 }
 
 function hitPlayer(amount)
