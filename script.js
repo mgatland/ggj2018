@@ -1642,7 +1642,6 @@ const mfOrange = "#FF5500"
 const mBlue = "#00AAFF"
 function showColorPicker() {
   state = states.colorPicker
-  const pipeWidth = 13.2
   ctx.fillStyle = "black"
   ctx.fillRect(0, 0, canvas.width, canvas.height)
   ctx.fillStyle=mfYellow
@@ -1658,23 +1657,27 @@ function showColorPicker() {
     }
     if (lineBreak !== false) me.y += me.lineHeight
   }
+
+  const pipeLineHeight = me.lineHeight*2 //firefox: subtract 1
+  const pipeWidth = 19.5
+  function drawPipes(text) {
+    let n = 0
+    for (let i of text) {
+      ctx.fillText(i, me.x+pipeWidth*n,pipeY)
+      n++
+    }
+    pipeY+= pipeLineHeight
+  }
+
   print("This Mattheware Game Can Be Played In " + colorModes.length + " Different Video Modes:")
   print()
   let pipeY = me.y
-  ctx.fillText("╔═══════╦════╦════════════════════════╗", me.x+pipeWidth*3, pipeY)
-  pipeY += me.lineHeight * 2
-  ctx.fillText("╔═╬═══════╬════╬════════════════════════╣", me.x, pipeY)
-  pipeY += me.lineHeight * 2
-  for(var i = 0; i < Math.floor(colorModes.length/2); i++) {
-    ctx.fillText("║", me.x+pipeWidth*0, pipeY)
-    ctx.fillText("║", me.x+pipeWidth*3, pipeY)
-    ctx.fillText("║", me.x+pipeWidth*15, pipeY)
-    ctx.fillText("║", me.x+pipeWidth*23-6.5, pipeY)
-    ctx.fillText("║", me.x+pipeWidth*60-0.2, pipeY)
-    pipeY += me.lineHeight * 2
-    ctx.fillStyle=mfYellow
+  drawPipes("  ╔═══════╦════╦════════════════════════╗")
+  drawPipes("╔═╬═══════╬════╬════════════════════════╣")
+  for(let i = 0; i < Math.floor(colorModes.length/2); i++) {
+    drawPipes("║ ║       ║    ║                        ║")
   }
-  ctx.fillText("╚═╩═══════╩════╩════════════════════════╝", me.x, pipeY)
+  drawPipes("╚═╩═══════╩════╩════════════════════════╝")
   print()
   print("      RESOLUTION    COLORS   DESCRIPTION, REQUIREMENTS")
   print()
