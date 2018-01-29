@@ -151,7 +151,7 @@ function restart() {
   deriveMaxHpAndSp()
   playerStats.hp = playerStats.maxHp
   playerStats.sp = playerStats.maxSp
-  playerPos = {x: 47, y: 11, dir: dirs.down}
+  playerPos = {x: 48, y: 21, dir: dirs.right}
   playerStats.spellKnown = [true,false,false,false,false,false,false,false,false,false]
   playerStats.bossesKilled = [false, false, false, false]
 
@@ -176,10 +176,12 @@ function makeMap() {
     }
   }
   //rooms
+  let rooms = []
   fixedRandom  = new Random(depth);
-  times(100, () => addRoom(2, 12))
-  times(160, () => addRoom(1, 20, true))
-
+  times(140, () => addRoom(rooms))
+  for(let r of rooms) {
+    addCorridors(r)
+  }
   makeEnemies()
   makeLadders(depth)
 }
@@ -187,10 +189,13 @@ function makeMap() {
 function makeLadders(n) {
   laddersUp.length = 0
   fixedRandom  = new Random(n-1);
-  times(100, () => addLadderUp())
+  times(50, () => addLadderUp())
+  if (depth==0) {
+    times(150, () => addLadderUp())
+  }
   laddersDown.length = 0
   fixedRandom  = new Random(n);
-  times(100, () => addLadderDown())
+  times(50, () => addLadderDown())
 }
 
 function addLadderDown() {
@@ -204,8 +209,9 @@ function addLadderUp() {
 function addLadder(isUp) {
   let type = isUp ? "up" : "down"
   let list = isUp ? laddersUp : laddersDown
-  let x = rnd(mapSize)
-  let y = rnd(mapSize)
+  let x = makeOdd(rnd(mapSize-1))
+  let y = makeOdd(rnd(mapSize-1))
+  let rand = rnd(4) //we have to ask for it whether we use it or not
   if (anyAtPos(list, {x:x, y:y})) {
     return //don't add duplicates
   }
@@ -214,26 +220,30 @@ function addLadder(isUp) {
 
   map[x][y] = 1 //clear the space
 
-  const pos = {x:x, y:y}
+  let pos = {x:x, y:y}
   
   if (cellAt(move(pos, dirs.up)) === 0
     && cellAt(move(pos, dirs.down)) === 0
     && cellAt(move(pos, dirs.left)) === 0
     && cellAt(move(pos, dirs.right)) === 0) {
     //ladder needs more room
-    //careful not to call rnd in here
-    let width = 1
-    let height = 1
-    if ((x+y) % 2 == 0) width++
-    if (y % 2 == 0) height++
 
-    for(let x = pos.x-width; x <= pos.x + width; x++) {
-      for (let y = pos.y - height; y <= pos.y + height; y++) {
-        if (x >= 0 && y >= 0 && x< mapSize && y < mapSize) {
-          map[x][y] = 1
-        }
-      }
+    //careful not to call rnd, unless you _always_ call it
+    //because ladders appear on two different levels
+    let dir = dirsList[rand]
+    if (x < 10) dir = dirs.right
+    if (x > mapSize - 10) dir = dirs.left
+    if (y < 10) dir = dirs.down
+    if (y > mapSize - 10) dir = dirs.up
+
+    pos = move(pos, dir)
+    console.log("hi")
+    while(isValidPos(pos)&&map[pos.x][pos.y]==0) {
+      console.log(pos)
+      map[pos.x][pos.y]=1
+      pos = move(pos, dir)
     }
+    console.log("bye")
   }
 }
 
@@ -293,27 +303,96 @@ function makeEnemy(fixedType) {
   return enemy
 }
 
-function addRoom(minSize, maxSize, hallway) {
-  let xPos = rnd(mapSize)
-  let yPos = rnd(mapSize)
-  let xSize = rnd(maxSize - minSize) + minSize
-  let ySize = rnd(maxSize - minSize) + minSize
-  if (hallway) {
-    if (xSize > ySize) {
-      xSize = 1
-    } else {
-      ySize = 1
-    }
+function addRoom(rooms) {
+  let attempt = 0
+  let room = {x:-1,y:-1,w:0,h:0}
+  const maxSize = (rnd(100)<30) ? 13 : 8
+  while (!isRoomValid(room)) {
+    attempt++
+    if (attempt > 100) return //abort!
+    room.x = makeOdd(rnd(mapSize))
+    room.y = makeOdd(rnd(mapSize))
+    room.w = makeOdd(rnd(maxSize-3) + 3)
+    room.h = makeOdd(rnd(maxSize-3) + 3)
   }
-  while (xSize + xPos >= mapSize) xPos--
-  while (ySize + yPos >= mapSize) yPos--
-  for(let x = xPos; x < xPos + xSize; x++) {
-    for (let y = yPos; y < yPos + ySize; y++) {
+  rooms.push(room)
+  for(let x = room.x; x < room.x+room.w; x++) {
+    for (let y = room.y; y < room.y+room.h; y++) {
       map[x][y] = 1
     }
   }
 }
 
+function addCorridors(room) {
+  const n = 1 + rnd((room.w+ room.h)/9+1)
+  for (let i = 0; i < n; i++) {
+    let pos = randomRoomEdge(room)
+    let attempt = 0
+    while (map[pos.x][pos.y]!=0&&attempt<5) {
+      attempt++
+      pos = randomRoomEdge(room)
+    }
+    carveCorridor(pos)
+  }
+}
+
+function carveCorridor(pos) {
+  map[pos.x][pos.y]=0//hack because corridor wants a solid start, but is usually started on space
+  let step = false //can only twist every 2nd step
+  while (isValidPos(pos) && map[pos.x][pos.y]==0) {
+    map[pos.x][pos.y]=1 //clear start pos
+    const dir = pos.dir
+    pos = move(pos, dir)
+    pos.dir = dir
+    step = !step
+    if (step && rnd(10)<4) {
+      pos.dir = (rnd(10)<5) ? pos.dir.cw : pos.dir.ccw
+    }
+  }
+}
+
+function isValidPos(pos) {
+  return !(pos.x < 0 || pos.y < 0 || pos.x >= mapSize || pos.y >= mapSize)
+}
+
+function randomRoomEdge(room) {
+  const n = makeEven(rnd(room.w+room.h+1))
+  const pos = {x:0,y:0}
+  if (n < room.w) {
+    //top or bottom
+    pos.dir = (rnd(2)==0) ? dirs.up : dirs.down
+    pos.x = room.x + n
+    pos.y = (pos.dir==dirs.up) ? room.y - 1 : room.y + room.h
+
+  } else {
+    //side
+    pos.dir = (rnd(2)==0) ? dirs.left : dirs.right
+    pos.x = (pos.dir==dirs.left) ? room.x - 1 : room.x + room.w
+    pos.y = room.y + (n - room.w - 1)
+  }
+  return pos
+}
+
+//room must not be touching any space
+function isRoomValid(room) {
+  for(let x = room.x-1; x <= room.x + room.w; x++) {
+    for (let y = room.y-1; y <= room.y+room.h; y++) {
+      if (x < 0 || y < 0 || x >= mapSize || y >= mapSize) return false
+      if (map[x][y] != 0) return false
+    }
+  }
+  return true
+}
+
+function makeOdd(n) {
+  if (n%2==0) return n + 1
+  return n
+}
+
+function makeEven(n) {
+  if (n%2==1) return n - 1
+  return n
+}
 
 const smallColWidth = 186
 const viewSize = canvas.width - smallColWidth*2
@@ -1082,7 +1161,7 @@ function restartIfDead() {
 }
 
 function townLadderType(pos) {
-  if ((pos.x + pos.y) % 2 == 0) {
+  if ((pos.x/2 + pos.y/2) % 2 == 0) {
     return 0
   }
   return 1
