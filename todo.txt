@@ -14,17 +14,29 @@ definitely:
 [x] better fx when an enemy is killed - it must stay on screen until the next action
 	and show what loot you got
 
-[ ] spells
+-post ggj-
+[x] Transmission spell gives directions to the boss! Who is transmitting radio 
+[x] Killing a boss reveals some story which helps you know to find the tree 
+[x] healing is unaffordable after levelling up
+[x] top ladders colored differently
+[x] gold drops randomly - TEST DROPS FROM NORMALS AND BOSSES
+[x] color mode picker
+[x] aging when you study - it's purely a text thing
+[x] spells
 [x] spell UI
 [x] unlock different spells
+[x] player shows as arrow on map
 [x] spell details screen [s]
-
-[ ] color pallete swapper
+[x] color pallete swapper
+[x] don't show enemies on map
 
 maybe:
-[ ] end game victory
+[ ] announce when on boss level
+[ ] fix looping levels after the bottom
+[ ] draw order - a ladder is drawn before a wall that should be closer
+[ ] let the player dig downwards (if they get stuck)
+[ ] end game victory - the potplant
 [ ] fog of war
-[ ] player shows as arrow on map
 [ ] bosses
 
 unlikely:
@@ -32,3 +44,14 @@ unlikely:
 [ ] nice error messages on invalid actions
 [ ] mouse controls
 [ ] full screen map
+
+[ ] balance the whole game
+[ ] full screen map button
+[ ] better pathfinding (flood fill)
+[ ] more random drops from monsters
+
+maybe
+[ ] fix bosses stuck in unreachable rooms
+[ ] healing probably gets too expensive, keep the price constant
+[ ] make more spells work
+[ ] save the game (local storage)

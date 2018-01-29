@@ -351,7 +351,7 @@ function draw() {
 
   //lower left HUD
   if (state !== states.start) {
-    ctx.fillStyle="white"
+    ctx.fillStyle=getColors().textColor
     ctx.font=mediumFont
     let lineHeight = 24
     const x = col1X + 20
@@ -420,13 +420,13 @@ function draw() {
         //misc notices
         if (playerStats.exp >= expNeeded()) {
           y+=lineHeight
-          ctx.fillStyle = "grey"
+          ctx.fillStyle = getColors().dullTextColor
           ctx.fillText(`You have enough experience to go`, x, y);  y+=lineHeight
           const amount = howManyLevelsCanIGet()
           const msg = (amount == 1) ? "a level" : amount + " levels"
           ctx.fillText(`up ${msg}! Return to the top of`, x, y);  y+=lineHeight
           ctx.fillText(`the dungeon. But it will cost you!`, x, y);  y+=lineHeight
-          ctx.fillStyle = "white"
+          ctx.fillStyle = getColors().textColor
         }         
       }
    
@@ -542,7 +542,7 @@ function drawMedium(text, x, y) {
       ctx.fillText(text, x+xi*2, y+yi*2)
     }
   }
-  ctx.fillStyle="white"
+  ctx.fillStyle=getColors().textColor
   ctx.fillText(text, x, y)
 }
 
@@ -557,14 +557,14 @@ function drawTitle(text, x, y) {
       ctx.fillText(text, x+xi*4, y+yi*4)
     }
   }
-  ctx.fillStyle="white"
+  ctx.fillStyle=getColors().textColor
   ctx.fillText(text, x, y)
 }
 
 function getMainWindowTextTool() {
     ctx.fillStyle = "black"
     ctx.fillRect(col2X, 0, viewSize, viewSizeY)
-    ctx.fillStyle="white"
+    ctx.fillStyle=getColors().textColor
     let me = {}
     me.x = col2X + 20
     me.y = 40
@@ -587,7 +587,7 @@ function drawSpellUi(x, y, width, height) {
   ctx.fillStyle = "black"
   ctx.fillRect(x,y,width,height)
   ctx.font=smallFont
-  ctx.fillStyle="white"
+  ctx.fillStyle=getColors().textColor
   let tX = x + 7
   let tY = y + 20
   const lineHeight = 16
@@ -722,7 +722,7 @@ function viewCellPos(pos, viewDir, i, j)
 }
 
 function drawMap(viewX, viewY, viewSizeX, viewSizeY) {
-  tCtx.fillStyle = "grey"
+  tCtx.fillStyle = getColors().mapBack
   tCtx.fillRect(0, 0, mapSize*cellSize+viewSizeX, mapSize*cellSize+viewSizeY)
   for (let x = 0; x < mapSize; x++) {
     for (let y = 0; y < mapSize; y++) {
@@ -739,11 +739,11 @@ function drawMap(viewX, viewY, viewSizeX, viewSizeY) {
   var cropX = playerPos.x * cellSize - viewSizeX / 2
   var cropY = playerPos.y * cellSize - viewSizeY / 2
 
-  ctx.fillStyle = "grey"
+  ctx.fillStyle = getColors().mapBack
   ctx.fillRect(viewX, viewY, viewSizeX, viewSizeY)
   ctx.drawImage(tempCanvas, cropX, cropY, viewSizeX, viewSizeY, viewX, viewY, viewSizeX, viewSizeY)
 
-  ctx.strokeStyle = "darkblue"
+  ctx.strokeStyle = getColors().border
   ctx.lineWidth = 4
   ctx.strokeRect(viewX, viewY, viewSizeX, viewSizeY)
 }
@@ -753,7 +753,7 @@ function drawCell(x, y) {
   const edgeLength = cellSize - 1
   tCtx.fillStyle = "black"
   tCtx.fillRect(x*cellSize,y*cellSize,cellSize-1,cellSize-1)
-  tCtx.fillStyle = "white"
+  tCtx.fillStyle = getColors().textColor
   if (cellAt(x-1, y) == 0) {
     tCtx.fillRect(x*cellSize-1,y*cellSize,1,edgeLength)
   }
@@ -773,15 +773,15 @@ function drawCell(x, y) {
   if (anyAtPos(laddersUp, {x:x, y:y})) {
     if (depth == 0) {
       const ladderType = townLadderType({x:x, y:y})
-      if (ladderType==0) tCtx.fillStyle = "lightblue"
-      else tCtx.fillStyle = "lightgreen"
+      if (ladderType==0) tCtx.fillStyle = getColors().uni
+      else tCtx.fillStyle = getColors().healer
     } else {
-      tCtx.fillStyle = "#E0E0E0"
+      tCtx.fillStyle = getColors().upLadder
     }
     tCtx.fillRect(x*cellSize+1, y*cellSize+1, cellSize - 3, cellSize - 3)    
   }
   if (anyAtPos(laddersDown, {x:x, y:y})) {
-    tCtx.fillStyle = "gray"
+    tCtx.fillStyle = getColors().downLadder
     tCtx.fillRect(x*cellSize+1, y*cellSize+1, cellSize - 3, cellSize - 3)    
   }
 }
@@ -1527,16 +1527,38 @@ function drawBoss(sX, sY, left, top, size) {
   }
 }
 
+const cga1 = "#FF6666"
+const cga2 = "#6666FF"
+
 const colorModes = []
 let colorMode = 0
-addColorMode("High-Res VGA", "", "256")
-addColorMode("High-Res EGA", "-ega", " 16")
-addColorMode("High-Res CGA", "-cga", "  4")
-addColorMode("Super High-Res VGA", "-svga", " 16")
-addColorMode("classic", "-moraff", " 16")
 
-function addColorMode(name, fileName, colors, res) {
-  colorModes.push({name:name, fileName:fileName, colors:colors, res:"1024 x 768"})
+//healer is green, uni is blue
+//                                             text,   map back, borders,   upLadder, downLadder, healer,   uni
+addColorMode("CGA", "-cga", "  4",             "white", cga2,    cga2,      cga2,     cga1,       cga2,     cga2)
+addColorMode("High-Res EGA", "-ega", " 16",    "white","#666666", "#000099","#999999","#666666",  "#009900", "#66FFFF")
+addColorMode("High-Res EGA with Classic Palette", "-moraff", " 16")
+addColorMode("High-Res VGA, requires 512k RAM", "", "256")
+addColorMode("Super High-Res VGA, requires 1 meg RAM", "-svga", "512")
+
+
+function addColorMode(name, fileName, colors, textColor, dullTextColor, border, upLadder, downLadder, healer, uni) {
+  var colorMode = {name:name, fileName:fileName, colors:colors, res:"1024 x 768",
+  textColor:textColor, dullTextColor:dullTextColor, border:border, 
+  upLadder:upLadder, downLadder:downLadder, healer:healer, uni:uni}
+  if (textColor==undefined) colorMode.textColor="white"
+  if (dullTextColor==undefined) colorMode.dullTextColor="grey"
+  colorMode.mapBack = colorMode.dullTextColor
+  if (border==undefined) colorMode.border="darkblue"
+  if (upLadder==undefined) colorMode.upLadder="#E0E0E0"
+  if (downLadder==undefined) colorMode.downLadder="grey"
+  if (healer==undefined) colorMode.healer="lightgreen"
+  if (uni==undefined) colorMode.uni="lightblue" 
+  colorModes.push(colorMode)
+}
+
+function getColors() {
+  return colorModes[colorMode]
 }
 
 const mfYellow = "#FFAA01"
@@ -1578,7 +1600,7 @@ function showColorPicker() {
   }
   ctx.fillText("╚═╩═══════╩════╩════════════════════════╝", me.x, pipeY)
   print()
-  print("      RESOLUTION    COLORS   DESCRIPTION")
+  print("      RESOLUTION    COLORS   DESCRIPTION, REQUIREMENTS")
   print()
   for(var i = 0; i < colorModes.length; i++) {
     print("  "+(i+1) + ") ", false)
