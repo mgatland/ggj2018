@@ -65,14 +65,10 @@ font.load().then(function () {
   showColorPicker()
 });
 
-let rngSeed = 1;
-function random() {
-    var x = Math.sin(rngSeed++) * 10000;
-    return x - Math.floor(x);
-}
+let fixedRandom  = new Random(1);
 
 function rnd(n) {
-  return Math.floor(random() * n)
+  return Math.floor(fixedRandom.nextFloat() * n)
 }
 
 function trueRnd(n) {
@@ -155,7 +151,7 @@ function restart() {
   deriveMaxHpAndSp()
   playerStats.hp = playerStats.maxHp
   playerStats.sp = playerStats.maxSp
-  playerPos = {x: 27, y: 11, dir: dirs.down}
+  playerPos = {x: 47, y: 11, dir: dirs.down}
   playerStats.spellKnown = [true,false,false,false,false,false,false,false,false,false]
   playerStats.bossesKilled = [false, false, false, false]
 
@@ -180,7 +176,7 @@ function makeMap() {
     }
   }
   //rooms
-  rngSeed = depth
+  fixedRandom  = new Random(depth);
   times(100, () => addRoom(2, 12))
   times(160, () => addRoom(1, 20, true))
 
@@ -190,10 +186,10 @@ function makeMap() {
 
 function makeLadders(n) {
   laddersUp.length = 0
-  rngSeed = n - 1
+  fixedRandom  = new Random(n-1);
   times(100, () => addLadderUp())
   laddersDown.length = 0
-  rngSeed = n
+  fixedRandom  = new Random(n);
   times(100, () => addLadderDown())
 }
 
@@ -1642,3 +1638,16 @@ function setColorMode(mode) {
 function nextColorMode() {
   setColorMode((colorMode+1)%colorModes.length)
 }
+
+//https://gist.github.com/blixt/f17b47c62508be59987b
+function Random(seed) {
+  this._seed = seed % 2147483647;
+  if (this._seed <= 0) this._seed += 2147483646;
+}
+Random.prototype.next = function () {
+  return this._seed = this._seed * 16807 % 2147483647;
+};
+Random.prototype.nextFloat = function (opt_minOrMax, opt_max) {
+  // We know that result of next() will be 1 to 2147483646 (inclusive).
+  return (this.next() - 1) / 2147483646;
+};
