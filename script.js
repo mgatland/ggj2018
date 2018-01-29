@@ -252,7 +252,7 @@ function makeEnemies() {
     times(30-enemies.length, makeEnemy)
   } else {
     enemies.length = 0
-    times(100+depth*10, makeEnemy)
+    times(280+depth*10, makeEnemy)
     maybeGenerateBoss()
   }
   
@@ -278,7 +278,7 @@ function makeEnemy(fixedType) {
 
   if (fixedType != undefined) {
     enemy.type = fixedType;
-  } else if (trueRnd(100)<10) {
+  } else if (trueRnd(100)<20) {
     //potion!
     enemy.type = normalEnemyCount+trueRnd(10)
   } else {
