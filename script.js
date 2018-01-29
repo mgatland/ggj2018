@@ -4,6 +4,8 @@ const canvas = document.querySelector(".gameCanvas")
 
 //credit font dysin4mation by Auntie Pixelante
 
+let debug = false
+
 const ctx = canvas.getContext('2d')
 ctx.webkitImageSmoothingEnabled = false
 ctx.mozImageSmoothingEnabled = false
@@ -100,37 +102,37 @@ const potionEnemyCount = 10
 const bossEnemyStartCount = normalEnemyCount + potionEnemyCount
 const enemyType = []
 
-enemyType.push({tileSet:0, sprite:1, maxHp:20, speed:7, defence: 3, power:5, name: "Broken One", desc:"It looks fragile"})
-enemyType.push({tileSet:0, sprite:2, maxHp:15, speed:5, defence: 3, power:6, name: "Smoke Elemental", desc:"It seems to be slowly burning away"})
-enemyType.push({tileSet:0, sprite:3, maxHp:30, speed:3, defence: 3, power:7, name: "Sewer Wyrm", desc:"It thrashes around to no avail"})
-enemyType.push({tileSet:0, sprite:4, maxHp:40, speed:2, defence: 3, power:8, name: "Canbion", desc:"It shuffles back and forth"})
+enemyType.push({tileSet:0, sprite:1, end:3, speed:7, defence: 3, power:5, name: "Broken One", desc:"It looks fragile"})
+enemyType.push({tileSet:0, sprite:2, end:4, speed:5, defence: 3, power:6, name: "Smoke Elemental", desc:"It seems to be slowly burning away"})
+enemyType.push({tileSet:0, sprite:3, end:5, speed:3, defence: 3, power:7, name: "Sewer Wyrm", desc:"It thrashes around to no avail"})
+enemyType.push({tileSet:0, sprite:4, end:6, speed:2, defence: 3, power:8, name: "Canbion", desc:"It shuffles back and forth"})
 
-enemyType.push({tileSet:1, sprite:1, maxHp:20, speed:7, defence: 3, power:5, name: "Killer Prawn", desc:"It sees you and snarls"})
-enemyType.push({tileSet:1, sprite:2, maxHp:15, speed:5, defence: 3, power:6, name: "Island Mimic", desc:"Its sandy shore has claimed many victims"})
-enemyType.push({tileSet:1, sprite:3, maxHp:30, speed:3, defence: 3, power:7, name: "Purple Tentacle", desc:"Does it belong to something bigger?"})
-enemyType.push({tileSet:1, sprite:4, maxHp:40, speed:2, defence: 3, power:8, name: "Iron Giant", desc:"You hear grinding gears from the depths"})
+enemyType.push({tileSet:1, sprite:1, end:3, speed:7, defence: 3, power:5, name: "Killer Prawn", desc:"It sees you and snarls"})
+enemyType.push({tileSet:1, sprite:2, end:2, speed:5, defence: 3, power:6, name: "Island Mimic", desc:"Its sandy shore has claimed many victims"})
+enemyType.push({tileSet:1, sprite:3, end:3, speed:3, defence: 3, power:7, name: "Purple Tentacle", desc:"Does it belong to something bigger?"})
+enemyType.push({tileSet:1, sprite:4, end:6, speed:2, defence: 3, power:8, name: "Iron Giant", desc:"You hear grinding gears from the depths"})
 
-enemyType.push({tileSet:2, sprite:1, maxHp:5, speed:7, defence: 3, power:3, name: "Sporangium Warrior", desc:"A cloud of intoxicating spores surrounds it"})
-enemyType.push({tileSet:2, sprite:2, maxHp:10, speed:5, defence: 3, power:4, name: "Aspergillus Philosopher", desc:"It quivers threateningly"})
-enemyType.push({tileSet:2, sprite:3, maxHp:12, speed:3, defence: 3, power:5, name: "Elder Shroom", desc:"It doesn't want you here"})
-enemyType.push({tileSet:2, sprite:4, maxHp:30, speed:2, defence: 3, power:6, name: "Earthstar", desc:"It stares expectantly"})
+enemyType.push({tileSet:2, sprite:1, end:1, speed:7, defence: 3, power:3, name: "Sporangium Warrior", desc:"A cloud of intoxicating spores surrounds it"})
+enemyType.push({tileSet:2, sprite:2, end:3, speed:5, defence: 3, power:4, name: "Aspergillus Philosopher", desc:"It quivers threateningly"})
+enemyType.push({tileSet:2, sprite:3, end:4, speed:3, defence: 3, power:5, name: "Elder Shroom", desc:"It doesn't want you here"})
+enemyType.push({tileSet:2, sprite:4, end:5, speed:2, defence: 3, power:6, name: "Earthstar", desc:"It stares expectantly"})
 
-enemyType.push({tileSet:3, sprite:1, maxHp:5, speed:7, defence: 3, power:3, name: "Triffid", desc:"It smells angry"})
-enemyType.push({tileSet:3, sprite:2, maxHp:10, speed:5, defence: 3, power:4, name: "Dumble-Dor", desc:"It clutches a crude spear"})
-enemyType.push({tileSet:3, sprite:3, maxHp:12, speed:3, defence: 3, power:5, name: "Honey Golem", desc:"It looks delicious"})
-enemyType.push({tileSet:3, sprite:4, maxHp:30, speed:2, defence: 3, power:6, name: "Larva", desc:"It writhes with ecstasy"})
+enemyType.push({tileSet:3, sprite:1, end:2, speed:7, defence: 3, power:3, name: "Triffid", desc:"It smells angry"})
+enemyType.push({tileSet:3, sprite:2, end:4, speed:5, defence: 3, power:4, name: "Dumble-Dor", desc:"It clutches a crude spear"})
+enemyType.push({tileSet:3, sprite:3, end:4, speed:3, defence: 3, power:5, name: "Honey Golem", desc:"It looks delicious"})
+enemyType.push({tileSet:3, sprite:4, end:6, speed:2, defence: 3, power:6, name: "Larva", desc:"It writhes with ecstasy"})
 
 //potions
 for (var i = 0; i < potionEnemyCount/2; i++) {
-  enemyType.push({tileSet:5, sprite:1+i, maxHp:5, speed:4, defence: 1, power:5, special: i, name: "Potion Bearer", desc:"This one will change you…"})
-  enemyType.push({tileSet:6, sprite:1+i, maxHp:5, speed:4, defence: 1, power:5, special: i+5, name: "Potion Bearer", desc:"This one will change you…"})
+  enemyType.push({tileSet:5, sprite:1+i, end:1, speed:4, defence: 1, power:5, special: i, name: "Potion Bearer", desc:"This one will change you…"})
+  enemyType.push({tileSet:6, sprite:1+i, end:1, speed:4, defence: 1, power:5, special: i+5, name: "Potion Bearer", desc:"This one will change you…"})
 }
 
 //bosses
-enemyType.push({tileSet:0, sprite:4, maxHp:40, speed:2, defence: 3, power:8, boss:0, name: "Super Canbion", desc:"It shuffles back and forth"})
-enemyType.push({tileSet:1, sprite:1, maxHp:20, speed:7, defence: 3, power:5, boss:1, name: "Super Killer Prawn", desc:"It sees you and snarls"})
-enemyType.push({tileSet:2, sprite:4, maxHp:30, speed:2, defence: 3, power:6, boss:2, name: "Super Earthstar", desc:"It stares expectantly"})
-enemyType.push({tileSet:3, sprite:1, maxHp:5, speed:7, defence: 3, power:3, boss:3, name: "Super Triffid", desc:"It smells angry"})
+enemyType.push({tileSet:0, sprite:4, end:8, speed:2, defence: 3, power:8, boss:0, name: "Super Canbion", desc:"It shuffles back and forth"})
+enemyType.push({tileSet:1, sprite:1, end:6, speed:7, defence: 3, power:5, boss:1, name: "Super Killer Prawn", desc:"It sees you and snarls"})
+enemyType.push({tileSet:2, sprite:4, end:8, speed:2, defence: 3, power:6, boss:2, name: "Super Earthstar", desc:"It stares expectantly"})
+enemyType.push({tileSet:3, sprite:1, end:6, speed:7, defence: 3, power:3, boss:3, name: "Super Triffid", desc:"It smells angry"})
 
 //information you would save
 let playerPos = {}
@@ -278,15 +280,15 @@ function makeEnemy(fixedType) {
   }
 
   const et = getType(enemy)
-  enemy.level = depth + trueRnd(2)
+  enemy.level = depth + 1 + trueRnd(2)
   if (et.boss != undefined) enemy.level += 5
-  enemy.maxHp = et.maxHp + Math.floor(enemy.level * et.maxHp / 2)
+  enemy.maxHp = Math.floor(et.end/2)*enemy.level
   enemy.hp = enemy.maxHp
   enemy.timer = 0
   enemy.defence = et.defence + Math.floor(enemy.level * et.defence / 4)
   enemy.speed = et.speed + Math.floor(enemy.level * et.speed / 4)
   enemy.power = et.power + Math.floor(enemy.level * et.power / 4)
-  enemy.exp = enemy.level + et.maxHp + enemy.power + enemy.defence
+  enemy.exp = enemy.level + et.end + enemy.power + enemy.defence
   enemy.gold = Math.floor(enemy.exp / 4)
   enemies.push(enemy)
   return enemy
@@ -760,13 +762,22 @@ function drawCell(x, y) {
   if (cellAt(x, y+1) == 0) {
     tCtx.fillRect(x*cellSize,(y+1)*cellSize-1,edgeLength,1)
   }
-  if (anyAtPos(enemies, {x:x, y:y})) {
+  if (debug && anyAtPos(enemies, {x:x, y:y})) {
     tCtx.fillStyle = "red"
     tCtx.fillRect(x*cellSize+2, y*cellSize+2, cellSize - 4, cellSize - 4)
   }
   if (anyAtPos(laddersUp, {x:x, y:y})) {
-    tCtx.fillStyle = "yellow"
-    tCtx.fillRect(x*cellSize+2, y*cellSize+2, cellSize - 4, cellSize - 4)
+    if (depth == 0) {
+      const ladderType = townLadderType({x:x, y:y})
+      if (ladderType==0) tCtx.fillStyle = "lightblue"
+      else tCtx.fillStyle = "lightgreen"
+
+      tCtx.fillRect(x*cellSize+2, y*cellSize+2, cellSize - 4, cellSize - 4)
+    } else {
+      tCtx.fillStyle = "lightgrey"
+      tCtx.fillRect(x*cellSize+2, y*cellSize+2, cellSize - 4, cellSize - 4)
+    }
+    
   }
   if (anyAtPos(laddersDown, {x:x, y:y})) {
     tCtx.fillStyle = "gold"
@@ -1252,7 +1263,7 @@ function cleanDeadEnemies() {
 }
 
 function playerDamageRoll() {
-  return rnd(10) //should be weapon power
+  return rnd(5) //should be weapon power
 }
 
 function timePasses()
@@ -1427,7 +1438,7 @@ function hitPlayer(amount)
 }
 
 function healCost(amount) {
-  return playerStats.level * 15 + amount * 4 * Math.floor(1 + playerStats.level/2)
+  return 15 + playerStats.level*2 + amount * 4 * Math.floor(1 + playerStats.level*0.1)
 }
 
 function specialHitEffect(effect) {
