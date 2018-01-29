@@ -269,7 +269,7 @@ function maybeGenerateBoss() {
 function makeEnemy(fixedType) {
   let x = -1
   let y = -1
-  while (!cellIsEmpty({x:x, y:y})) {
+  while (!cellIsEmpty({x:x, y:y}||anyAtPos(laddersUp, pos)||anyAtPos(laddersDown,pos))) {
     x = trueRnd(mapSize)
     y = trueRnd(mapSize)
   }
@@ -1441,7 +1441,7 @@ function drawWall(ctx, tileSet, left, top, width, leftSize, rightSize)
 {
   if (width < 1) return
   const img = spriteImage
-  const h = 256
+  const h = 255
   const w = 256
   const numSlices = width
   const widthScale = width / w
