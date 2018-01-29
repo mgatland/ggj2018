@@ -32,14 +32,14 @@ let townMessage = []
 let flipped = false
 
 const spellNames = []
-spellNames.push({name:"We are together", fullName:"As long as we have each other, we will never run out of problems", desc:""}) //instakill
-spellNames.push({name:"Deception", desc:""}) // enemies stop hunting you
-spellNames.push({name:"Extinction", desc:""}) //destroy all enemies of this type (op?)
-spellNames.push({name:"Ouroboros", desc:""}) //enemy attacks itself
-spellNames.push({name:"Heartbeat", desc:""}) //heal (better)
-spellNames.push({name:"See things as we are", fullName: "We don't see things as they are, we see them as we are.", desc:""}) // see enemies on map
+spellNames.push({name:"We are together", fullName:"As long as we have each other, we will never run out of problems", desc:"Does nothing"}) //instakill
+spellNames.push({name:"Deception", desc:"Does nothing"}) // enemies stop hunting you
+spellNames.push({name:"Extinction", desc:"Does nothing"}) //destroy all enemies of this type (op?)
+spellNames.push({name:"Ouroboros", desc:"Does nothing"}) //enemy attacks itself
+spellNames.push({name:"Heartbeat", desc:"Heals 10 health points per level"}) //heal (better)
+spellNames.push({name:"See things as we are", fullName: "We don't see things as they are, we see them as we are.", desc:"Does nothing"}) // see enemies on map
 spellNames.push({name:"What do we do now?", desc:""}) //teleport
-spellNames.push({name:"Ritual", desc:"Heals up to 2 health points per level"}) //heal (small)
+spellNames.push({name:"Ritual", desc:"Heals up to 10 health points per level"}) //heal (small)
 spellNames.push({name:"Waves", desc:"Deals 15-30 health points of damage"}) //damage
 spellNames.push({name:"Transmission", desc:"Detect the mind waves of a Shadow Guardian, so you can hunt it for its treasure"}) //detect boss
 spellNames.reverse()
@@ -893,6 +893,9 @@ function doKey(keyCode) {
     case 49: castTransmission(); break //1
     case 50: castWaves(); break //2
     case 51: castRitual(); break //3
+    case 52: ; break //4
+    case 53:  break //5
+    case 54: castHeartbeat(); break //6
     case 48: //0
 
   }
@@ -902,12 +905,27 @@ function getPlayerTarget() {
   return findAtPos(enemies, move(playerPos, playerPos.dir))
 }
 
+function castHeartbeat() {
+  if (!inGame()) return
+  clearMessages()
+  const e = getPlayerTarget()
+  if (trySpendSp(3)) {
+    const amount = playerStats.level*10
+    playerStats.hp = Math.min(playerStats.hp + amount, playerStats.maxHp)
+    playerCombatMessage.push(`You focus on your heart,`)
+    playerCombatMessage.push(`healing ${amount} health points.`)
+    monsterCombatTurn()
+    draw()
+  }
+}
+
+
 function castRitual() {
   if (!inGame()) return
   clearMessages()
   const e = getPlayerTarget()
   if (trySpendSp(3)) {
-    const amount = trueRnd(playerStats.level*2) + 1
+    const amount = trueRnd(playerStats.level*10) + 1
     playerStats.hp = Math.min(playerStats.hp + amount, playerStats.maxHp)
     playerCombatMessage.push(`The ritual heals ${amount} health points.`)
     monsterCombatTurn()
