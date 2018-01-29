@@ -29,3 +29,9 @@ The Sound of a Heartbeat
 
 "Transmission"
 -talk to the monsters
+
+
+--------------
+sergio new:
+
+1) something that protected me from instant death (e.g. cast on self in advance, then grants 1 hp on going below zero one time)
