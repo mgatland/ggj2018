@@ -41,7 +41,7 @@ spellNames.push({name:"See things as we are", fullName: "We don't see things as 
 spellNames.push({name:"What do we do now?", desc:""}) //teleport
 spellNames.push({name:"Ritual", desc:"Heals up to 2 hit point per level"}) //heal (small)
 spellNames.push({name:"Waves", desc:"Does nothing"}) //damage
-spellNames.push({name:"Transmission", desc:"Detect the mind waves of a mighty guardian, so you can hunt it for its treasure"}) //detect boss
+spellNames.push({name:"Transmission", desc:"Detect the mind waves of a Shadow Guardian, so you can hunt it for its treasure"}) //detect boss
 spellNames.reverse()
 
 const spriteImage = new Image()
@@ -277,6 +277,7 @@ function makeEnemy(fixedType) {
 
   const et = getType(enemy)
   enemy.level = depth + trueRnd(2)
+  if (et.boss != undefined) enemy.level += 5
   enemy.maxHp = et.maxHp + Math.floor(enemy.level * et.maxHp / 2)
   enemy.hp = enemy.maxHp
   enemy.timer = 0
@@ -407,11 +408,13 @@ function draw() {
         //misc notices
         if (playerStats.exp >= expNeeded()) {
           y+=lineHeight
+          ctx.fillStyle = "grey"
           ctx.fillText(`You have enough experience to go`, x, y);  y+=lineHeight
           const amount = howManyLevelsCanIGet()
           const msg = (amount == 1) ? "a level" : amount + " levels"
           ctx.fillText(`up ${msg}! Return to the top of`, x, y);  y+=lineHeight
           ctx.fillText(`the dungeon. But it will cost you!`, x, y);  y+=lineHeight
+          ctx.fillStyle = "white"
         }         
       }
    
@@ -666,12 +669,15 @@ function draw3D(viewX, viewY, viewSize, dir) {
           const eSize = viewSizeY/(Math.pow(depthFactor,i-0.4))
           const left = viewXCentre - eSize/2 + j*eSize
           const top = viewYCentre - eSize/2+eSize*0.2
-          tCtx.drawImage(spriteImage, 256*et.sprite+1, et.tileSet*256, 255, 256, left, top, eSize, eSize)
+          if (et.boss != undefined) {
+            drawBoss(et.sprite, et.tileSet, left, top, eSize)
+          } else {
+            tCtx.drawImage(spriteImage, 256*et.sprite+1, et.tileSet*256, 255, 256, left, top, eSize, eSize)
+          }
           if (e.hp <= 0) {
             tCtx.drawImage(spriteImage, 256*5, 1*256, 255, 256, left, top, eSize, eSize)
           }
         }
-
       } 
     }
   }
@@ -830,7 +836,22 @@ function doKey(keyCode) {
   if (state === states.foundSomething) {
     state = states.main
     cleanDeadEnemies()
-    if (rnd(100) < 10) {
+    if (playerStats.surprise != undefined) {
+      switch (playerStats.surprise) {
+        case 0: playerCombatMessage.push("A Fountain Pen of Luck! +10 Luc")
+        playerStats.luck += 10
+        break
+        case 1: playerCombatMessage.push("A Mobile Phone of Speed! +12 Spd")
+        playerStats.speed += 12
+        break
+        case 2: playerCombatMessage.push("A Poison of Intelligence! +15 Int")
+        playerStats.int += 15
+        break
+        case 3: playerCombatMessage.push("Boots of Endurance! +20 End")
+        playerStats.end += 20
+        break
+      }
+    } else if (rnd(100) < 10) {
       var spellToGet = playerStats.spellKnown.indexOf(false)
       console.log(spellToGet)
       if (spellToGet >= 0) {
@@ -885,17 +906,16 @@ function castTransmission() {
       const bossN = playerStats.bossesKilled.indexOf(false)
       const dist = (bossN+1)*3 - 1 - depth
       if (dist==0) {
-        playerCombatMessage.push("You hear the Guardian's mind!")
-        playerCombatMessage.push("It is on this level!")
+        playerCombatMessage.push("You hear the Shadow Guardian's mind!")
         const boss = enemies.find(x=>getType(x).boss != undefined)
         const txt = bossPointText(boss.x - playerPos.x, boss.y - playerPos.y)
-        playerCombatMessage.push(txt + "!")
+        playerCombatMessage.push(`It is on this level! ${txt}!`)
       } else {
-        playerCombatMessage.push("You hear the Guardian's mind!")
+        playerCombatMessage.push("You hear the Shadow Guardian's mind!")
         playerCombatMessage.push(`It is ${bossDistText(dist)}!`)
       }
     }
-    draw()
+    timePasses(100/playerStats.speed)
   }
 }
 
@@ -919,7 +939,7 @@ function bossDistText(n) {
 
 function trySpendSp(n) {
   if (playerStats.sp < n) {
-    playerCombatMessage.push("You need more Spell Points to cast that")
+    playerCombatMessage.push("You need more Spell Points for that")
     draw()
     return false
   }
@@ -1058,9 +1078,17 @@ function playerAttack(e) {
       playerCombatMessage.push("You hit the monster!")
       playerCombatMessage.push("It takes " + damage + " points of damage!")
     } else {
-      playerCombatMessage.push("You killed it!")
-      playerCombatMessage.push("You found... (PRESS ANY KEY)")
       state = states.foundSomething
+      const boss = getType(e).boss
+      playerStats.surprise = boss
+      if (boss != undefined) {
+        playerStats.bossesKilled[boss] = true
+        playerCombatMessage.push("The mighty Shadow Guardian is dead!")
+        playerCombatMessage.push("You take its treasure... (PRESS A KEY)")
+      } else {
+        playerCombatMessage.push("You killed it!")
+        playerCombatMessage.push("You found... (PRESS ANY KEY)")
+      }
     }
   } else {
     playerCombatMessage.push("You missed!")
@@ -1312,6 +1340,30 @@ function specialHitEffect(effect) {
     case 9: playerStats.end--
     enemyCombatMessage.push("Endurance lowered by potion!")
     break
+  } 
+}
+
+function drawBoss(sX, sY, left, top, size) {
+  const img = spriteImage
+  const h = 256
+  const w = 255
+  const numSlices = size
+  const widthScale = size / w
+
+  // The width of each source slice.
+  const sliceWidth = w / numSlices
+
+  for(var n = 0; n < numSlices; n++) {
+    var sx = sX*256 + sliceWidth * n,
+        sy = sY*256,
+        sWidth = sliceWidth,
+        sHeight = h;
+
+    const progress = n / numSlices
+    var dx = left + (sliceWidth * n * widthScale)
+    var dWidth = sliceWidth * widthScale
+    var dHeight = size + ((n % 2 == 0) ? 5 : -5)
+    var dy = top
+    tCtx.drawImage(img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
   }
-  
 }
