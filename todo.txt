@@ -30,15 +30,44 @@ definitely:
 [x] color pallete swapper
 [x] don't show enemies on map
 [x] fix looping levels after the bottom
+[x] draw order - a ladder is drawn before a wall that should be closer
 
+[ ] move enemies when you fall onto them form a ladder - sergio (is right)
+[ ] add music (sergio fb chat)
+[ ] poison enemies? or level drainers
+[ ] study cost
+- cost 83, i have 153 and i healed once
+- cost 166, i have 289
+- it should probaly cost a little more, check gold drop vs experience drop
+iron giant level 4 - v slow, i got 6 attacks and killed it before it fought back. ok?
+[ ] everything here (water level) is a bit slow imo - should be 1/2 player speed on average. some things should be faster
+
+spell thoughts:
+1. i only use healing - matt
+2. unlock too fast - sergio ++++
+	could unlock at 1/2 or 1/3 the rate (make it less random)
+3. heartbeat is too good re ritual, it's always better and should be a risk\reward thing - matt
+4. final spell to be renamed (short name) to either "problems" or "each other" depending on what we decide it should do
+5. sergio wants instant death resistance
+[ ] the damage spell should be strong enough to get you out of a tough situation
+[ ] seeing monsters on map would be useful
+[ ] invisibility and teleport kinda solve the same problem?
+	we need spells that don't all solve the same problem!
+	maybe have some prep spells vs combat spells
+	an ascend spell would be useful, but shouldn't work in combat or it trumps combat spells
+	defeat 1 monster vs defeat many monsters at more risk
+	resist specific attacks - poison, ice
+	waves - temporarily upgrade speed, that's versatile (and different from invisibility)
+
+[ ] health go red when low?!
 [ ] announce when on boss level
-[ ] draw order - a ladder is drawn before a wall that should be closer
 [ ] interesting enemies - i.e. a slow one with lots of health, a poison one
 [ ] poison - sporangium, bee, trash?
 [ ] let the player dig downwards (if they get stuck)
 [ ] end game victory - the potplant - no looping below bottom of dungeon
 [ ] fog of war
 [ ] full screen map
+[ ] more spells
 
 unlikely:
 [ ] cryptocurrencies

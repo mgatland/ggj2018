@@ -37,7 +37,7 @@ spellNames.push({name:"We are together", fullName:"As long as we have each other
 spellNames.push({name:"Deception", desc:"Does nothing"}) // enemies stop hunting you
 spellNames.push({name:"Extinction", desc:"Does nothing"}) //destroy all enemies of this type (op?)
 spellNames.push({name:"Ouroboros", desc:"Does nothing"}) //enemy attacks itself
-spellNames.push({name:"Heartbeat", desc:"Heals exactly 10 health points per level"}) //(todo: heal over time for a time)
+spellNames.push({name:"Heartbeat", desc:"Heals exactly 7 health points per level"}) //(todo: heal over time for a time)
 spellNames.push({name:"See things as we are", fullName: "We don't see things as they are, we see them as we are.", desc:"Disguise yourself as a monster. Monsters will ignore you unless provoked."})
 spellNames.push({name:"What do we do now?", desc:"Teleport to a random position on this level.", desc2:"If a Shadow Guardian is present, it will draw you closer!"}) //teleport
 spellNames.push({name:"Ritual", desc:"Heals up to 10 health points per level"}) //heal (small)
@@ -1011,7 +1011,7 @@ function castHeartbeat() {
   if (!inGame()) return
   clearMessages()
   if (trySpendSp(6)) {
-    const amount = playerStats.level*10
+    const amount = playerStats.level*7
     playerStats.hp = Math.min(playerStats.hp + amount, playerStats.maxHp)
     playerCombatMessage.push(`You focus on your heart,`)
     playerCombatMessage.push(`healing ${amount} health points.`)
