@@ -31,22 +31,21 @@ definitely:
 [x] don't show enemies on map
 [x] fix looping levels after the bottom
 
-maybe:
 [ ] announce when on boss level
 [ ] draw order - a ladder is drawn before a wall that should be closer
 [ ] interesting enemies - i.e. a slow one with lots of health, a poison one
+[ ] poison - sporangium, bee, trash?
 [ ] let the player dig downwards (if they get stuck)
-[ ] end game victory - the potplant
+[ ] end game victory - the potplant - no looping below bottom of dungeon
 [ ] fog of war
+[ ] full screen map
 
 unlikely:
 [ ] cryptocurrencies
 [ ] nice error messages on invalid actions
 [ ] mouse controls
-[ ] full screen map
 
 [ ] balance the whole game
-[ ] full screen map button
 [ ] better pathfinding (flood fill)
 [ ] more random drops from monsters
 

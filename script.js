@@ -236,13 +236,10 @@ function addLadder(isUp) {
     if (y > mapSize - 10) dir = dirs.up
 
     pos = move(pos, dir)
-    console.log("hi")
     while(isValidPos(pos)&&map[pos.x][pos.y]==0) {
-      console.log(pos)
       map[pos.x][pos.y]=1
       pos = move(pos, dir)
     }
-    console.log("bye")
   }
 }
 
@@ -254,7 +251,7 @@ function makeEnemies() {
     times(30-enemies.length, makeEnemy)
   } else {
     enemies.length = 0
-    times(100, makeEnemy)
+    times(100+depth*10, makeEnemy)
     maybeGenerateBoss()
   }
   
@@ -296,7 +293,7 @@ function makeEnemy(fixedType) {
   enemy.defence = et.defence + Math.floor(enemy.level * et.defence / 4)
   enemy.speed = et.speed + Math.floor(enemy.level * et.speed / 4)
   enemy.power = et.power + Math.floor(enemy.level * et.power / 4)
-  enemy.exp = enemy.level + et.end + enemy.power + enemy.defence
+  enemy.exp = enemy.maxHp / 2 + enemy.power + enemy.defence + enemy.speed
   enemy.gold = (trueRnd(100) < 25) ? trueRnd(enemy.exp) + 5 : 0
   enemies.push(enemy)
   return enemy
@@ -1448,6 +1445,7 @@ function inGame() {
 
 function drawWall(ctx, tileSet, left, top, width, leftSize, rightSize)
 {
+  if (width < 1) return
   const img = spriteImage
   const h = 256
   const w = 256
@@ -1468,7 +1466,12 @@ function drawWall(ctx, tileSet, left, top, width, leftSize, rightSize)
     var dWidth = sliceWidth * widthScale
     var dHeight = leftSize * (1 - progress) + rightSize * progress;
     var dy = top + (leftSize - dHeight) / 2
-    ctx.drawImage(img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+    try {
+      ctx.drawImage(img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+    } catch (e) {
+      console.log("bad: " + sWidth+":"+ sHeight+":"+ dx+":"+ dy+":"+ dWidth+":"+ dHeight)
+    }
+    
   }
 }
 
@@ -1610,11 +1613,11 @@ let colorMode = 0
 //healer is green, uni is blue
 //mapback is reused for dull text
 //                                             text,   map back, borders,   upLadder, downLadder, healer,   uni
-addColorMode("CGA", "-cga", "  4",             "white", cga2,    cga1,      cga2,     cga1,       cga2,     cga2)
-addColorMode("High-Res EGA", "-ega", " 16",    "white","#666666", "#000099","#999999","#666666",  "#009900", "#66FFFF")
-addColorMode("High-Res EGA with Classic Palette", "-moraff", " 16")
-addColorMode("High-Res VGA, requires 512k RAM", "", "256")
-addColorMode("Super High-Res VGA, requires 1 meg RAM", "-svga", "512")
+addColorMode("CGA", "-cga", "    4",             "white", cga2,    cga1,      cga2,     cga1,       cga2,     cga2)
+addColorMode("High-Res EGA", "-ega", "   16",    "white","#666666", "#000099","#999999","#666666",  "#009900", "#66FFFF")
+addColorMode("High-Res EGA with Classic Moraff Palette", "-moraff", "   16")
+addColorMode("High-Res VGA, requires 512k RAM", "", "  256")
+addColorMode("Super High Quality, requires 2 meg RAM", "-svga", "65,536")
 
 
 function addColorMode(name, fileName, colors, textColor, dullTextColor, border, upLadder, downLadder, healer, uni) {
@@ -1641,7 +1644,6 @@ const mfOrange = "#FF5500"
 const mBlue = "#00AAFF"
 function showColorPicker() {
   state = states.colorPicker
-  const pipeWidth = 13.2
   ctx.fillStyle = "black"
   ctx.fillRect(0, 0, canvas.width, canvas.height)
   ctx.fillStyle=mfYellow
@@ -1657,23 +1659,27 @@ function showColorPicker() {
     }
     if (lineBreak !== false) me.y += me.lineHeight
   }
+
+  const pipeLineHeight = me.lineHeight*2 //firefox: subtract 1
+  const pipeWidth = 19.5
+  function drawPipes(text) {
+    let n = 0
+    for (let i of text) {
+      ctx.fillText(i, me.x+pipeWidth*n,pipeY)
+      n++
+    }
+    pipeY+= pipeLineHeight
+  }
+
   print("This Mattheware Game Can Be Played In " + colorModes.length + " Different Video Modes:")
   print()
   let pipeY = me.y
-  ctx.fillText("╔═══════╦════╦════════════════════════╗", me.x+pipeWidth*3, pipeY)
-  pipeY += me.lineHeight * 2
-  ctx.fillText("╔═╬═══════╬════╬════════════════════════╣", me.x, pipeY)
-  pipeY += me.lineHeight * 2
-  for(var i = 0; i < Math.floor(colorModes.length/2); i++) {
-    ctx.fillText("║", me.x+pipeWidth*0, pipeY)
-    ctx.fillText("║", me.x+pipeWidth*3, pipeY)
-    ctx.fillText("║", me.x+pipeWidth*15, pipeY)
-    ctx.fillText("║", me.x+pipeWidth*23-6.5, pipeY)
-    ctx.fillText("║", me.x+pipeWidth*60-0.2, pipeY)
-    pipeY += me.lineHeight * 2
-    ctx.fillStyle=mfYellow
+  drawPipes("  ╔═══════╦════╦════════════════════════╗")
+  drawPipes("╔═╬═══════╬════╬════════════════════════╣")
+  for(let i = 0; i < Math.floor(colorModes.length/2); i++) {
+    drawPipes("║ ║       ║    ║                        ║")
   }
-  ctx.fillText("╚═╩═══════╩════╩════════════════════════╝", me.x, pipeY)
+  drawPipes("╚═╩═══════╩════╩════════════════════════╝")
   print()
   print("      RESOLUTION    COLORS   DESCRIPTION, REQUIREMENTS")
   print()
@@ -1681,7 +1687,9 @@ function showColorPicker() {
     print("  "+(i+1) + ") ", false)
     ctx.fillStyle=mfOrange
     print(colorModes[i].res, false, 70)
-    print(colorModes[i].colors, false, 230)
+    ctx.textAlign = "right"
+    print(colorModes[i].colors, false, 290)
+    ctx.textAlign = "left"
     print(colorModes[i].name, false, 330)
     ctx.fillStyle=mfYellow
     print()
