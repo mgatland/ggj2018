@@ -15,6 +15,10 @@ let largeFont = "48px \"dysin4mation\", monospace"
 let headingFont = "96px \"dysin4mation\", monospace"
 let fontLineHeightScale = 0.6
 
+const audios = []
+let currentAudio = undefined
+const audioCount = 2 //repeat after this many tracks
+
 const tempCanvas = document.createElement("canvas")
 const tCtx = tempCanvas.getContext("2d")
 tempCanvas.width = 1024
@@ -55,6 +59,8 @@ spriteImage.addEventListener('load', function() {
   draw()
 }, false)
 
+//start preloading
+loadAudio(0)
 var font = new FontFaceObserver('dysin4mation', {});
 font.load().then(function () {
   console.log('Font is available');
@@ -1190,8 +1196,30 @@ function changeLevelTo(newLevel)
   }
   depth = newLevel
   tileSet = Math.floor(depth / 3) % tileSetCount
+  playAudio(tileSet)
+  //sneaky: preload the audio for the level below!
+  const preLoadTileSet = Math.floor((depth+1) / 3) % tileSetCount
+  loadAudio(preLoadTileSet)
   makeMap()
   draw()
+}
+
+function loadAudio(tileSet) {
+  if (audios[tileSet]===undefined) {
+    audios[tileSet] = new Audio((tileSet % audioCount) + '.mp3');
+    audios[tileSet].loop = true
+  }  
+}
+
+function playAudio(tileSet) {
+  if (currentAudio==tileSet) return
+  if (currentAudio != undefined) {
+    audios[currentAudio].pause()
+    audios[currentAudio].currentTime = 0;
+  }
+  loadAudio(tileSet)
+  audios[tileSet].play()
+  currentAudio = tileSet
 }
 
 function wait() {
