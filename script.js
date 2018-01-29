@@ -41,7 +41,7 @@ spellNames.push({name:"See things as we are", fullName: "We don't see things as 
 spellNames.push({name:"What do we do now?", desc:""}) //teleport
 spellNames.push({name:"Ritual", desc:"Heals up to 2 hit point per level"}) //heal (small)
 spellNames.push({name:"Waves", desc:"Does nothing"}) //damage
-spellNames.push({name:"Transmission", desc:"Does nothing"}) //speed
+spellNames.push({name:"Transmission", desc:"Detect the mind waves of a mighty guardian, so you can hunt it for its treasure"}) //detect boss
 spellNames.reverse()
 
 const spriteImage = new Image()
@@ -94,6 +94,8 @@ function setDirs(dirs) {
 
 const tileSetCount = 4
 const normalEnemyCount = tileSetCount * 4
+const potionEnemyCount = 10
+const bossEnemyStartCount = normalEnemyCount + potionEnemyCount
 const enemyType = []
 
 enemyType.push({tileSet:0, sprite:1, maxHp:20, speed:7, defence: 3, power:5, name: "Broken One", desc:"It looks fragile"})
@@ -116,12 +118,17 @@ enemyType.push({tileSet:2, sprite:2, maxHp:10, speed:5, defence: 3, power:4, nam
 enemyType.push({tileSet:2, sprite:3, maxHp:12, speed:3, defence: 3, power:5, name: "Honey Golem", desc:"It looks delicious"})
 enemyType.push({tileSet:2, sprite:4, maxHp:30, speed:2, defence: 3, power:6, name: "Larva", desc:"It writhes with ecstasy"})
 
-
 //potions
-for (var i = 0; i < 5; i++) {
+for (var i = 0; i < potionEnemyCount/2; i++) {
   enemyType.push({tileSet:5, sprite:1+i, maxHp:5, speed:4, defence: 1, power:5, special: i, name: "Potion Bearer", desc:"This one will change you…"})
   enemyType.push({tileSet:6, sprite:1+i, maxHp:5, speed:4, defence: 1, power:5, special: i+5, name: "Potion Bearer", desc:"This one will change you…"})
 }
+
+//bosses
+enemyType.push({tileSet:0, sprite:4, maxHp:40, speed:2, defence: 3, power:8, boss:0, name: "Super Canbion", desc:"It shuffles back and forth"})
+enemyType.push({tileSet:0, sprite:1, maxHp:20, speed:7, defence: 3, power:5, boss:1, name: "Super Killer Prawn", desc:"It sees you and snarls"})
+enemyType.push({tileSet:2, sprite:4, maxHp:30, speed:2, defence: 3, power:6, boss:2, name: "Super Earthstar", desc:"It stares expectantly"})
+enemyType.push({tileSet:3, sprite:1, maxHp:5, speed:7, defence: 3, power:3, boss:3, name: "Super Triffid", desc:"It smells angry"})
 
 //information you would save
 let playerPos = {}
@@ -143,6 +150,7 @@ function restart() {
   playerStats.sp = playerStats.maxSp
   playerPos = {x: 27, y: 11, dir: dirs.down}
   playerStats.spellKnown = [true,false,false,false,false,false,false,false,false,false]
+  playerStats.bossesKilled = [false, false, false, false]
 
   clearMessages()
   storedEnemies.length = 0
@@ -226,8 +234,7 @@ function addLadder(isUp) {
   }
 }
 
-function makeEnemies() {
-  
+function makeEnemies() {  
   if (storedEnemies[depth] != undefined) {
     enemies = storedEnemies[depth]
     storedEnemies[depth] = undefined
@@ -235,23 +242,37 @@ function makeEnemies() {
     times(30-enemies.length, makeEnemy)
   } else {
     enemies.length = 0
-    times(100, makeEnemy)  
+    times(100, makeEnemy)
+    maybeGenerateBoss()
   }
   
 }
 
-function makeEnemy() {
+function maybeGenerateBoss() {
+  if (isBossLevel(depth)) {
+    const bossN = Math.floor(depth/3)
+    if (!playerStats.bossesKilled[bossN]) {
+      makeEnemy(bossEnemyStartCount+bossN)
+    }
+  }
+}
+
+function makeEnemy(fixedType) {
   let x = -1
   let y = -1
   while (!cellIsEmpty({x:x, y:y})) {
     x = trueRnd(mapSize)
     y = trueRnd(mapSize)
   }
-  var enemy = {x:x, y:y, type:trueRnd(4)+tileSet*4}
+  var enemy = {x:x, y:y}
 
-  if (trueRnd(100)<10) {
+  if (fixedType != undefined) {
+    enemy.type = fixedType;
+  } else if (trueRnd(100)<10) {
     //potion!
     enemy.type = normalEnemyCount+trueRnd(10)
+  } else {
+    enemy.type = trueRnd(4)+tileSet*4
   }
 
   const et = getType(enemy)
@@ -265,6 +286,7 @@ function makeEnemy() {
   enemy.exp = enemy.level + et.maxHp + enemy.power + enemy.defence
   enemy.gold = Math.floor(enemy.exp / 4)
   enemies.push(enemy)
+  return enemy
 }
 
 function addRoom(minSize, maxSize, hallway) {
@@ -846,7 +868,63 @@ function doKey(keyCode) {
         break
     case 77: showMap()
       break
+    case 49: castTransmission(); break //1
+    case 48: //0
+
   }
+}
+
+function castTransmission() {
+  if (!inGame()) return
+  clearMessages()
+  if (trySpendSp(1)) {
+    const areAllDead = !playerStats.bossesKilled.some(x => x === false)
+    if (areAllDead) {
+      playerCombatMessage.push("No signal. You killed them all!")
+    } else {
+      const bossN = playerStats.bossesKilled.indexOf(false)
+      const dist = (bossN+1)*3 - 1 - depth
+      if (dist==0) {
+        playerCombatMessage.push("You hear the Guardian's mind!")
+        playerCombatMessage.push("It is on this level!")
+        const boss = enemies.find(x=>getType(x).boss != undefined)
+        const txt = bossPointText(boss.x - playerPos.x, boss.y - playerPos.y)
+        playerCombatMessage.push(txt + "!")
+      } else {
+        playerCombatMessage.push("You hear the Guardian's mind!")
+        playerCombatMessage.push(`It is ${bossDistText(dist)}!`)
+      }
+    }
+    draw()
+  }
+}
+
+function bossPointText(xD, yD) {
+  const compass = ["West", "North West", "North", "North East", "East", "East", "South East", "South", "South West"]
+  const rad = Math.atan2(yD, xD);
+  const deg = rad * (180 / Math.PI) + 180 //left is zero, goes clockwise
+  return compass[Math.floor((deg+22.5)/45)]
+}
+
+function isBossLevel(n) {
+  return (n%3==2)
+}
+
+function bossDistText(n) {
+  const s = (n == 1 || n == -1) ? "" : "s"
+  const amount = Math.abs(n)
+  const dir = (n > 0) ? "below" : "above"
+  return amount + " level" + s + " " + dir 
+}
+
+function trySpendSp(n) {
+  if (playerStats.sp < n) {
+    playerCombatMessage.push("You need more Spell Points to cast that")
+    draw()
+    return false
+  }
+  playerStats.sp -= n
+  return true
 }
 
 function restartIfDead() {
