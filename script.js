@@ -2,7 +2,6 @@
 //DOM stuff
 const canvas = document.querySelector(".gameCanvas")
 
-
 let debug = false
 
 const ctx = canvas.getContext('2d')
@@ -100,25 +99,25 @@ const potionEnemyCount = 10
 const bossEnemyStartCount = normalEnemyCount + potionEnemyCount
 const enemyType = []
 
-enemyType.push({tileSet:0, sprite:1, end:3, speed:7, defence: 3, power:5, name: "Broken One", desc:"It looks fragile"})
-enemyType.push({tileSet:0, sprite:2, end:4, speed:5, defence: 3, power:6, name: "Smoke Elemental", desc:"It seems to be slowly burning away"})
-enemyType.push({tileSet:0, sprite:3, end:5, speed:3, defence: 3, power:7, name: "Sewer Wyrm", desc:"It thrashes around to no avail"})
-enemyType.push({tileSet:0, sprite:4, end:6, speed:2, defence: 3, power:8, name: "Canbion", desc:"It shuffles back and forth"})
+enemyType.push({tileSet:0, sprite:1, end:1, speed:6, defence: 3, power:5, name: "Broken One", desc:"It looks fragile"})
+enemyType.push({tileSet:0, sprite:2, end:3, speed:5, defence: 3, power:5, name: "Smoke Elemental", desc:"It seems to be slowly burning away"})
+enemyType.push({tileSet:0, sprite:3, end:4, speed:3, defence: 2, power:4, name: "Sewer Wyrm", desc:"It thrashes around to no avail"})
+enemyType.push({tileSet:0, sprite:4, end:5, speed:2, defence: 3, power:4, name: "Canbion", desc:"It shuffles back and forth"})
 
-enemyType.push({tileSet:1, sprite:1, end:3, speed:7, defence: 3, power:5, name: "Killer Prawn", desc:"It sees you and snarls"})
-enemyType.push({tileSet:1, sprite:2, end:2, speed:5, defence: 3, power:6, name: "Island Mimic", desc:"Its sandy shore has claimed many victims"})
-enemyType.push({tileSet:1, sprite:3, end:3, speed:3, defence: 3, power:7, name: "Purple Tentacle", desc:"Does it belong to something bigger?"})
-enemyType.push({tileSet:1, sprite:4, end:6, speed:2, defence: 3, power:8, name: "Iron Giant", desc:"You hear grinding gears from the depths"})
+enemyType.push({tileSet:1, sprite:1, end:3, speed:7, defence: 3, power:5, name: "Killer Prawn", desc:"It snarls at your presence"})
+enemyType.push({tileSet:1, sprite:2, end:2, speed:2, defence: 1, power:5, name: "Island Mimic", desc:"Its sandy shore has claimed many victims"})
+enemyType.push({tileSet:1, sprite:3, end:4, speed:3, defence: 4, power:6, name: "Purple Tentacle", desc:"Does it belong to something bigger?"})
+enemyType.push({tileSet:1, sprite:4, end:8, speed:1, defence: 1, power:7, name: "Iron Giant", desc:"You hear grinding gears from the depths"})
 
-enemyType.push({tileSet:2, sprite:1, end:1, speed:7, defence: 3, power:3, name: "Sporangium Warrior", desc:"A cloud of intoxicating spores surrounds it"})
-enemyType.push({tileSet:2, sprite:2, end:3, speed:5, defence: 3, power:4, name: "Aspergillus Philosopher", desc:"It quivers threateningly"})
-enemyType.push({tileSet:2, sprite:3, end:4, speed:3, defence: 3, power:5, name: "Elder Shroom", desc:"It doesn't want you here"})
-enemyType.push({tileSet:2, sprite:4, end:5, speed:2, defence: 3, power:6, name: "Earthstar", desc:"It stares expectantly"})
+enemyType.push({tileSet:2, sprite:1, end:3, speed:5, defence: 3, power:3, name: "Sporangium Warrior", desc:"A cloud of toxic spores surrounds it"})
+enemyType.push({tileSet:2, sprite:2, end:3, speed:6, defence: 2, power:4, name: "Aspergillus Philosopher", desc:"It quivers threateningly"})
+enemyType.push({tileSet:2, sprite:3, end:2, speed:2, defence: 2, power:7, name: "Elder Shroom", desc:"It doesn't want you here"})
+enemyType.push({tileSet:2, sprite:4, end:6, speed:2, defence: 3, power:6, name: "Earthstar", desc:"It stares expectantly"})
 
-enemyType.push({tileSet:3, sprite:1, end:2, speed:7, defence: 3, power:3, name: "Triffid", desc:"It smells angry"})
-enemyType.push({tileSet:3, sprite:2, end:4, speed:5, defence: 3, power:4, name: "Dumble-Dor", desc:"It clutches a crude spear"})
-enemyType.push({tileSet:3, sprite:3, end:4, speed:3, defence: 3, power:5, name: "Honey Golem", desc:"It looks delicious"})
-enemyType.push({tileSet:3, sprite:4, end:6, speed:2, defence: 3, power:6, name: "Larva", desc:"It writhes with ecstasy"})
+enemyType.push({tileSet:3, sprite:1, end:5, speed:6, defence: 3, power:8, name: "Triffid", desc:"It smells angry"})
+enemyType.push({tileSet:3, sprite:2, end:4, speed:5, defence: 4, power:5, name: "Dumble-Dor", desc:"It clutches a crude spear"})
+enemyType.push({tileSet:3, sprite:3, end:9, speed:2, defence: 2, power:7, name: "Honey Golem", desc:"It looks delicious"})
+enemyType.push({tileSet:3, sprite:4, end:2, speed:2, defence: 3, power:4, name: "Larva", desc:"It writhes with ecstasy"})
 
 //potions
 for (var i = 0; i < potionEnemyCount/2; i++) {
@@ -127,10 +126,10 @@ for (var i = 0; i < potionEnemyCount/2; i++) {
 }
 
 //bosses
-enemyType.push({tileSet:0, sprite:4, end:8, speed:2, defence: 3, power:8, boss:0, name: "Super Canbion", desc:"It shuffles back and forth"})
-enemyType.push({tileSet:1, sprite:1, end:6, speed:7, defence: 3, power:5, boss:1, name: "Super Killer Prawn", desc:"It sees you and snarls"})
-enemyType.push({tileSet:2, sprite:4, end:8, speed:2, defence: 3, power:6, boss:2, name: "Super Earthstar", desc:"It stares expectantly"})
-enemyType.push({tileSet:3, sprite:1, end:6, speed:7, defence: 3, power:3, boss:3, name: "Super Triffid", desc:"It smells angry"})
+enemyType.push({tileSet:0, sprite:4, end:6, speed:2, defence: 3, power:8, boss:0, name: "Alumincubus", desc:"It hurts to look at"})
+enemyType.push({tileSet:1, sprite:1, end:7, speed:6, defence: 3, power:9, boss:1, name: "Shadow Prawn", desc:"It demands blood for its barbequed brethren"})
+enemyType.push({tileSet:2, sprite:4, end:8, speed:2, defence: 3, power:10, boss:2, name: "Moonstar", desc:"Its gaze crosses dimensions"})
+enemyType.push({tileSet:3, sprite:1, end:9, speed:5, defence: 4, power:12, boss:3, name: "Audrey IV", desc:"It fights as if protecting its kin"})
 
 //information you would save
 let playerPos = {}
