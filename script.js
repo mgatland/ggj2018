@@ -1611,11 +1611,11 @@ let colorMode = 0
 //healer is green, uni is blue
 //mapback is reused for dull text
 //                                             text,   map back, borders,   upLadder, downLadder, healer,   uni
-addColorMode("CGA", "-cga", "  4",             "white", cga2,    cga1,      cga2,     cga1,       cga2,     cga2)
-addColorMode("High-Res EGA", "-ega", " 16",    "white","#666666", "#000099","#999999","#666666",  "#009900", "#66FFFF")
-addColorMode("High-Res EGA with Classic Palette", "-moraff", " 16")
-addColorMode("High-Res VGA, requires 512k RAM", "", "256")
-addColorMode("Super High-Res VGA, requires 1 meg RAM", "-svga", "512")
+addColorMode("CGA", "-cga", "    4",             "white", cga2,    cga1,      cga2,     cga1,       cga2,     cga2)
+addColorMode("High-Res EGA", "-ega", "   16",    "white","#666666", "#000099","#999999","#666666",  "#009900", "#66FFFF")
+addColorMode("High-Res EGA with Classic Moraff Palette", "-moraff", "   16")
+addColorMode("High-Res VGA, requires 512k RAM", "", "  256")
+addColorMode("Super High Quality, requires 2 meg RAM", "-svga", "65,536")
 
 
 function addColorMode(name, fileName, colors, textColor, dullTextColor, border, upLadder, downLadder, healer, uni) {
@@ -1685,7 +1685,9 @@ function showColorPicker() {
     print("  "+(i+1) + ") ", false)
     ctx.fillStyle=mfOrange
     print(colorModes[i].res, false, 70)
-    print(colorModes[i].colors, false, 230)
+    ctx.textAlign = "right"
+    print(colorModes[i].colors, false, 290)
+    ctx.textAlign = "left"
     print(colorModes[i].name, false, 330)
     ctx.fillStyle=mfYellow
     print()
