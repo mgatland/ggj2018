@@ -18,7 +18,7 @@ let fontLineHeightScale = 0.6
 const tempCanvas = document.createElement("canvas")
 const tCtx = tempCanvas.getContext("2d")
 tempCanvas.width = 1024
-tempCanvas.height = 768
+tempCanvas.height = 1024
 tCtx.webkitImageSmoothingEnabled = false
 tCtx.mozImageSmoothingEnabled = false
 tCtx.imageSmoothingEnabled = false
@@ -36,9 +36,9 @@ spellNames.push({name:"We are together", fullName:"As long as we have each other
 spellNames.push({name:"Deception", desc:"Does nothing"}) // enemies stop hunting you
 spellNames.push({name:"Extinction", desc:"Does nothing"}) //destroy all enemies of this type (op?)
 spellNames.push({name:"Ouroboros", desc:"Does nothing"}) //enemy attacks itself
-spellNames.push({name:"Heartbeat", desc:"Heals 10 health points per level"}) //heal (better)
+spellNames.push({name:"Heartbeat", desc:"Heals exactly 10 health points per level"}) //(todo: heal over time for a time)
 spellNames.push({name:"See things as we are", fullName: "We don't see things as they are, we see them as we are.", desc:"Does nothing"}) // see enemies on map
-spellNames.push({name:"What do we do now?", desc:""}) //teleport
+spellNames.push({name:"What do we do now?", desc:"Teleport to a random position on this level.", desc2:"If a Shadow Guardian is present, it will draw you closer!"}) //teleport
 spellNames.push({name:"Ritual", desc:"Heals up to 10 health points per level"}) //heal (small)
 spellNames.push({name:"Waves", desc:"Deals 15-30 health points of damage"}) //damage
 spellNames.push({name:"Transmission", desc:"Detect the mind waves of a Shadow Guardian, so you can hunt it for its treasure"}) //detect boss
@@ -460,6 +460,7 @@ function draw() {
       if (playerStats.spellKnown[i]) {
         t.print((i+1) + " " + (spellNames[i].fullName != undefined ? spellNames[i].fullName : spellNames[i].name))
         t.print("    " + spellNames[i].desc)
+        if (spellNames[i].desc2 != null) t.print("    " +spellNames[i].desc2)
       } else {
         t.print((i+1) + " " + "???")
         t.print()
@@ -711,7 +712,7 @@ function viewCellPos(pos, viewDir, i, j)
 
 function drawMap(viewX, viewY, viewSizeX, viewSizeY) {
   tCtx.fillStyle = "grey"
-  tCtx.fillRect(0, 0, mapSize*cellSize, mapSize*cellSize)
+  tCtx.fillRect(0, 0, mapSize*cellSize+viewSizeX, mapSize*cellSize+viewSizeY)
   for (let x = 0; x < mapSize; x++) {
     for (let y = 0; y < mapSize; y++) {
       const cell = cellAt(x, y)
@@ -893,7 +894,7 @@ function doKey(keyCode) {
     case 49: castTransmission(); break //1
     case 50: castWaves(); break //2
     case 51: castRitual(); break //3
-    case 52: ; break //4
+    case 52: castWhatDo(); break //4
     case 53:  break //5
     case 54: castHeartbeat(); break //6
     case 48: //0
@@ -908,8 +909,7 @@ function getPlayerTarget() {
 function castHeartbeat() {
   if (!inGame()) return
   clearMessages()
-  const e = getPlayerTarget()
-  if (trySpendSp(3)) {
+  if (trySpendSp(6)) {
     const amount = playerStats.level*10
     playerStats.hp = Math.min(playerStats.hp + amount, playerStats.maxHp)
     playerCombatMessage.push(`You focus on your heart,`)
@@ -919,11 +919,38 @@ function castHeartbeat() {
   }
 }
 
+function castWhatDo() {
+  if (!inGame()) return
+  clearMessages()
+  if (trySpendSp(4)) {
+    const amount = playerStats.level*10
+    const pos = {x:-1,y:-1}
+    const boss = enemies.find(x=>getType(x).boss != undefined)
+    const startDist = boss != undefined ? distanceFromTo(playerPos, boss) : undefined
+    let dist = 0
+    while (!cellIsEmpty(pos) || (boss != undefined && dist > 4 + startDist/2)) {
+      pos.x = trueRnd(mapSize)
+      pos.y = trueRnd(mapSize)
+      dist = boss != undefined ? distanceFromTo(pos, boss) : undefined
+    }
+    playerPos.x = pos.x
+    playerPos.y = pos.y
+    if (boss != undefined) {
+      playerCombatMessage.push(`You forget where you are,`)
+      playerCombatMessage.push(`and feel a cold presence calling you.`)
+      console.log(`old dist ${startDist}, new dist ${dist}`)
+    } else {
+      playerCombatMessage.push(`You forget where you are,`)
+      playerCombatMessage.push(`and you are somewhere else.`)
+    }
+    monsterCombatTurn()
+    draw()
+  }
+}
 
 function castRitual() {
   if (!inGame()) return
   clearMessages()
-  const e = getPlayerTarget()
   if (trySpendSp(3)) {
     const amount = trueRnd(playerStats.level*10) + 1
     playerStats.hp = Math.min(playerStats.hp + amount, playerStats.maxHp)
