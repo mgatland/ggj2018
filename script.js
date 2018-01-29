@@ -2,7 +2,6 @@
 //DOM stuff
 const canvas = document.querySelector(".gameCanvas")
 
-//credit font dysin4mation by Auntie Pixelante
 
 let debug = false
 
@@ -1574,8 +1573,8 @@ function showColorPicker() {
   const me = {}
   ctx.font=mediumFont
   me.lineHeight = 21
-  me.x = 4
-  me.y = me.lineHeight
+  me.x = 8
+  me.y = me.lineHeight + 4
   function print(text, lineBreak, xOff) {
     if (text) {
       ctx.fillText(text, me.x + (xOff ? xOff : 0), me.y)
@@ -1615,7 +1614,14 @@ function showColorPicker() {
   ctx.fillStyle = mBlue
   print("Select Video Mode You Want by Entering One of the Above Values:")
   print()
-  print("(Press C At Any Time To Change Video Mode In-Game. This Requires A Newer Graphics Adapter!)")
+  print("(Press C At Any Time To Change Video Mode In-Game. This Requires A Good Graphics Adapter!)")
+  times(17, print)
+  ctx.fillStyle=mfOrange
+  print("Credits:")
+  print("Code - Matthew Gatland")
+  print("Art - Sergio Cornaga")
+  print()
+  print("Font: Dysin4mation by Anna Anthropy")
 }
 
 function doKeyColorPicker(keyCode) {

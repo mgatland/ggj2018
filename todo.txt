@@ -29,10 +29,10 @@ definitely:
 [x] spell details screen [s]
 [x] color pallete swapper
 [x] don't show enemies on map
+[x] fix looping levels after the bottom
 
 maybe:
 [ ] announce when on boss level
-[ ] fix looping levels after the bottom
 [ ] draw order - a ladder is drawn before a wall that should be closer
 [ ] let the player dig downwards (if they get stuck)
 [ ] end game victory - the potplant
