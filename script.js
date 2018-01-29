@@ -771,17 +771,14 @@ function drawCell(x, y) {
       const ladderType = townLadderType({x:x, y:y})
       if (ladderType==0) tCtx.fillStyle = "lightblue"
       else tCtx.fillStyle = "lightgreen"
-
-      tCtx.fillRect(x*cellSize+2, y*cellSize+2, cellSize - 4, cellSize - 4)
     } else {
-      tCtx.fillStyle = "lightgrey"
-      tCtx.fillRect(x*cellSize+2, y*cellSize+2, cellSize - 4, cellSize - 4)
+      tCtx.fillStyle = "#E0E0E0"
     }
-    
+    tCtx.fillRect(x*cellSize+1, y*cellSize+1, cellSize - 3, cellSize - 3)    
   }
   if (anyAtPos(laddersDown, {x:x, y:y})) {
-    tCtx.fillStyle = "gold"
-    tCtx.fillRect(x*cellSize+2, y*cellSize+2, cellSize - 4, cellSize - 4)
+    tCtx.fillStyle = "gray"
+    tCtx.fillRect(x*cellSize+1, y*cellSize+1, cellSize - 3, cellSize - 3)    
   }
 }
 
