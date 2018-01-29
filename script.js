@@ -258,7 +258,7 @@ function makeEnemies() {
 
 function maybeGenerateBoss() {
   if (isBossLevel(depth)) {
-    const bossN = Math.floor(depth/3)
+    const bossN = (Math.floor(depth/3))%tileSetCount
     if (!playerStats.bossesKilled[bossN]) {
       makeEnemy(bossEnemyStartCount+bossN)
     }
