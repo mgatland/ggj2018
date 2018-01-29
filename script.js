@@ -252,7 +252,7 @@ function makeEnemies() {
     times(30-enemies.length, makeEnemy)
   } else {
     enemies.length = 0
-    times(100, makeEnemy)
+    times(100+depth*10, makeEnemy)
     maybeGenerateBoss()
   }
   
