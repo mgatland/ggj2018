@@ -892,6 +892,7 @@ function doKey(keyCode) {
       break
     case 49: castTransmission(); break //1
     case 50: castWaves(); break //2
+    case 51: castRitual(); break //3
     case 48: //0
 
   }
@@ -899,6 +900,19 @@ function doKey(keyCode) {
 
 function getPlayerTarget() {
   return findAtPos(enemies, move(playerPos, playerPos.dir))
+}
+
+function castRitual() {
+  if (!inGame()) return
+  clearMessages()
+  const e = getPlayerTarget()
+  if (trySpendSp(3)) {
+    const amount = trueRnd(playerStats.level*2) + 1
+    playerStats.hp = Math.min(playerStats.hp + amount, playerStats.maxHp)
+    playerCombatMessage.push(`The ritual heals ${amount} health points.`)
+    monsterCombatTurn()
+    draw()
+  }
 }
 
 function castWaves() {
