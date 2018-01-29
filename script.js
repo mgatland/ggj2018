@@ -1208,6 +1208,7 @@ function loadAudio(tileSet) {
   if (audios[tileSet]===undefined) {
     audios[tileSet] = new Audio((tileSet % audioCount) + '.mp3');
     audios[tileSet].loop = true
+    audios[tileSet].volume = 0.2;
   }  
 }
 
@@ -1725,11 +1726,12 @@ function showColorPicker() {
   print("Select Video Mode You Want by Entering One of the Above Values:")
   print()
   print("(Press C At Any Time To Change Video Mode In-Game. This Requires A Good Graphics Adapter!)")
-  times(17, print)
+  times(16, print)
   ctx.fillStyle=mfOrange
   print("Credits:")
-  print("Code - Matthew Gatland")
   print("Art - Sergio Cornaga")
+  print("Code - Matthew Gatland")  
+  print("Music - Chimeratio")
   print()
   print("Font: Dysin4mation by Anna Anthropy")
 }
