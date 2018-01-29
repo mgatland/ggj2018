@@ -942,9 +942,11 @@ function doKey(keyCode) {
           break
           case 2: playerCombatMessage.push("A Poison of Intelligence! +15 Int")
           playerStats.int += 15
+          deriveMaxHpAndSp()
           break
           case 3: playerCombatMessage.push("Boots of Endurance! +20 End")
           playerStats.end += 20
+          deriveMaxHpAndSp()
           break
         }
       }
@@ -1548,9 +1550,11 @@ function specialHitEffect(effect) {
     enemyCombatMessage.push("Luck raised by potion!")
     break
     case 4: playerStats.int++
+    deriveMaxHpAndSp()
     enemyCombatMessage.push("Intelligence raised by potion!")
     break
     case 5: playerStats.end++
+    deriveMaxHpAndSp()
     enemyCombatMessage.push("Endurance raised by potion!")
     break
     case 0: playerStats.speed--
@@ -1563,9 +1567,11 @@ function specialHitEffect(effect) {
     enemyCombatMessage.push("Luck lowered by potion!")
     break
     case 8: playerStats.int--
+    deriveMaxHpAndSp()
     enemyCombatMessage.push("Intelligence lowered by potion!")
     break
     case 9: playerStats.end--
+    deriveMaxHpAndSp()
     enemyCombatMessage.push("Endurance lowered by potion!")
     break
   } 
