@@ -694,7 +694,7 @@ function draw3D(viewX, viewY, viewSize, dir) {
     }
   }
   ctx.drawImage(tempCanvas, 0, 0, viewSizeX, viewSizeY, viewX, viewY, viewSizeX, viewSizeY)
-  ctx.strokeStyle = "darkblue"
+  ctx.strokeStyle = getColors().border
   ctx.lineWidth = 4
   ctx.strokeRect(viewX, viewY, viewSizeX, viewSizeY)
 }
@@ -1533,8 +1533,9 @@ const colorModes = []
 let colorMode = 0
 
 //healer is green, uni is blue
+//mapback is reused for dull text
 //                                             text,   map back, borders,   upLadder, downLadder, healer,   uni
-addColorMode("CGA", "-cga", "  4",             "white", cga2,    cga2,      cga2,     cga1,       cga2,     cga2)
+addColorMode("CGA", "-cga", "  4",             "white", cga2,    cga1,      cga2,     cga1,       cga2,     cga2)
 addColorMode("High-Res EGA", "-ega", " 16",    "white","#666666", "#000099","#999999","#666666",  "#009900", "#66FFFF")
 addColorMode("High-Res EGA with Classic Palette", "-moraff", " 16")
 addColorMode("High-Res VGA, requires 512k RAM", "", "256")
