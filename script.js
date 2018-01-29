@@ -287,7 +287,7 @@ function makeEnemy(fixedType) {
   const et = getType(enemy)
   enemy.level = depth + 1 + trueRnd(2)
   if (et.boss != undefined) enemy.level += 5
-  enemy.maxHp = Math.floor(et.end/2)*enemy.level
+  enemy.maxHp = 5 + Math.floor(et.end/2)*enemy.level
   enemy.hp = enemy.maxHp
   enemy.timer = 0
   enemy.defence = et.defence + Math.floor(enemy.level * et.defence / 4)
