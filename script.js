@@ -126,9 +126,14 @@ enemyType.push({tileSet:3, sprite:3, end:9, speed:2, defence: 2, power:7, name: 
 enemyType.push({tileSet:3, sprite:4, end:2, speed:2, defence: 3, power:4, name: "Larva", desc:"It writhes with ecstasy"})
 
 //potions
-for (var i = 0; i < potionEnemyCount/2; i++) {
-  enemyType.push({tileSet:5, sprite:1+i, end:1, speed:4, defence: 1, power:5, special: i, name: "Potion Bearer", desc:"This one will change you…"})
-  enemyType.push({tileSet:6, sprite:1+i, end:1, speed:4, defence: 1, power:5, special: i+5, name: "Potion Bearer", desc:"This one will change you…"})
+{
+  const potionNames = 
+  ["Turquoise", "Pink", "Aqua", "Red", "Dark Blue", "Orange", "Violet", "Lemon", "Lavender", "Green"]
+  let n = 0
+  for (var i = 0; i < potionEnemyCount/2; i++) {
+    enemyType.push({tileSet:5, sprite:1+i, end:1, speed:4, defence: 1, power:5, special: i, name: potionNames[n++] + " Potion Bearer", desc:"This one will change you…"})
+    enemyType.push({tileSet:6, sprite:1+i, end:1, speed:4, defence: 1, power:5, special: i+5, name: potionNames[n++]+ " Potion Bearer", desc:"This one will change you…"})
+  }
 }
 
 //bosses

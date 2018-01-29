@@ -36,8 +36,8 @@ definitely:
 	- cost 83, i have 153 and i healed once
 	- cost 166, i have 289
 	- it should probaly cost a little more
+[x] add music (sergio fb chat)
 
-[ ] add music (sergio fb chat)
 [ ] spells unlock too fast - sergio ++++
 	could unlock at 1/2 or 1/3 the rate (make it less random)
 [ ] pits
