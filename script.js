@@ -897,31 +897,21 @@ function doKey(keyCode) {
   }
 }
 
-function castWaves() {
-
+function getPlayerTarget() {
+  return findAtPos(enemies, move(playerPos, playerPos.dir))
 }
 
-function castTransmission() {
+function castWaves() {
   if (!inGame()) return
   clearMessages()
-  if (trySpendSp(1)) {
-    const areAllDead = !playerStats.bossesKilled.some(x => x === false)
-    if (areAllDead) {
-      playerCombatMessage.push("No signal. You killed them all!")
-    } else {
-      const bossN = playerStats.bossesKilled.indexOf(false)
-      const dist = (bossN+1)*3 - 1 - depth
-      if (dist==0) {
-        playerCombatMessage.push("You hear the Shadow Guardian's mind!")
-        const boss = enemies.find(x=>getType(x).boss != undefined)
-        const txt = bossPointText(boss.x - playerPos.x, boss.y - playerPos.y)
-        playerCombatMessage.push(`It is on this level! ${txt}!`)
-      } else {
-        playerCombatMessage.push("You hear the Shadow Guardian's mind!")
-        playerCombatMessage.push(`It is ${bossDistText(dist)}!`)
-      }
-    }
-    timePasses()
+  const e = getPlayerTarget()
+  if (e == undefined) {
+    playerCombatMessage.push("This spell requires a target")
+    draw()
+  } else if (trySpendSp(2)) {
+    hitMonster(trueRnd(15)+15, e, "You emit waves of energy!")
+    monsterCombatTurn()
+    draw()
   }
 }
 
@@ -945,7 +935,7 @@ function castTransmission() {
         playerCombatMessage.push(`It is ${bossDistText(dist)}!`)
       }
     }
-    timePasses()
+    monsterCombatTurn()
   }
 }
 
@@ -1109,29 +1099,12 @@ function playerAttack(e) {
   let damage = 0
   if (result > 0) {
     times(Math.floor(result/40)+1, () => damage += playerDamageRoll())
-    hitMonster(damage, e)
     //bonus damage
     damage += rnd(Math.floor(playerStats.strength / 3)) + rnd(playerStats.level)
   }
 
   if (damage > 0) {
     hitMonster(damage, e)
-    if (e.hp > 0) {
-      playerCombatMessage.push("You hit the monster!")
-      playerCombatMessage.push("It takes " + damage + " points of damage!")
-    } else {
-      state = states.foundSomething
-      const boss = getType(e).boss
-      playerStats.surprise = boss
-      if (boss != undefined) {
-        playerStats.bossesKilled[boss] = true
-        playerCombatMessage.push("The mighty Shadow Guardian is dead!")
-        playerCombatMessage.push("You take its treasure... (PRESS A KEY)")
-      } else {
-        playerCombatMessage.push("You killed it!")
-        playerCombatMessage.push("You found... (PRESS ANY KEY)")
-      }
-    }
   } else {
     playerCombatMessage.push("You missed!")
   }
@@ -1165,12 +1138,26 @@ function monsterAttack(e) {
   }
 }
 
-function hitMonster(damage, e)
+function hitMonster(damage, e, text)
 {
   e.hp -= damage
-  if (e.hp <= 0) {
+  if (e.hp > 0) {
+    playerCombatMessage.push(text == undefined ? "You hit the monster!" : text)
+    playerCombatMessage.push("It takes " + damage + " points of damage!")
+  } else {
     playerStats.exp += e.exp
     playerStats.gold += e.gold
+    state = states.foundSomething
+    const boss = getType(e).boss
+    playerStats.surprise = boss
+    if (boss != undefined) {
+      playerStats.bossesKilled[boss] = true
+      playerCombatMessage.push("The mighty Shadow Guardian is dead!")
+      playerCombatMessage.push("You take its treasure... (PRESS A KEY)")
+    } else {
+      playerCombatMessage.push("You killed it!")
+      playerCombatMessage.push("You found... (PRESS ANY KEY)")
+    }
   }
 }
 
