@@ -237,13 +237,10 @@ function addLadder(isUp) {
     if (y > mapSize - 10) dir = dirs.up
 
     pos = move(pos, dir)
-    console.log("hi")
     while(isValidPos(pos)&&map[pos.x][pos.y]==0) {
-      console.log(pos)
       map[pos.x][pos.y]=1
       pos = move(pos, dir)
     }
-    console.log("bye")
   }
 }
 
@@ -297,7 +294,7 @@ function makeEnemy(fixedType) {
   enemy.defence = et.defence + Math.floor(enemy.level * et.defence / 4)
   enemy.speed = et.speed + Math.floor(enemy.level * et.speed / 4)
   enemy.power = et.power + Math.floor(enemy.level * et.power / 4)
-  enemy.exp = enemy.level + et.end + enemy.power + enemy.defence
+  enemy.exp = et.maxHp / 2 + enemy.power + enemy.defence + enemy.speed
   enemy.gold = (trueRnd(100) < 25) ? trueRnd(enemy.exp) + 5 : 0
   enemies.push(enemy)
   return enemy
@@ -1449,6 +1446,7 @@ function inGame() {
 
 function drawWall(ctx, tileSet, left, top, width, leftSize, rightSize)
 {
+  if (width < 1) return
   const img = spriteImage
   const h = 256
   const w = 256
@@ -1469,7 +1467,12 @@ function drawWall(ctx, tileSet, left, top, width, leftSize, rightSize)
     var dWidth = sliceWidth * widthScale
     var dHeight = leftSize * (1 - progress) + rightSize * progress;
     var dy = top + (leftSize - dHeight) / 2
-    ctx.drawImage(img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+    try {
+      ctx.drawImage(img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+    } catch (e) {
+      console.log("bad: " + sWidth+":"+ sHeight+":"+ dx+":"+ dy+":"+ dWidth+":"+ dHeight)
+    }
+    
   }
 }
 
