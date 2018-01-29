@@ -179,6 +179,10 @@ function deriveMaxHpAndSp() {
 }
 
 function makeMap() {
+  if (depth >= tileSetCount*3-1) {
+    makeFinalMap()
+    return
+  }
   for(let x = 0; x < mapSize; x++) {
     map[x] = [];
     for (let y = 0; y < mapSize; y++) {
@@ -194,6 +198,18 @@ function makeMap() {
   }
   makeEnemies()
   makeLadders(depth)
+}
+
+function makeFinalMap() {
+  for(let x = 0; x < mapSize; x++) {
+    map[x] = [];
+    for (let y = 0; y < mapSize; y++) {
+      map[x][y] = 1
+    }
+  }
+  makeEnemies()
+  makeLadders(depth)
+  laddersDown.length = 0 //hack out the down ladders
 }
 
 function makeLadders(n) {
