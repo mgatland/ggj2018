@@ -39,8 +39,8 @@ spellNames.push({name:"Ouroboros", desc:""}) //enemy attacks itself
 spellNames.push({name:"Heartbeat", desc:""}) //heal (better)
 spellNames.push({name:"See things as we are", fullName: "We don't see things as they are, we see them as we are.", desc:""}) // see enemies on map
 spellNames.push({name:"What do we do now?", desc:""}) //teleport
-spellNames.push({name:"Ritual", desc:"Heals up to 2 hit point per level"}) //heal (small)
-spellNames.push({name:"Waves", desc:"Does nothing"}) //damage
+spellNames.push({name:"Ritual", desc:"Heals up to 2 health points per level"}) //heal (small)
+spellNames.push({name:"Waves", desc:"Deals 15-30 health points of damage"}) //damage
 spellNames.push({name:"Transmission", desc:"Detect the mind waves of a Shadow Guardian, so you can hunt it for its treasure"}) //detect boss
 spellNames.reverse()
 
@@ -81,8 +81,9 @@ let playerStats = {}
 const mapSize = 100
 const cellSize = 10
 const dirs = {up:{name:"up", y:-1,i:0}, right:{name:"right",x:1,i:1}, down:{name:"down",y:1,i:2}, left:{name:"left",x:-1,i:3}}
-setDirs([dirs.up, dirs.right, dirs.down, dirs.left])
-function setDirs(dirs) {
+const dirsList = [dirs.up, dirs.right, dirs.down, dirs.left]
+setupDirs(dirsList)
+function setupDirs(dirs) {
   for(let i = 0; i < dirs.length; i++) {
     dirs[i].cw = dirs[(i+1)%dirs.length]
     dirs[i].ccw = dirs[(i+3)%dirs.length]
@@ -282,8 +283,8 @@ function makeEnemy(fixedType) {
   enemy.hp = enemy.maxHp
   enemy.timer = 0
   enemy.defence = et.defence + Math.floor(enemy.level * et.defence / 4)
-  enemy.speed = et.speed + Math.floor(enemy.level * et.defence / 4)
-  enemy.power = et.power + Math.floor(enemy.level * et.defence / 4)
+  enemy.speed = et.speed + Math.floor(enemy.level * et.speed / 4)
+  enemy.power = et.power + Math.floor(enemy.level * et.power / 4)
   enemy.exp = enemy.level + et.maxHp + enemy.power + enemy.defence
   enemy.gold = Math.floor(enemy.exp / 4)
   enemies.push(enemy)
@@ -890,8 +891,37 @@ function doKey(keyCode) {
     case 77: showMap()
       break
     case 49: castTransmission(); break //1
+    case 50: castWaves(); break //2
     case 48: //0
 
+  }
+}
+
+function castWaves() {
+
+}
+
+function castTransmission() {
+  if (!inGame()) return
+  clearMessages()
+  if (trySpendSp(1)) {
+    const areAllDead = !playerStats.bossesKilled.some(x => x === false)
+    if (areAllDead) {
+      playerCombatMessage.push("No signal. You killed them all!")
+    } else {
+      const bossN = playerStats.bossesKilled.indexOf(false)
+      const dist = (bossN+1)*3 - 1 - depth
+      if (dist==0) {
+        playerCombatMessage.push("You hear the Shadow Guardian's mind!")
+        const boss = enemies.find(x=>getType(x).boss != undefined)
+        const txt = bossPointText(boss.x - playerPos.x, boss.y - playerPos.y)
+        playerCombatMessage.push(`It is on this level! ${txt}!`)
+      } else {
+        playerCombatMessage.push("You hear the Shadow Guardian's mind!")
+        playerCombatMessage.push(`It is ${bossDistText(dist)}!`)
+      }
+    }
+    timePasses()
   }
 }
 
@@ -915,7 +945,7 @@ function castTransmission() {
         playerCombatMessage.push(`It is ${bossDistText(dist)}!`)
       }
     }
-    timePasses(100/playerStats.speed)
+    timePasses()
   }
 }
 
@@ -1000,7 +1030,7 @@ function wait() {
   if (!inGame()) return
   clearMessages()
   
-  timePasses(100/playerStats.speed)
+  timePasses()
 }
 
 function turnBack() {
@@ -1040,7 +1070,7 @@ function forward() {
     flipped = !flipped
     playerPos.x += playerPos.dir.x
     playerPos.y += playerPos.dir.y
-    timePasses(100/playerStats.speed)
+    timePasses()
   }
 }
 
@@ -1053,10 +1083,22 @@ function clearMessages() {
 function fight(e) {
   if (!inGame()) return
   clearMessages()
-
   playerAttack(e)
-  monsterAttack(e) //FIXME: all adjacent monsters get initiative
+  monsterCombatTurn()
   draw()
+}
+
+function playerMoveTime() {
+  return 100/playerStats.speed
+}
+
+function monsterCombatTurn() {
+  const time = playerMoveTime()
+  for(let dir of dirsList) {
+    const newPos = move(playerPos, dir)
+    const e = findAtPos(enemies, newPos)
+    if (e) passTimeForEnemy(time, e)
+  }
 }
 
 function playerAttack(e) {
@@ -1145,27 +1187,34 @@ function playerDamageRoll() {
   return rnd(10) //should be weapon power
 }
 
-function timePasses(amount)
+function timePasses()
 {
+  const amount = playerMoveTime()
   for (let e of enemies) {
-    if (e.timer == undefined) e.timer = 0
-    e.timer += amount
-    const et = getType(e)
-    if (e.timer > 100/et.speed) {
-      e.timer -= 100/et.speed
-      moveEnemy(e)
-    }
+    passTimeForEnemy(amount, e)
   }
   draw()
+}
+
+function passTimeForEnemy(amount, e)
+{
+  if (e.timer == undefined) e.timer = 0
+    e.timer += amount
+    const et = getType(e)
+    while (e.timer > 100/et.speed) {
+      e.timer -= 100/et.speed
+      moveEnemy(e)
+  }
 }
 
 function getType(e) {
   return enemyType[e.type]
 }
 
+
 function moveEnemy(e) {
   const moves = []
-  const options = [dirs.up, dirs.down, dirs.left, dirs.right]
+  
   const dist = distanceFromTo(e, playerPos)
 
   if (dist > 10) return //distant enemies just stand there
@@ -1176,7 +1225,7 @@ function moveEnemy(e) {
     return
   }
 
-  for(let dir of options) {
+  for(let dir of dirsList) {
     const newPos = move(e, dir)
     const score = distanceFromTo(newPos, playerPos)
     if (cellIsEmpty(newPos)) {
