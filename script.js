@@ -164,7 +164,7 @@ function deriveMaxHpAndSp() {
   playerStats.maxHp = 15 + Math.floor(playerStats.end/2)*playerStats.level
   playerStats.maxSp = Math.floor((playerStats.int*3)/5)*playerStats.level
   if (playerStats.hp > playerStats.maxHp) playerStats.hp = playerStats.maxHp
-  if (playerStats.sp > playerStats.maxSp) playerStats.sp = playerStats.mapSp
+  if (playerStats.sp > playerStats.maxSp) playerStats.sp = playerStats.maxSp
 }
 
 function makeMap() {
