@@ -128,7 +128,7 @@ for (var i = 0; i < potionEnemyCount/2; i++) {
 
 //bosses
 enemyType.push({tileSet:0, sprite:4, maxHp:40, speed:2, defence: 3, power:8, boss:0, name: "Super Canbion", desc:"It shuffles back and forth"})
-enemyType.push({tileSet:0, sprite:1, maxHp:20, speed:7, defence: 3, power:5, boss:1, name: "Super Killer Prawn", desc:"It sees you and snarls"})
+enemyType.push({tileSet:1, sprite:1, maxHp:20, speed:7, defence: 3, power:5, boss:1, name: "Super Killer Prawn", desc:"It sees you and snarls"})
 enemyType.push({tileSet:2, sprite:4, maxHp:30, speed:2, defence: 3, power:6, boss:2, name: "Super Earthstar", desc:"It stares expectantly"})
 enemyType.push({tileSet:3, sprite:1, maxHp:5, speed:7, defence: 3, power:3, boss:3, name: "Super Triffid", desc:"It smells angry"})
 
