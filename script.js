@@ -715,15 +715,7 @@ function draw3D(viewX, viewY, viewSize, dir) {
           const pixelWidth = (viewXCentre - behindSize/2 + (j+1)*behindSize) - (left+size)
           drawWall(tCtx, tileSet, left+size, top, pixelWidth, size, behindSize)
         }
-      }
-    }
-    //draw fronts and enemies
-    for (let j of across) {
-      const cellPos = viewCellPos(playerPos, dir, i, j)
-      const cell = cellAt(cellPos)
-      if (cell == 0) {
-        const left = viewXCentre - size/2 + j*size
-        const top = viewYCentre - size/2
+        //front
         tCtx.drawImage(spriteImage, 0, 256*tileSet, 256, 256, left, top, size, size)
       } else {
         {
