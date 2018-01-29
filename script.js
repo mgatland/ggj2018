@@ -48,20 +48,23 @@ spellNames.push({name:"Transmission", desc:"Detect the mind waves of a Shadow Gu
 spellNames.reverse()
 
 const spriteImage = new Image()
-spriteImage.src = 'sprites.png'
 spriteImage.addEventListener('load', function() {
   loaded = true
-
-  var font = new FontFaceObserver('dysin4mation', {});
-
-  font.load().then(function () {
-    console.log('Font is available');
+  console.log("sprites loaded")
+  if (state==states.colorPicker) {
     restart()
-  }, function () {
-    console.log('Font is not available');
-    restart()
-  });
+  }
+  draw()
 }, false)
+
+var font = new FontFaceObserver('dysin4mation', {});
+font.load().then(function () {
+  console.log('Font is available');
+  showColorPicker()
+}, function () {
+  console.log('Font is not available');
+  showColorPicker()
+});
 
 let rngSeed = 1;
 function random() {
@@ -77,7 +80,7 @@ function trueRnd(n) {
   return Math.floor(Math.random() * n)
 }
 
-const states = { main:"main", dead:"dead", start:"start", town:"town", healer:"healer", foundSomething:"foundSomething", spellNotes:"spellNotes" }
+const states = { main:"main", dead:"dead", start:"start", town:"town", healer:"healer", foundSomething:"foundSomething", spellNotes:"spellNotes", colorPicker:"colorPicker"}
 let state = states.start
 
 let playerStats = {}
@@ -806,7 +809,18 @@ window.addEventListener("keyup", function (e) {
 })
 
 function doKey(keyCode) {
+
+  if (keyCode==67) {
+    nextColorMode()
+    return
+  }
+
+  if (state === states.colorPicker) {
+    doKeyColorPicker(keyCode)
+    return
+  }
   if (!loaded) return
+
   if (state === states.start) {
     if (keyCode===32) {
       state = states.main
@@ -1511,4 +1525,90 @@ function drawBoss(sX, sY, left, top, size) {
     var dy = top
     tCtx.drawImage(img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
   }
+}
+
+const colorModes = []
+let colorMode = 0
+addColorMode("High-Res VGA", "", "256")
+addColorMode("High-Res EGA", "-ega", " 16")
+addColorMode("High-Res CGA", "-cga", "  4")
+addColorMode("Super High-Res VGA", "-svga", " 16")
+addColorMode("classic", "-moraff", " 16")
+
+function addColorMode(name, fileName, colors, res) {
+  colorModes.push({name:name, fileName:fileName, colors:colors, res:"1024 x 768"})
+}
+
+const mfYellow = "#FFAA01"
+const mfOrange = "#FF5500"
+const mBlue = "#00AAFF"
+function showColorPicker() {
+  state = states.colorPicker
+  const pipeWidth = 13.2
+  ctx.fillStyle = "black"
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+  ctx.fillStyle=mfYellow
+  ctx.font
+  const me = {}
+  ctx.font=mediumFont
+  me.lineHeight = 21
+  me.x = 4
+  me.y = me.lineHeight
+  function print(text, lineBreak, xOff) {
+    if (text) {
+      ctx.fillText(text, me.x + (xOff ? xOff : 0), me.y)
+    }
+    if (lineBreak !== false) me.y += me.lineHeight
+  }
+  print("This Mattheware Game Can Be Played In " + colorModes.length + " Different Video Modes:")
+  print()
+  let pipeY = me.y
+  ctx.fillText("╔═══════╦════╦════════════════════════╗", me.x+pipeWidth*3, pipeY)
+  pipeY += me.lineHeight * 2
+  ctx.fillText("╔═╬═══════╬════╬════════════════════════╣", me.x, pipeY)
+  pipeY += me.lineHeight * 2
+  for(var i = 0; i < Math.floor(colorModes.length/2); i++) {
+    ctx.fillText("║", me.x+pipeWidth*0, pipeY)
+    ctx.fillText("║", me.x+pipeWidth*3, pipeY)
+    ctx.fillText("║", me.x+pipeWidth*15, pipeY)
+    ctx.fillText("║", me.x+pipeWidth*23-6.5, pipeY)
+    ctx.fillText("║", me.x+pipeWidth*60-0.2, pipeY)
+    pipeY += me.lineHeight * 2
+    ctx.fillStyle=mfYellow
+  }
+  ctx.fillText("╚═╩═══════╩════╩════════════════════════╝", me.x, pipeY)
+  print()
+  print("      RESOLUTION    COLORS   DESCRIPTION")
+  print()
+  for(var i = 0; i < colorModes.length; i++) {
+    print("  "+(i+1) + ") ", false)
+    ctx.fillStyle=mfOrange
+    print(colorModes[i].res, false, 70)
+    print(colorModes[i].colors, false, 230)
+    print(colorModes[i].name, false, 330)
+    ctx.fillStyle=mfYellow
+    print()
+  }
+  print()
+  ctx.fillStyle = mBlue
+  print("Select Video Mode You Want by Entering One of the Above Values:")
+  print()
+  print("(Press C At Any Time To Change Video Mode In-Game. This Requires A Newer Graphics Adapter!)")
+}
+
+function doKeyColorPicker(keyCode) {
+ const mode = keyCode - 49
+ if (mode >= 0 && mode < colorModes.length) {
+  setColorMode(mode)
+ }
+}
+
+function setColorMode(mode) {
+  loaded = false
+  spriteImage.src =  'sprites' + colorModes[mode].fileName + '.png'
+  colorMode = mode
+}
+
+function nextColorMode() {
+  setColorMode((colorMode+1)%colorModes.length)
 }
