@@ -965,7 +965,7 @@ function castWaves() {
   clearMessages()
   const e = getPlayerTarget()
   if (e == undefined) {
-    playerCombatMessage.push("This spell requires a target")
+    playerCombatMessage.push("That spell requires a target")
     draw()
   } else if (trySpendSp(2)) {
     hitMonster(trueRnd(15)+15, e, "You emit waves of energy!")
@@ -1017,6 +1017,11 @@ function bossDistText(n) {
 }
 
 function trySpendSp(n) {
+  if (!playerStats.spellKnown[n-1]) {
+    playerCombatMessage.push("You don't know that spell yet!")
+    draw()
+    return false
+  }
   if (playerStats.sp < n) {
     playerCombatMessage.push("You need more Spell Points for that")
     draw()
