@@ -34,10 +34,10 @@ definitely:
 maybe:
 [ ] announce when on boss level
 [ ] draw order - a ladder is drawn before a wall that should be closer
+[ ] interesting enemies - i.e. a slow one with lots of health, a poison one
 [ ] let the player dig downwards (if they get stuck)
 [ ] end game victory - the potplant
 [ ] fog of war
-[ ] bosses
 
 unlikely:
 [ ] cryptocurrencies
