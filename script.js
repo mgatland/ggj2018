@@ -32,12 +32,13 @@ let townMessage = []
 let flipped = false
 
 const spellNames = []
+// see enemies on map | no fog of war
 spellNames.push({name:"We are together", fullName:"As long as we have each other, we will never run out of problems", desc:"Does nothing"}) //instakill
 spellNames.push({name:"Deception", desc:"Does nothing"}) // enemies stop hunting you
 spellNames.push({name:"Extinction", desc:"Does nothing"}) //destroy all enemies of this type (op?)
 spellNames.push({name:"Ouroboros", desc:"Does nothing"}) //enemy attacks itself
 spellNames.push({name:"Heartbeat", desc:"Heals exactly 10 health points per level"}) //(todo: heal over time for a time)
-spellNames.push({name:"See things as we are", fullName: "We don't see things as they are, we see them as we are.", desc:"Does nothing"}) // see enemies on map
+spellNames.push({name:"See things as we are", fullName: "We don't see things as they are, we see them as we are.", desc:"Disguise yourself as a monster for a short time. Monsters will ignore you, unless you provoke them."})
 spellNames.push({name:"What do we do now?", desc:"Teleport to a random position on this level.", desc2:"If a Shadow Guardian is present, it will draw you closer!"}) //teleport
 spellNames.push({name:"Ritual", desc:"Heals up to 10 health points per level"}) //heal (small)
 spellNames.push({name:"Waves", desc:"Deals 15-30 health points of damage"}) //damage
@@ -369,6 +370,10 @@ function draw() {
     ctx.fillText(`Arrow keys move and attack. Spacebar to wait.`, x, y);  y+=lineHeight
     if (anyAtPos(laddersUp, playerPos) || anyAtPos(laddersDown, playerPos)) {
       ctx.fillText(`[d] or [u] to go down or up a ladder.`, x, y);  y+=lineHeight
+    }
+    y+=lineHeight
+    if (playerStats.seeThingsSpellTimer > 0) {
+      ctx.fillText(`Spell effect: disguised (${playerStats.seeThingsSpellTimer})`, x, y);  y+=lineHeight
     }
   }
 
@@ -895,7 +900,7 @@ function doKey(keyCode) {
     case 50: castWaves(); break //2
     case 51: castRitual(); break //3
     case 52: castWhatDo(); break //4
-    case 53:  break //5
+    case 53: castSeeThings(); break //5
     case 54: castHeartbeat(); break //6
     case 48: //0
 
@@ -914,6 +919,18 @@ function castHeartbeat() {
     playerStats.hp = Math.min(playerStats.hp + amount, playerStats.maxHp)
     playerCombatMessage.push(`You focus on your heart,`)
     playerCombatMessage.push(`healing ${amount} health points.`)
+    monsterCombatTurn()
+    draw()
+  }
+}
+
+function castSeeThings() {
+  if (!inGame()) return
+  clearMessages()
+  if (trySpendSp(5)) {
+    playerCombatMessage.push(`What if we are all monsters?`)
+    playerCombatMessage.push(`You pretend to fit in.`)
+    playerStats.seeThingsSpellTimer = 15
     monsterCombatTurn()
     draw()
   }
@@ -1240,6 +1257,11 @@ function playerDamageRoll() {
 
 function timePasses()
 {
+  if (playerStats.seeThingsSpellTimer > 0) {
+    playerStats.seeThingsSpellTimer--
+    draw()
+    return
+  }
   const amount = playerMoveTime()
   for (let e of enemies) {
     passTimeForEnemy(amount, e)
