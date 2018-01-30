@@ -18,7 +18,7 @@ let fontLineHeightScale = 0.6
 
 const audios = []
 let currentAudio = undefined
-const audioCount = 2 //repeat after this many tracks
+const audioCount = 4 //repeat after this many tracks
 
 const tempCanvas = document.createElement("canvas")
 const tCtx = tempCanvas.getContext("2d")
