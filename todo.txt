@@ -38,34 +38,30 @@ definitely:
 	- it should probaly cost a little more
 [x] add music (sergio fb chat)
 [x] no looping below bottom of dungeon
-
-[ ] end game victory - the potplant
+[x] end game victory - the potplant
 [x] clues
+[x] spells unlock too fast - sergio ++++
+	could unlock at 1/2 the rate
 
-[ ] spells unlock too fast - sergio ++++
-	could unlock at 1/2 or 1/3 the rate (make it less random)
 [ ] pits
-
-[ ] announce when on boss level
 [ ] better spells
-[ ] mute button
-
-
 
 [ ] Get out of trouble spells must be: the cheaper the worse. 
-[ ] Waves or what do we do now should be an instant drop downwards! Cheap escape 
+[ ] Waves or what do we do now could be an instant drop downwards - its' cheap but risky
+	expensive powers should deal with multiple encounters
+	i.e. boost a stat for 20 turns, slowly regenerate health, resist disease for a while
 	Power to disable one enemy only | Power to disable all enemies 
-	Poison as a countdown to get to the surface - or cast cure poison, it's a tough decision
-	Ascent spell is too good if you can use in combat (get out of any trouble instantly)
+	Poison as a countdown to get to the surface - do i run or cast cure poison, it's a tough decision
+	Ascend spells are too good if you can use in combat (get out of any trouble instantly)
 
 [ ] poison - sporangium, bee, trash?
 
 [ ] fog of war
 [ ] full screen map
-[ ] health drops from monsters (makes healing spell more debatable)
+[ ] health drops from monsters (makes using a healing spell more debatable)
 [ ] move enemies when you fall onto them from a ladder - sergio (is right)
-iron giant level 4 - v slow, i got 6 attacks and killed it before it fought back. ok?
-[ ] everything here (water level) is a bit slow imo - should be 1/2 player speed on average. some things should be faster
+iron giant level 4 - v slow, i got 6 attacks and killed it before it fought back. ok? could it have more health so it gets a hit off
+[ ] everything this deep is a bit slow imo - some enemies should be as fast as the player
 
 spell thoughts:
 i only use healing - matt
@@ -74,16 +70,10 @@ sergio wants instant death resistance
 [ ] the damage spell should be strong enough to get you out of a tough situation
 [ ] seeing monsters on map would be a useful power
 [ ] invisibility and teleport kinda solve the same problem?
-	we need spells that don't all solve the same problem!
-	maybe have some prep spells vs combat spells
-	an ascend spell would be useful, but shouldn't work in combat or it trumps combat spells
-	defeat 1 monster vs defeat many monsters at more risk
 	resist specific attacks - poison, ice
 	waves - temporarily upgrade speed, that's versatile (and different from invisibility)
-
 [ ] health go red when low?!
 [ ] let the player dig downwards (if they get stuck) (we've never needed this)
-[ ] more spells
 [ ] save the game (local storage)
 
 unlikely:

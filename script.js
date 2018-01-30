@@ -167,7 +167,7 @@ function restart() {
   state = states.start
   playerStats = {speed:10, strength: 10, luck: 10, int:10, end:10, 
                   level:1, sp:0, maxSp:0, hp:0, maxHp:0, exp:0, gold: 50, age:22,
-                  surprise:[]}
+                  surprise:[], kills:0}
   deriveMaxHpAndSp()
   playerStats.hp = playerStats.maxHp
   playerStats.sp = playerStats.maxSp
@@ -1480,6 +1480,7 @@ function hitMonster(damage, e, text)
     playerCombatMessage.push("It takes " + damage + " points of damage!")
   } else {
     playerStats.exp += e.exp
+    playerStats.kills++
     state = states.foundSomething
     if (e.gold > 0) {
       playerStats.surprise.push({type:"gold", amount:e.gold})
@@ -1493,7 +1494,7 @@ function hitMonster(damage, e, text)
     } else {
       playerCombatMessage.push("You killed it!")
       playerCombatMessage.push("You found... (PRESS ANY KEY)")
-      if (rnd(100) < 10) {
+      if (rnd(100) < 5) {
         playerStats.surprise.push({type:"spell"})
       }
     }
