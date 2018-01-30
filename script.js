@@ -166,7 +166,7 @@ const laddersDown = []
 function restart() {
   state = states.start
   playerStats = {speed:10, strength: 10, luck: 10, int:10, end:10, 
-                  level:1, sp:0, maxSp:0, hp:0, maxHp:0, exp:0, gold: 50, age:22,
+                  level:1, sp:0, maxSp:0, hp:0, maxHp:0, exp:0, gold: 50, age:startAge(),
                   surprise:[], kills:0}
   deriveMaxHpAndSp()
   playerStats.hp = playerStats.maxHp
@@ -598,13 +598,14 @@ function draw() {
     let y = viewSizeY + 50
     const lineHeight = 30
     drawMedium("Life in the citadel is hard but fair.", centerX, y); y += lineHeight
-    drawMedium("There is only enough air for one thousand and twenty-two people.", centerX, y); y += lineHeight
+    //works up to 1099
+    drawMedium(`There is only enough air for one thousand and ${numberToWords.toWords(12+getPeopleSaved())} people.`, centerX, y); y += lineHeight
     drawMedium("When a baby is born, the oldest citizen is sent into the Depths.", centerX, y); y += lineHeight
     y += lineHeight
     drawMedium("Today is your turn to be exiled.", centerX, y); y += lineHeight
     y += lineHeight
     drawMedium("You have 50 coins and know 1 spell.", centerX, y); y += lineHeight
-    drawMedium("You are 22 years old.", centerX, y); y += lineHeight
+    drawMedium(`You are ${startAge()} years old.`, centerX, y); y += lineHeight
     drawMedium(" Good luck!", centerX, y); y += lineHeight
     drawMedium("", centerX, y); y += lineHeight
     drawMedium("", centerX, y); y += lineHeight
@@ -1935,3 +1936,16 @@ addFloorMsg(11, floorMsg[5])//repeats
 addFloorMsg(1000, ["\"You killed us all...","Now our shadow magic","is gone. Anyone can find","and steal our Oxygen","Generator from the","lowest level of the","dungeon.\""])
 addFloorMsg(1001, ["The Oxygen Generator","Is Yours! Now Your","People Will Let You","Return Home And Live","Out Your Years."])
 addFloorMsg(1002, ["\"You bring us an Oxygen","generator! As thanks,","you may live out your","days in the citadel.\"","","No! you say. Give my","place to another."])
+
+function getPeopleSaved() {
+  var out = parseInt(localStorage.getItem("peopleSaved"));
+  if (isNaN(out)) return 0;
+  return out
+}
+
+function saveSomeone() {
+  localStorage.setItem('peopleSaved', getPeopleSaved()+1);
+}
+function startAge() {
+  return 22 + getPeopleSaved()
+}
