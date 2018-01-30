@@ -291,10 +291,10 @@ function makeEnemies() {
     enemies = storedEnemies[depth]
     storedEnemies[depth] = undefined
     //spawn more if there aren't many left
-    times(250-enemies.length, makeEnemy)
+    times(180-enemies.length, makeEnemy)
   } else {
     enemies.length = 0
-    times(400+depth*30, makeEnemy)
+    times(280+depth*30, makeEnemy)
     maybeGenerateBoss()
   }
   
