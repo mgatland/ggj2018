@@ -1331,6 +1331,12 @@ function firstTimeOnLevel() {
 function loadAudio(tileSet) {
   if (audios[tileSet]===undefined) {
     audios[tileSet] = new Audio((tileSet % audioCount) + '.mp3');
+    audios[tileSet].addEventListener('timeupdate', function(){
+      var buffer = .5
+      if(this.currentTime > this.duration - buffer){
+          this.currentTime = 0
+          this.play()
+      }}, false);
     audios[tileSet].loop = true
     audios[tileSet].volume = 0.2;
   }  
