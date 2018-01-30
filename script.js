@@ -1548,7 +1548,7 @@ function hitMonster(damage, e, text)
     } else {
       playerCombatMessage.push("You killed it!")
       playerCombatMessage.push("You found... (PRESS ANY KEY)")
-      if (rnd(100) < 5) {
+      if (playerStats.kills / 10 > playerStats.spellKnown.filter(i => i === true).length && rnd(100) < 15) {
         playerStats.surprise.push({type:"spell"})
       }
     }
