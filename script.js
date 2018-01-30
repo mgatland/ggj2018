@@ -472,6 +472,8 @@ function draw() {
   }
   draw3D(col2X, 0, viewSize, playerPos.dir)
 
+  drawLadderPopups(col2X, 0, viewSize, viewSizeY)
+
   const ahead = move(playerPos, playerPos.dir)
   const target = enemyAt(ahead)
 
@@ -712,6 +714,35 @@ function drawTitle(text, x, y) {
   }
   ctx.fillStyle=getColors().textColor
   ctx.fillText(text, x, y)
+}
+
+const popupWidth = 120
+const popupHeight = Math.floor(popupWidth*0.7)
+function drawLadderPopups(x,y,width,height) {
+  if (!state === states.main) return
+
+  const topPos = y + 20
+  const bottomPos = y + height - popupHeight - 20
+  let already = false
+  if (anyAtPos(laddersDown, playerPos)) {
+    drawPopup(x+40,bottomPos,"HIT D TO","GO DOWN")
+    already = true
+  }
+  if (anyAtPos(laddersUp, playerPos)) {
+    drawPopup(x+40,already ? topPos: bottomPos," HIT 'U'","TO GO UP")
+    already = true
+  }
+}
+
+function drawPopup(x,y,text1,text2)
+{
+  ctx.fillStyle="black"
+  ctx.fillRect(x,y,popupWidth, popupHeight)
+  ctx.fillStyle = getColors().textColor
+  ctx.font=mediumFont
+  ctx.fillText(text1, x+20, y+35)
+  ctx.fillText(text2, x+20, y+65)
+  drawBorder(x, y, popupWidth, popupHeight)
 }
 
 function getMainWindowTextTool() {
