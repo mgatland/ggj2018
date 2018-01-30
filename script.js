@@ -1363,10 +1363,10 @@ function firstTimeOnLevel() {
 
 function loadAudio(tileSet) {
   if (audios[tileSet]===undefined) {
-    audios[tileSet] = new Audio((tileSet % audioCount) + '.mp3');
+    audios[tileSet] = new Audio((tileSet % audioCount) + '.ogg');
     audios[tileSet].loop = true
     audios[tileSet].volume = 0.2;
-    audios[tileSet+audioCount] = new Audio((tileSet % audioCount) + '.mp3');
+    audios[tileSet+audioCount] = new Audio((tileSet % audioCount) + '.ogg');
     audios[tileSet+audioCount].loop = true
     audios[tileSet+audioCount].volume = 0.2;
   }  
