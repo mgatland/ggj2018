@@ -1771,7 +1771,7 @@ function hitPlayer(amount)
 }
 
 function healCost(amount) {
-  return 15 + playerStats.level*2 + amount * 4 * Math.floor(1 + playerStats.level*0.1)
+  return Math.floor(14 + playerStats.level*2 + amount * 2.5 * (1 + playerStats.level*0.4))
 }
 
 function specialHitEffect(effect) {
