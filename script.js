@@ -36,6 +36,8 @@ let enemyCombatMessage = []
 let townMessage = []
 let flipped = false
 
+let endState = "" //hack for spawning final treasure
+let endRuns = 0
 const spellNames = []
 // see enemies on map | no fog of war
 spellNames.push({name:"We are together", fullName:"As long as we have each other, we will never run out of problems", desc:"Does nothing"}) //instakill
@@ -148,6 +150,7 @@ enemyType.push({tileSet:0, sprite:4, end:6, speed:2, defence: 3, power:8, boss:0
 enemyType.push({tileSet:1, sprite:1, end:7, speed:6, defence: 3, power:9, boss:1, name: "Shadow Prawn", desc:"It demands blood for its barbequed brethren"})
 enemyType.push({tileSet:2, sprite:4, end:8, speed:2, defence: 3, power:10, boss:2, name: "Moonstar", desc:"Its gaze crosses dimensions"})
 enemyType.push({tileSet:3, sprite:1, end:9, speed:5, defence: 4, power:12, boss:3, name: "Audrey IV", desc:"It fights as if protecting its kin"})
+enemyType.push({tileSet:3, sprite:5, end:0, speed:0, defence: 0, power:0, boss:4, isItem:true, name: "Oxygen Generator", desc:"This is it!!!"})
 
 //information you would save
 let playerPos = {}
@@ -171,7 +174,7 @@ function restart() {
   playerPos = {x: 48, y: 21, dir: dirs.right}
   playerStats.spellKnown = [true,false,false,false,false,false,false,false,false,false]
   playerStats.bossesKilled = [false, false, false, false]
-  playerStats.levelsVisited = [0]
+  playerStats.levelsVisited = []
 
   clearMessages()
   storedEnemies.length = 0
@@ -186,8 +189,12 @@ function deriveMaxHpAndSp() {
   if (playerStats.sp > playerStats.maxSp) playerStats.sp = playerStats.maxSp
 }
 
+function isLastLevel() {
+  return depth >= tileSetCount*3-1
+}
+
 function makeMap() {
-  if (depth >= tileSetCount*3-1) {
+  if (isLastLevel()) {
     makeFinalMap()
     return
   }
@@ -443,8 +450,8 @@ function draw() {
     t.setFont(specialFont)
     t.y += 20
     t.lineHeight += 12
-    for (let i = 0; i < floorMsg[depth].length; i++) {
-      t.print(floorMsg[depth][i])
+    for (let i = 0; i < floorMsg[newLevelMsg].length; i++) {
+      t.print(floorMsg[newLevelMsg][i])
     }
 
     t.setFont(smallFont)
@@ -549,14 +556,36 @@ function draw() {
           ctx.fillText(`up ${msg}! Return to the top of`, x, y);  y+=lineHeight
           ctx.fillText(`the dungeon. But it will cost you!`, x, y);  y+=lineHeight
           ctx.fillStyle = getColors().textColor
-        }         
+        }
+        if (isLastLevel() && endState === "flowerHunt") {
+          const flower = enemies.find(x=>getType(x).isItem === true)
+          if (flower != undefined) {
+            const txt = bossPointText(flower.x - playerPos.x, flower.y - playerPos.y)
+            y+=lineHeight
+            ctx.fillText(`The Oxygen Generator is ${txt}!`, x, y);  y+=lineHeight
+          }
+        }
+        if (endState === "hasFlower") {
+            y+=lineHeight
+            ctx.fillText(`You have the Oxygen Generator!`, x, y);  y+=lineHeight
+            ctx.fillText(`Return to the surface!`, x, y);  y+=lineHeight
+        }
+        if (endState === "shouldSpawn") {
+            y+=lineHeight
+            ctx.fillText(`You sense an Oxygen Generator`, x, y);  y+=lineHeight
+            ctx.fillText(`on the lowest dungeon level!`, x, y);  y+=lineHeight
+        }
+        if (endRuns > 0) {
+            y+=lineHeight
+            ctx.fillText(`You helped the citadel ${endRuns} time${plural(endRuns)}.`, x, y);  y+=lineHeight 
+        }
       }
    
     }
   }
 
   if (state===states.dead) {
-    drawTitle("you have died", centerX, 100)
+    drawTitle("You have died", centerX, 100)
     drawMedium("Press R to restart", centerX, viewSizeY - 20)
     ctx.textAlign="left"
   }
@@ -1005,6 +1034,10 @@ function doKey(keyCode) {
           deriveMaxHpAndSp()
           break
         }
+        //killed final boss, change state but AFTER screen redraw
+        if (!playerStats.bossesKilled.some(x=>x===false)) {
+          endState="showMessage"
+        }
       }
       if (thing.type==="spell") {
         var spellToGet = playerStats.spellKnown.indexOf(false)
@@ -1057,6 +1090,24 @@ function doKey(keyCode) {
     case 48: //0
 
   }
+}
+
+function cheatToBoss() {
+  let nextBossLevel = 2+playerStats.bossesKilled.indexOf(false)*3
+  changeLevelTo(nextBossLevel)
+  const boss = enemies.find(x=>getType(x).boss != undefined)
+  playerPos.x = boss.x + 1
+  playerPos.y = boss.y
+  playerStats.hp = 9999
+  playerStats.strength = 9999
+  playerStats.mp = 9999
+}
+
+function cheatLastBoss() {
+  playerStats.bossesKilled[1]=true
+  playerStats.bossesKilled[2]=true
+  playerStats.bossesKilled[3]=true
+  cheatToBoss()
 }
 
 function getPlayerTarget() {
@@ -1180,10 +1231,14 @@ function isBossLevel(n) {
 }
 
 function bossDistText(n) {
-  const s = (n == 1 || n == -1) ? "" : "s"
+  const s = plural(n)
   const amount = Math.abs(n)
   const dir = (n > 0) ? "below" : "above"
   return amount + " level" + s + " " + dir 
+}
+
+function plural(n) {
+  return (n == 1 || n == -1) ? "" : "s"
 }
 
 function trySpendSp(n) {
@@ -1252,15 +1307,23 @@ function changeLevelTo(newLevel)
   loadAudio(preLoadTileSet)
   makeMap()
   if (playerStats.levelsVisited.indexOf(newLevel)==-1) {
+    playerStats.levelsVisited.push(newLevel)
     firstTimeOnLevel(newLevel)
   }
-  playerStats.levelsVisited.push(newLevel)
+  if(depth==0 && endState === "hasFlower") {
+    //win message
+    endState = "shouldSpawn"
+    state = states.newLevel
+    newLevelMsg=1002
+    endRuns++
+  }
   draw()
 }
 
 function firstTimeOnLevel() {
   if (floorMsg[depth] != undefined) {
     state = states.newLevel
+    newLevelMsg = depth
   }
 }
 
@@ -1407,6 +1470,10 @@ function monsterAttack(e) {
 
 function hitMonster(damage, e, text)
 {
+  if (getType(e).isItem) {
+    hitItem(e)
+    return
+  }
   e.hp -= damage
   if (e.hp > 0) {
     playerCombatMessage.push(text == undefined ? "You hit the monster!" : text)
@@ -1433,6 +1500,14 @@ function hitMonster(damage, e, text)
   }
 }
 
+//hack for final flower
+function hitItem(e) {
+  e.hp=0
+  endState = "hasFlower"
+  newLevelMsg = 1001 //special end message
+  state = states.newLevel
+}
+
 function cleanDeadEnemies() {
   for (let i = 0; i < enemies.length; i++) {
     if (enemies[i].hp <= 0) {
@@ -1448,6 +1523,7 @@ function playerDamageRoll() {
 
 function timePasses()
 {
+
   if (playerStats.seeThingsSpellTimer > 0) {
     playerStats.seeThingsSpellTimer--
     draw()
@@ -1457,11 +1533,26 @@ function timePasses()
   for (let e of enemies) {
     passTimeForEnemy(amount, e)
   }
+  checkEndState()
   draw()
+}
+
+function checkEndState() {
+  if (endState == "shouldSpawn" && isLastLevel()) {
+    endState = "flowerHunt"
+    makeEnemy(bossEnemyStartCount+tileSetCount)
+  }
+  if (endState === "showMessage") {
+    state = states.newLevel
+    newLevelMsg = 1000
+    endState = "shouldSpawn"
+    return
+  }
 }
 
 function passTimeForEnemy(amount, e)
 {
+  if (getType(e).isItem) return
   if (e.timer == undefined) e.timer = 0
     e.timer += amount
     const et = getType(e)
@@ -1827,9 +1918,11 @@ Random.prototype.nextFloat = function (opt_minOrMax, opt_max) {
 };
 
 const floorMsg = []
+let newLevelMsg = -1
 function addFloorMsg(n, list) {
     floorMsg[n]=list
 }
+//HEY if you're rewriting these, set the floor number 0 for testing - it will show as soon as you start the game.
 addFloorMsg(1, ["A Little Snake Says:","    \"Such a Shame You","Had to Leave Home! ","There might be a way","to Get Back... But You","Don't Look Tough","Enough!\""])
 addFloorMsg(2, ["A Note:", "    \"Find Me On","This Level! I Have a","Crush on You! Or, Will","I Crush You? Puns Aside,","You Are Doomed.\"","- The Shadow Guardian"])
 addFloorMsg(3, ["A Little Snake Says:","    \"If You Can Find An","Oxygen Generator, You","Will Be Welcomed Back","Home At The Citidel!\"","But It Won't Be Easy.\""])
@@ -1837,3 +1930,7 @@ addFloorMsg(4, ["A Little Snake Says:", "    \"The Four Shadow","Guardians Prote
 addFloorMsg(5, ["A Little Snake Says:", "    \"A Shadow Guardian","Dwells On This Level!","Hunting Them Is Your","Ticket Out Of Here!","But Be Careful!\""])
 addFloorMsg(8, floorMsg[5])//repeats
 addFloorMsg(11, floorMsg[5])//repeats
+//special
+addFloorMsg(1000, ["\"You killed us all...","Now our shadow magic","is gone. Anyone can find","and steal our Oxygen","Generator from the","lowest level of the","dungeon.\""])
+addFloorMsg(1001, ["The Oxygen Generator","Is Yours! Now Your","People Will Let You","Return Home And Live","Out Your Years."])
+addFloorMsg(1002, ["\"You bring us an Oxygen","generator! As thanks,","you may live out your","days in the citadel.\"","","No! you say. Give my","place to another."])
