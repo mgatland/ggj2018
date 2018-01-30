@@ -556,7 +556,7 @@ function draw() {
   }
 
   if (state===states.dead) {
-    drawTitle("YOU HAVE DIED", centerX, 100)
+    drawTitle("you have died", centerX, 100)
     drawMedium("Press R to restart", centerX, viewSizeY - 20)
     ctx.textAlign="left"
   }
