@@ -19,6 +19,7 @@ let fontLineHeightScale = 0.6
 const audios = []
 let currentAudio = undefined
 const audioCount = 4 //repeat after this many tracks
+const audioDuration = [999,999,999,999]
 
 const tempCanvas = document.createElement("canvas")
 const tCtx = tempCanvas.getContext("2d")
@@ -1331,16 +1332,22 @@ function firstTimeOnLevel() {
 function loadAudio(tileSet) {
   if (audios[tileSet]===undefined) {
     audios[tileSet] = new Audio((tileSet % audioCount) + '.mp3');
-    audios[tileSet].addEventListener('timeupdate', function(){
-      var buffer = .5
-      if(this.currentTime > this.duration - buffer){
-          this.currentTime = 0
-          this.play()
-      }}, false);
     audios[tileSet].loop = true
     audios[tileSet].volume = 0.2;
   }  
 }
+//hack to loop better
+function audioTick() {
+  if (currentAudio != undefined) {
+    const audio = audios[currentAudio]
+    if (!audio.paused && audio.currentTime > audioDuration[currentAudio]) {
+      audio.currentTime = 0
+      audio.play()
+    }
+  }
+  window.requestAnimationFrame(audioTick)
+}
+window.requestAnimationFrame(audioTick)
 
 function playAudio(tileSet) {
   if (currentAudio==tileSet) return
