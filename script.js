@@ -1334,15 +1334,23 @@ function loadAudio(tileSet) {
     audios[tileSet] = new Audio((tileSet % audioCount) + '.mp3');
     audios[tileSet].loop = true
     audios[tileSet].volume = 0.2;
+    audios[tileSet+audioCount] = new Audio((tileSet % audioCount) + '.mp3');
+    audios[tileSet+audioCount].loop = true
+    audios[tileSet+audioCount].volume = 0.2;
   }  
 }
 //hack to loop better
 function audioTick() {
   if (currentAudio != undefined) {
     const audio = audios[currentAudio]
-    if (!audio.paused && audio.currentTime > audioDuration[currentAudio]) {
-      audio.currentTime = 0
-      audio.play()
+    if (!audio.paused && audio.currentTime > audioDuration[currentAudio%audioCount]) {
+      audio.pause()
+      audio.currentTime=0
+      const newTrack = (currentAudio+audioCount)%(audioCount*2)
+      audios[newTrack].play()
+      console.log("now playing " + newTrack + " from " + currentAudio)
+      currentAudio=newTrack
+
     }
   }
   window.requestAnimationFrame(audioTick)
@@ -1350,7 +1358,8 @@ function audioTick() {
 window.requestAnimationFrame(audioTick)
 
 function playAudio(tileSet) {
-  if (currentAudio==tileSet) return
+  console.log("play")
+  if (currentAudio==tileSet||((currentAudio+audioCount)%audioCount*2)==tileSet) return
   if (currentAudio != undefined) {
     audios[currentAudio].pause()
     audios[currentAudio].currentTime = 0;
