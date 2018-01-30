@@ -23,4 +23,10 @@ canvas {
 	format('truetype');
 }
 
-
+@font-face {
+	font-family: "Wizard's Manse";
+	src: 
+	local("Wizard's Manse"),
+	url('wizards-manse.otf')
+	format('opentype');
+}

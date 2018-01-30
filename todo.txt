@@ -39,12 +39,16 @@ definitely:
 [x] add music (sergio fb chat)
 [x] no looping below bottom of dungeon
 
+[ ] end game victory - the potplant
+[ ] clues
+
 [ ] spells unlock too fast - sergio ++++
 	could unlock at 1/2 or 1/3 the rate (make it less random)
 [ ] pits
+
 [ ] announce when on boss level
 [ ] better spells
-
+[ ] mute button
 
 
 
@@ -55,7 +59,7 @@ definitely:
 	Ascent spell is too good if you can use in combat (get out of any trouble instantly)
 
 [ ] poison - sporangium, bee, trash?
-[ ] end game victory - the potplant
+
 [ ] fog of war
 [ ] full screen map
 [ ] health drops from monsters (makes healing spell more debatable)

@@ -12,7 +12,8 @@ ctx.imageSmoothingEnabled = false
 let smallFont = "24px \"dysin4mation\", monospace"
 let mediumFont = "36px \"dysin4mation\", monospace"
 let largeFont = "48px \"dysin4mation\", monospace"
-let headingFont = "96px \"dysin4mation\", monospace"
+let headingFont = "96px \"Wizard's Manse\", monospace"
+let specialFont = "64px \"Wizard's Manse\", monospace"
 let fontLineHeightScale = 0.6
 
 const audios = []
@@ -59,6 +60,7 @@ spriteImage.addEventListener('load', function() {
   draw()
 }, false)
 
+
 //start preloading
 loadAudio(0)
 var font = new FontFaceObserver('dysin4mation', {});
@@ -69,6 +71,8 @@ font.load().then(function () {
   console.log('Font is not available');
   showColorPicker()
 });
+var font2 = new FontFaceObserver('Wizard\'s Manse', {});
+font2.load()
 
 let fixedRandom  = new Random(1);
 
@@ -80,7 +84,10 @@ function trueRnd(n) {
   return Math.floor(Math.random() * n)
 }
 
-const states = { main:"main", dead:"dead", start:"start", town:"town", healer:"healer", foundSomething:"foundSomething", spellNotes:"spellNotes", colorPicker:"colorPicker"}
+const states = { main:"main", dead:"dead", start:"start", 
+  town:"town", healer:"healer", foundSomething:"foundSomething", 
+  spellNotes:"spellNotes", colorPicker:"colorPicker",
+  newLevel:"newLevel"}
 let state = states.start
 
 let playerStats = {}
@@ -164,6 +171,7 @@ function restart() {
   playerPos = {x: 48, y: 21, dir: dirs.right}
   playerStats.spellKnown = [true,false,false,false,false,false,false,false,false,false]
   playerStats.bossesKilled = [false, false, false, false]
+  playerStats.levelsVisited = [0]
 
   clearMessages()
   storedEnemies.length = 0
@@ -429,6 +437,23 @@ const centerX = Math.floor(canvas.width/2)
 const rearViewX = Math.floor(centerX-smallColWidth/2)
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+  if (state===states.newLevel) {
+    const t = getMainWindowTextTool()
+    t.setFont(specialFont)
+    t.y += 20
+    t.lineHeight += 12
+    for (let i = 0; i < floorMsg[depth].length; i++) {
+      t.print(floorMsg[depth][i])
+    }
+
+    t.setFont(smallFont)
+    t.print()
+    t.print("Press any key to close")
+
+    drawBorder(col2X, 0, viewSize, viewSizeY)
+    return //draw nothing else
+  }
   
   if (state !== states.start) {
     draw3D(col1X, smallViewY, smallColWidth, playerPos.dir.ccw)
@@ -537,9 +562,9 @@ function draw() {
   }
 
   if (state===states.start) {
-    drawTitle("MATTHEW'S", centerX, 80)
-    drawTitle("DUNGEONS OF", centerX, 80+70)
-    drawTitle("THE UNFORGIVEN", centerX, 80+70+70)
+    drawTitle("Matthew's", centerX, 80)
+    drawTitle("Dungeons of", centerX, 80+90)
+    drawTitle("the Unforgiven", centerX, 80+90+70)
     drawMedium("Press [spacebar] to start", centerX, viewSizeY - 20)
     let y = viewSizeY + 50
     const lineHeight = 30
@@ -784,9 +809,13 @@ function draw3D(viewX, viewY, viewSize, dir) {
     }
   }
   ctx.drawImage(tempCanvas, 0, 0, viewSizeX, viewSizeY, viewX, viewY, viewSizeX, viewSizeY)
+  drawBorder(viewX, viewY, viewSizeX, viewSizeY)
+}
+
+function drawBorder(viewX, viewY, viewSizeX, viewSizeY) {
   ctx.strokeStyle = getColors().border
   ctx.lineWidth = 4
-  ctx.strokeRect(viewX, viewY, viewSizeX, viewSizeY)
+  ctx.strokeRect(viewX, viewY, viewSizeX, viewSizeY)  
 }
 
 function enemyAt(cellPos)
@@ -917,7 +946,7 @@ function doKey(keyCode) {
     }
     return
   }
-  if (state === states.spellNotes) {
+  if (state === states.spellNotes || state === states.newLevel) {
     state = states.main
     draw()
     return
@@ -1222,7 +1251,17 @@ function changeLevelTo(newLevel)
   const preLoadTileSet = Math.floor((depth+1) / 3) % tileSetCount
   loadAudio(preLoadTileSet)
   makeMap()
+  if (playerStats.levelsVisited.indexOf(newLevel)==-1) {
+    firstTimeOnLevel(newLevel)
+  }
+  playerStats.levelsVisited.push(newLevel)
   draw()
+}
+
+function firstTimeOnLevel() {
+  if (floorMsg[depth] != undefined) {
+    state = states.newLevel
+  }
 }
 
 function loadAudio(tileSet) {
@@ -1754,7 +1793,7 @@ function showColorPicker() {
   print("Code - Matthew Gatland")  
   print("Music - Chimeratio")
   print()
-  print("Font: Dysin4mation by Anna Anthropy")
+  print("Fonts: Dysin4mation and Wizard's Manse by Anna Anthropy")
 }
 
 function doKeyColorPicker(keyCode) {
@@ -1786,3 +1825,15 @@ Random.prototype.nextFloat = function (opt_minOrMax, opt_max) {
   // We know that result of next() will be 1 to 2147483646 (inclusive).
   return (this.next() - 1) / 2147483646;
 };
+
+const floorMsg = []
+function addFloorMsg(n, list) {
+    floorMsg[n]=list
+}
+addFloorMsg(1, ["A Little Snake Says:","    \"Such a Shame You","Had to Leave Home! ","There might be a way","to Get Back... But You","Don't Look Tough","Enough!\""])
+addFloorMsg(2, ["A Note:", "    \"Find Me On","This Level! I Have a","Crush on You! Or, Will","I Crush You? Puns Aside,","You Are Doomed.\"","- The Shadow Guardian"])
+addFloorMsg(3, ["A Little Snake Says:","    \"If You Can Find An","Oxygen Generator, You","Will Be Welcomed Back","Home At The Citidel!\"","But It Won't Be Easy.\""])
+addFloorMsg(4, ["A Little Snake Says:", "    \"The Four Shadow","Guardians Protect An","Oxygen Generator! If","You Kill Them All, You","Can Claim It!\""])
+addFloorMsg(5, ["A Little Snake Says:", "    \"A Shadow Guardian","Dwells On This Level!","Hunting Them Is Your","Ticket Out Of Here!","But Be Careful!\""])
+addFloorMsg(8, floorMsg[5])//repeats
+addFloorMsg(11, floorMsg[5])//repeats
