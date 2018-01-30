@@ -42,6 +42,8 @@ definitely:
 [x] clues
 [x] spells unlock too fast - sergio ++++
 	could unlock at 1/2 the rate
+[x] iron giant level 4 - v slow, i got 6 attacks and killed it before it fought back. ok? could it have more health so it gets a hit off
+[x] everything this deep is a bit slow imo - some enemies should be as fast as the player - untested :/ :/
 
 [ ] pits
 [ ] better spells
@@ -60,8 +62,7 @@ definitely:
 [ ] full screen map
 [ ] health drops from monsters (makes using a healing spell more debatable)
 [ ] move enemies when you fall onto them from a ladder - sergio (is right)
-iron giant level 4 - v slow, i got 6 attacks and killed it before it fought back. ok? could it have more health so it gets a hit off
-[ ] everything this deep is a bit slow imo - some enemies should be as fast as the player
+
 
 spell thoughts:
 i only use healing - matt
