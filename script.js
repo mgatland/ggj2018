@@ -869,7 +869,7 @@ function draw3D(viewX, viewY, viewSize, dir) {
           const et = enemyType[e.type]
           const eSize = viewSizeY/(Math.pow(depthFactor,i-0.4))
           const left = viewXCentre - eSize/2 + j*eSize
-          const top = viewYCentre - eSize/2+eSize*0.2
+          const top = viewYCentre - eSize/2+eSize*0.2 + eSize*tileSetHeightAdjust()
           //draw island under some enemies
           if (tileSet==1 && et.special != undefined) {
             tCtx.drawImage(spriteImage, 256*2, 1*256, 255, 256, left, top, eSize, eSize) 
@@ -888,6 +888,12 @@ function draw3D(viewX, viewY, viewSize, dir) {
   }
   ctx.drawImage(tempCanvas, 0, 0, viewSizeX, viewSizeY, viewX, viewY, viewSizeX, viewSizeY)
   drawBorder(viewX, viewY, viewSizeX, viewSizeY)
+}
+
+let waterHeightAdjust = -0.07
+function tileSetHeightAdjust() {
+  if (tileSet===1) return waterHeightAdjust
+    return 0
 }
 
 function drawBorder(viewX, viewY, viewSizeX, viewSizeY) {
