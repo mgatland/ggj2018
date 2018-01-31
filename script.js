@@ -1595,7 +1595,7 @@ function cleanDeadEnemies() {
 }
 
 function playerDamageRoll() {
-  return rnd(5) //should be weapon power
+  return rnd(6) //should be weapon power
 }
 
 function timePasses()
