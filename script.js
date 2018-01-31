@@ -554,13 +554,12 @@ function draw() {
         //misc notices
         if (playerStats.exp >= expNeeded()) {
           y+=lineHeight
-          ctx.fillStyle = getColors().dullTextColor
+          ctx.fillStyle = getColors().textColor
           ctx.fillText(`You have enough experience to go`, x, y);  y+=lineHeight
           const amount = howManyLevelsCanIGet()
           const msg = (amount == 1) ? "a level" : amount + " levels"
           ctx.fillText(`up ${msg}! Return to the top of`, x, y);  y+=lineHeight
           ctx.fillText(`the dungeon. But it will cost you!`, x, y);  y+=lineHeight
-          ctx.fillStyle = getColors().textColor
         }
         if (isLastLevel() && endState === "flowerHunt") {
           const flower = enemies.find(x=>getType(x).isItem === true)
@@ -1875,13 +1874,12 @@ addColorMode("High-Res VGA, requires 512k RAM", "", "  256")
 addColorMode("Super High Quality, requires 2 meg RAM", "-svga", "65,536")
 
 
-function addColorMode(name, fileName, colors, textColor, dullTextColor, border, upLadder, downLadder, healer, uni) {
+function addColorMode(name, fileName, colors, textColor, mapBack, border, upLadder, downLadder, healer, uni) {
   var colorMode = {name:name, fileName:fileName, colors:colors, res:"1024 x 768",
-  textColor:textColor, dullTextColor:dullTextColor, border:border, 
+  textColor:textColor, mapBack:mapBack, border:border, 
   upLadder:upLadder, downLadder:downLadder, healer:healer, uni:uni}
   if (textColor==undefined) colorMode.textColor="white"
-  if (dullTextColor==undefined) colorMode.dullTextColor="grey"
-  colorMode.mapBack = colorMode.dullTextColor
+  if (mapBack==undefined) colorMode.mapBack="grey"
   if (border==undefined) colorMode.border="darkblue"
   if (upLadder==undefined) colorMode.upLadder="#E0E0E0"
   if (downLadder==undefined) colorMode.downLadder="grey"
