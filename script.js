@@ -336,7 +336,8 @@ function makeEnemy(fixedType) {
   enemy.defence = et.defence + Math.floor(enemy.level * et.defence / 4)
   enemy.speed = et.speed + Math.floor(enemy.level * et.speed / 4)
   enemy.power = et.power + Math.floor(enemy.level * et.power / 4)
-  enemy.exp = Math.floor(enemy.maxHp / 2 + enemy.power + enemy.defence + enemy.speed)
+  const baseExp = (et.end + et.power + et.speed + et.defence)
+  enemy.exp = baseExp * (1+enemy.level/2)
   enemy.gold = (trueRnd(100) < 25) ? trueRnd(enemy.exp) + 5 : 0
   enemies.push(enemy)
   return enemy
