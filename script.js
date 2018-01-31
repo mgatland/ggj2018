@@ -331,7 +331,7 @@ function makeEnemy(fixedType) {
   const et = getType(enemy)
   enemy.level = depth + 1 + trueRnd(2)
   if (et.boss != undefined) enemy.level += 5
-  enemy.maxHp = 5 + Math.floor(et.end/2)*enemy.level
+  enemy.maxHp = 5 + Math.floor(et.end/2*enemy.level)
   enemy.hp = enemy.maxHp
   enemy.timer = 0
   enemy.defence = et.defence + Math.floor(enemy.level * et.defence / 4)
@@ -1166,7 +1166,8 @@ function cheatLastBoss() {
 }
 
 function cheat() {
-  playerStats.hp = 9999
+  playerStats.end = 99999
+  playerStats.hp = 99999999
   playerStats.strength = 9999
   playerStats.mp = 9999
   draw()
@@ -1523,6 +1524,7 @@ function monsterAttack(e) {
   const result = attackRoll - defenceRoll
   let damage = 0
   if (result > 0) {
+    damage++ //at least 1 damage!
     times(Math.floor(result/40)+1, () => damage += rnd(e.power))
     //add bonus damage
   }
