@@ -482,6 +482,7 @@ function draw() {
     button(col2X, 0, viewSize, viewSizeY, forward)
     button(col3X, viewSizeY-smallViewSizeY, smallColWidth, smallViewSizeY, turnRight)
     button(rearViewX, viewSizeY, smallColWidth, smallViewSizeY, turnBack)
+    button(col1X, viewSizeY, canvas.width, canvas.height-viewSizeY, wait)
   }
   draw3D(col2X, 0, viewSize, playerPos.dir)
 
@@ -1032,9 +1033,7 @@ function cellIsEmpty(pos) {
 }
 
 canvas.addEventListener("click", function (e) {
-  //still to do:
-  //waiting
-  //UI help: show people where to click to wait
+  //UI help: show people where to click to wait?
   var x = e.pageX - this.offsetLeft;
   var y = e.pageY - this.offsetTop;
   console.log(x+":"+y)
@@ -1503,11 +1502,16 @@ function playAudio(tileSet) {
   currentAudio = tileSet
 }
 
+const waitMessages=["You wait.","You pause.", "You hesitate.", "You think.", "You stand there.", "You sit tight.", "You stand ready."]
 function wait() {
   if (!inGame()) return
   clearMessages()
-  
+  playerCombatMessage.push(pickRandom(waitMessages))
   timePasses()
+}
+
+function pickRandom(list) {
+  return list[trueRnd(list.length)]
 }
 
 function turnBack() {
