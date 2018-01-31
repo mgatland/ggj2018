@@ -2,7 +2,7 @@
 //DOM stuff
 const canvas = document.querySelector(".gameCanvas")
 
-let debug = false
+let debug = true
 
 const ctx = canvas.getContext('2d')
 ctx.webkitImageSmoothingEnabled = false
@@ -88,7 +88,7 @@ function trueRnd(n) {
 }
 
 const states = { main:"main", dead:"dead", start:"start", 
-  town:"town", healer:"healer", foundSomething:"foundSomething", 
+  university:"university", healer:"healer", foundSomething:"foundSomething", 
   spellNotes:"spellNotes", colorPicker:"colorPicker",
   newLevel:"newLevel"}
 let state = states.start
@@ -663,12 +663,14 @@ function draw() {
       t.print("I can heal you with my words.")
     }
     t.print()
+    button(col2X, t.y-t.lineHeight,viewSize,t.lineHeight,buyHealing,10,true)
     t.print("Press [1] to heal 10 hp for " + healCost(10))
+    button(col2X, t.y-t.lineHeight,viewSize,t.lineHeight,buyHealing,50,true)
     t.print(`Press [2] to heal 50 for ${healCost(50)}`)
-    drawPopup(false,"HIT D TO","GO BACK", down)
+    drawPopup(false,"HIT D TO","GO BACK", backToMain)
   }
 
-  if (state===states.town) {
+  if (state===states.university) {
     const t = getMainWindowTextTool()
     t.print("Survivor's Technical College")
     t.setFont(mediumFont)
@@ -681,6 +683,7 @@ function draw() {
       if (canLevelUp()) {
         if (playerStats.gold >= goldNeededToLevel()) {
           t.print("You're ready to study here!")
+          button(col2X, t.y-t.lineHeight,viewSize,t.lineHeight,buyLevelUp,null,true)
           t.print(`Press [S] to study, paying ${goldNeededToLevel()}`)
         } else {
           t.print("You're ready to study here!")
@@ -692,7 +695,7 @@ function draw() {
       }
       t.print()
     }
-    drawPopup(false,"HIT D TO","GO BACK", down)
+    drawPopup(false,"HIT D TO","GO BACK", backToMain)
   }
   
 }
@@ -997,7 +1000,7 @@ function drawCell(x, y) {
   if (anyAtPos(laddersUp, {x:x, y:y})) {
     if (depth == 0) {
       const ladderType = townLadderType({x:x, y:y})
-      if (ladderType==0) tCtx.fillStyle = getColors().uni
+      if (ladderType==0) tCtx.fillStyle = getColors().uniColor
       else tCtx.fillStyle = getColors().healer
     } else {
       tCtx.fillStyle = getColors().upLadder
@@ -1030,7 +1033,6 @@ function cellIsEmpty(pos) {
 
 canvas.addEventListener("click", function (e) {
   //still to do:
-  //healer and uni
   //waiting
   //UI help: show people where to click to wait
   var x = e.pageX - this.offsetLeft;
@@ -1089,30 +1091,24 @@ function doKey(keyCode) {
   if (state === states.healer) {
     switch (keyCode) {
       case 68: //down
-      //foobar: make this back()
-        state = states.main
-        draw()
+        backToMain()
         break
       case 49: //1 -> buy 10
         buyHealing(10)
-        draw()
         break
       case 50: //2 -> buy 50
         buyHealing(50)
-        draw()
         break
     }
     return
   }
-  if (state === states.town) {
+  if (state === states.university) {
     switch (keyCode) {
       case 68: //down
-        state = states.main
-        draw()
+        backToMain()
         break
       case 83: //s
-        levelUp()
-        draw()
+        buyLevelUp()
         break
     }
     return
@@ -1208,6 +1204,14 @@ function doKey(keyCode) {
     case 54: castHeartbeat(); break //6
     case 48: //0
 
+  }
+}
+
+function backToMain() {
+  //if we are in a state that can return to main
+  if (state===states.healer||state===states.university) {
+    state = states.main
+    draw()
   }
 }
 
@@ -1428,7 +1432,7 @@ function up() {
   if (ladder == undefined) return
   if (depth == 0) {
     const ladderType = townLadderType(playerPos)
-    state = ladderType == 0 ? states.town : states.healer
+    state = ladderType == 0 ? states.university : states.healer
     townMessage.length = 0
     draw()
   } else {
@@ -1831,7 +1835,7 @@ function howManyLevelsCanIGet() {
   return n
 }
 
-function levelUp() {
+function buyLevelUp() {
   if (!canLevelUp()) return
   if (playerStats.gold < goldNeededToLevel()) return
   playerStats.gold -= goldNeededToLevel()
@@ -1852,6 +1856,7 @@ function levelUp() {
     e.x = newPos.x
     e.y = newPos.y
   })
+  draw()
 }
 
 function buyHealing(n) {
@@ -1865,7 +1870,9 @@ function buyHealing(n) {
     playerStats.hp += n
     if (playerStats.hp > playerStats.maxHp) playerStats.hp = playerStats.maxHp
     townMessage.push("> You feel better after your session.")
+    townMessage.push("") //to align the text the same amount
   }
+  draw()
 }
 
 function goldNeededToLevel() {
@@ -1956,7 +1963,7 @@ let colorMode = 0
 
 //healer is green, uni is blue
 //mapback is reused for dull text
-//                                             text,   map back, borders,   upLadder, downLadder, healer,   uni
+//                                             text,   map back, borders,   upLadder, downLadder, healer,   uniColor
 addColorMode("CGA", "-cga", "    4",             "white", cga2,    cga1,      cga2,     cga1,       cga2,     cga2)
 addColorMode("High-Res EGA", "-ega", "   16",    "white","#666666", "#000099","#999999","#666666",  "#009900", "#66FFFF")
 addColorMode("High-Res EGA with Classic Moraff Palette", "-moraff", "   16")
@@ -1964,17 +1971,17 @@ addColorMode("High-Res VGA, requires 512k RAM", "", "  256")
 addColorMode("Super High Quality, requires 2 meg RAM", "-svga", "65,536")
 
 
-function addColorMode(name, fileName, colors, textColor, mapBack, border, upLadder, downLadder, healer, uni) {
+function addColorMode(name, fileName, colors, textColor, mapBack, border, upLadder, downLadder, healer, uniColor) {
   var colorMode = {name:name, fileName:fileName, colors:colors, res:"1024 x 768",
   textColor:textColor, mapBack:mapBack, border:border, 
-  upLadder:upLadder, downLadder:downLadder, healer:healer, uni:uni}
+  upLadder:upLadder, downLadder:downLadder, healer:healer, uniColor:uniColor}
   if (textColor==undefined) colorMode.textColor="white"
   if (mapBack==undefined) colorMode.mapBack="grey"
   if (border==undefined) colorMode.border="darkblue"
   if (upLadder==undefined) colorMode.upLadder="#E0E0E0"
   if (downLadder==undefined) colorMode.downLadder="grey"
   if (healer==undefined) colorMode.healer="lightgreen"
-  if (uni==undefined) colorMode.uni="lightblue" 
+  if (uniColor==undefined) colorMode.uniColor="lightblue" 
   colorModes.push(colorMode)
 }
 
