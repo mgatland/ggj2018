@@ -310,14 +310,17 @@ function maybeGenerateBoss() {
   }
 }
 
-function makeEnemy(fixedType) {
-  let x = -1
-  let y = -1
-  while (!cellIsEmpty({x:x, y:y}||anyAtPos(laddersUp, pos)||anyAtPos(laddersDown,pos))) {
-    x = trueRnd(mapSize)
-    y = trueRnd(mapSize)
+function randomEmptyCell() {
+  const pos = {x:-1, y:-1}
+  while (!cellIsEmpty(pos||anyAtPos(laddersUp, pos)||anyAtPos(laddersDown,pos))) {
+    pos.x = trueRnd(mapSize)
+    pos.y = trueRnd(mapSize)
   }
-  var enemy = {x:x, y:y}
+  return pos
+}
+
+function makeEnemy(fixedType) {
+  const enemy = randomEmptyCell()
 
   if (fixedType != undefined) {
     enemy.type = fixedType;
@@ -1762,6 +1765,12 @@ function levelUp() {
   townMessage.length = 0
   townMessage.push("You study for three years.")
   townMessage.push(`You are now level ${playerStats.level}. You are ${playerStats.age} years old.`)
+  //enemies moved around while you were away
+  enemies.forEach(function(e) {
+    const newPos = randomEmptyCell()
+    e.x = newPos.x
+    e.y = newPos.y
+  })
 }
 
 function buyHealing(n) {
