@@ -1186,15 +1186,15 @@ function doKey(keyCode) {
   }
   switch (keyCode) {
     case 37: //left
-    case 65: //a
+    //case 65: //a
       turnLeft()
       break
     case 38: //up
-    case 87: //w
+    case 88: //x
      forward()
       break
     case 39: //right
-    case 68: //d
+    //case 68: //d
       turnRight()
       break
     case 40: turnBack()
