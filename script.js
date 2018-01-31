@@ -1114,6 +1114,13 @@ function doKey(keyCode) {
         playerStats.sp++
         deriveMaxHpAndSp()
       }
+      if (thing.type==="hp") {
+        const amount = trueRnd(9)+1
+        playerCombatMessage.push("A wedge of muscle cheese...")
+        playerCombatMessage.push(`You chew it, gaining ${amount} health points.`)
+        playerStats.hp += amount
+        deriveMaxHpAndSp()
+      }
       if (thing.type==="gold") {
         playerCombatMessage.push(thing.amount + " gold coins!")
         playerStats.gold += thing.amount
@@ -1579,8 +1586,10 @@ function hitMonster(damage, e, text)
         playerStats.surprise.push({type:"spell"})
       } else if (e.gold > 0 && playerStats.lootTimer.pop()===1) {
         playerStats.surprise.push({type:"gold", amount:e.gold})
-      } else if (rnd(100) < 10) {
+      } else if (rnd(100) < 7) {
         playerStats.surprise.push({type:"sp"})
+      } else if (rnd(100) < 7) {
+        playerStats.surprise.push({type:"hp"})
       }
       if (playerStats.lootTimer.length===0) playerStats.lootTimer = makeLootArray();
     }
