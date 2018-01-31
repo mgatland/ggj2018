@@ -35,6 +35,7 @@ let playerCombatMessage = []
 let enemyCombatMessage = []
 let townMessage = []
 let flipped = false
+let buttons = []
 
 let endState = "" //hack for spawning final treasure
 let endRuns = 0
@@ -441,7 +442,8 @@ function makeEven(n) {
 const smallColWidth = 186
 const viewSize = canvas.width - smallColWidth*2
 const viewSizeY = Math.floor(viewSize/1.5)
-const smallViewY = viewSizeY-Math.floor(smallColWidth/1.5)
+const smallViewSizeY = Math.floor(smallColWidth/1.5)
+const smallViewY = viewSizeY-smallViewSizeY
 const col1X = 0
 const col2X = smallColWidth
 const col3X = smallColWidth + viewSize
@@ -449,6 +451,7 @@ const lowerHudY = viewSizeY + 30
 const centerX = Math.floor(canvas.width/2)
 const rearViewX = Math.floor(centerX-smallColWidth/2)
 function draw() {
+  buttons.length=0
   ctx.clearRect(0, 0, canvas.width, canvas.height)
 
   if (state===states.newLevel) {
@@ -474,6 +477,11 @@ function draw() {
     
     draw3D(rearViewX, viewSizeY, smallColWidth, playerPos.dir.reverse)
     drawMap(col3X, 0, canvas.width - col3X, smallViewY)
+
+    button(col1X, viewSizeY-smallViewSizeY, smallColWidth, smallViewSizeY, turnLeft)
+    button(col2X, 0, viewSize, viewSizeY, forward)
+    button(col3X, viewSizeY-smallViewSizeY, smallColWidth, smallViewSizeY, turnRight)
+    button(rearViewX, viewSizeY, smallColWidth, smallViewSizeY, turnBack)
   }
   draw3D(col2X, 0, viewSize, playerPos.dir)
 
@@ -784,6 +792,7 @@ function drawSpellUi(x, y, width, height) {
   tY += lineHeight
   for (var i = 0; i < 10; i++) {
     if (playerStats.spellKnown[i]) {
+      button(col1X, tY-lineHeight+4, smallColWidth, lineHeight, castSpell, i)
       ctx.fillText((i+1) + " " + spellNames[i].name, tX, tY);
       tY += lineHeight
     } else {
@@ -792,6 +801,7 @@ function drawSpellUi(x, y, width, height) {
   }
   tY += lineHeight
   ctx.fillText("[1-9] Cast Spell", tX, tY); tY += lineHeight
+  button(col1X, tY-lineHeight+4, smallColWidth, lineHeight, showSpellNotes)
   ctx.fillText("[S] Show spell notes", tX, tY); tY += lineHeight
 }
 
@@ -1010,6 +1020,33 @@ function cellIsEmpty(pos) {
     && !anyAtPos(enemies, pos)
 }
 
+canvas.addEventListener("click", function (e) {
+  //still to do:
+  //ladders up and down
+  //healer and uni
+  //waiting
+  //UI help: show people where to click to wait
+  var x = e.pageX - this.offsetLeft;
+  var y = e.pageY - this.offsetTop;
+  console.log(x+":"+y)
+  //full screen press any key
+  if (state===states.start||state===states.foundSomething
+    || state === states.spellNotes || state === states.newLevel) {
+    doKey(32)//enter
+    return
+  }
+  buttons.forEach(b => {
+    if (debug) {
+      ctx.strokeStyle = ["white","red","blue","green","orange","magenta","cyan","yellow"][trueRnd(8)]
+      ctx.lineWidth=1
+      ctx.strokeRect(b.x,b.y,b.width,b.height)
+    }
+    if (x >= b.x && x <= b.x + b.width && y >= b.y && y <= b.y + b.height) {
+      b.callback(b.arg1)
+    }
+  })
+})
+
 window.addEventListener("keyup", function (e) {
   doKey(e.keyCode)
 })
@@ -1148,8 +1185,7 @@ function doKey(keyCode) {
     case 82: restartIfDead()
       break
     case 83: //s
-        state = states.spellNotes
-        draw()
+        showSpellNotes()
         break
     case 77: showMap()
       break
@@ -1162,6 +1198,23 @@ function doKey(keyCode) {
     case 48: //0
 
   }
+}
+
+const spellFunctionsAsList = [castTransmission, castWaves, castRitual, castWhatDo, castSeeThings, 
+  castHeartbeat, castNone, castNone, castNone, castNone]
+
+function castSpell(i) {
+  spellFunctionsAsList[i]()
+}
+
+function castNone() {
+  trySpendSp(99999)
+}
+
+function showSpellNotes() {
+  if (!inGame()) return
+  state = states.spellNotes
+  draw()  
 }
 
 function cheatToBoss() {
@@ -1963,6 +2016,7 @@ function showColorPicker() {
   print("      RESOLUTION    COLORS   DESCRIPTION, REQUIREMENTS")
   print()
   for(var i = 0; i < colorModes.length; i++) {
+    button(0, me.y-me.lineHeight, canvas.width, me.lineHeight, setColorMode, i)
     print("  "+(i+1) + ") ", false)
     ctx.fillStyle=mfOrange
     print(colorModes[i].res, false, 70)
@@ -2060,4 +2114,8 @@ function shuffleArray(array) {
         let j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
     }
+}
+
+function button(x,y,width,height,callback, arg1) {
+  buttons.push({x:x,y:y,width:width,height:height,callback:callback, arg1:arg1})
 }
