@@ -791,6 +791,14 @@ function drawSpellUi(x, y, width, height) {
   ctx.fillText("[S] Show spell notes", tX, tY); tY += lineHeight
 }
 
+
+let ladderIslandTop = -1.06
+let ladderIslandLeft = -0.6
+let ladderIslandScale = 2.3
+let potIslandLeft = 0.03
+let potIslandTop = 0
+let potIslandScale = 0.8
+
 function draw3D(viewX, viewY, viewSize, dir) {
   const viewSizeX = viewSize
   const viewSizeY = Math.floor(viewSize / 1.5)
@@ -849,6 +857,10 @@ function draw3D(viewX, viewY, viewSize, dir) {
             const eSize = viewSizeY/(Math.pow(depthFactor,i-0.4))
             const left = viewXCentre - eSize/2 + j*eSize
             const top = viewYCentre - eSize/2+eSize*(isHomeRow ? 0.4:0.2)
+            if (tileSet==1) {
+              //draw island
+              tCtx.drawImage(spriteImage, 256*2, 1*256, 255, 256, left+ladderIslandLeft*eSize, top+ladderIslandTop*eSize, eSize*ladderIslandScale, eSize*ladderIslandScale) 
+            }
             tCtx.drawImage(spriteImage, 0, 6*256, 256, 256, left, top, eSize, eSize)
           }
         }
@@ -858,7 +870,11 @@ function draw3D(viewX, viewY, viewSize, dir) {
           const eSize = viewSizeY/(Math.pow(depthFactor,i-0.4))
           const left = viewXCentre - eSize/2 + j*eSize
           const top = viewYCentre - eSize/2+eSize*0.2
-          if (et.boss != undefined) {
+          //draw island under some enemies
+          if (tileSet==1 && et.special != undefined) {
+            tCtx.drawImage(spriteImage, 256*2, 1*256, 255, 256, left, top, eSize, eSize) 
+            tCtx.drawImage(spriteImage, 256*et.sprite+1, et.tileSet*256, 255, 256, left+potIslandLeft*eSize, top+potIslandTop*eSize, eSize*potIslandScale, eSize*potIslandScale)
+          } else if (et.boss != undefined) {
             drawBoss(et.sprite, et.tileSet, left, top, eSize)
           } else {
             tCtx.drawImage(spriteImage, 256*et.sprite+1, et.tileSet*256, 255, 256, left, top, eSize, eSize)
@@ -1146,6 +1162,16 @@ function cheat() {
   playerStats.strength = 9999
   playerStats.mp = 9999
   draw()
+}
+
+function cheat2() {
+  tileSet=1
+  enemies[0].x = playerPos.x - 1
+  enemies[0].y = playerPos.y
+  playerPos.dir = dirs.left
+  map[playerPos.x-1][playerPos.y]=1
+  enemies[0].type = 17
+  cheat()
 }
 
 function getPlayerTarget() {
