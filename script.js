@@ -1108,6 +1108,12 @@ function doKey(keyCode) {
           playerCombatMessage.push("A spell, but you already knew it.")  
         }
       }
+      if (thing.type==="sp") {
+        playerCombatMessage.push("A shimmering ball of thought...")
+        playerCombatMessage.push("You touch it, and gain 1 spell point!")
+        playerStats.sp++
+        deriveMaxHpAndSp()
+      }
       if (thing.type==="gold") {
         playerCombatMessage.push(thing.amount + " gold coins!")
         playerStats.gold += thing.amount
@@ -1563,7 +1569,7 @@ function hitMonster(damage, e, text)
     if (bossId != undefined) {
       playerStats.bossesKilled[bossId] = true
       playerStats.surprise.push({type:"boss", bossId:bossId})
-      playerStats.surprise.push({type:"gold", amount:e.gold})
+      playerStats.surprise.push({type:"gold", amount:e.gold}) //bosses always give gold
       playerCombatMessage.push("The mighty Shadow Guardian is dead!")
       playerCombatMessage.push("You take its treasure... (PRESS A KEY)")
     } else {
@@ -1573,6 +1579,8 @@ function hitMonster(damage, e, text)
         playerStats.surprise.push({type:"spell"})
       } else if (e.gold > 0 && playerStats.lootTimer.pop()===1) {
         playerStats.surprise.push({type:"gold", amount:e.gold})
+      } else if (rnd(100) < 10) {
+        playerStats.surprise.push({type:"sp"})
       }
       if (playerStats.lootTimer.length===0) playerStats.lootTimer = makeLootArray();
     }
