@@ -818,9 +818,12 @@ function drawSpellUi(x, y, width, height) {
 }
 
 
-let ladderIslandTop = -1.06
-let ladderIslandLeft = -0.6
+let ladderIslandTop = -0.85
+let ladderIslandLeft = -0.44
 let ladderIslandScale = 2.3
+let extraScale = 0.8
+let ladderIslandLadderLeft = 0.07
+
 let potIslandLeft = 0.03
 let potIslandTop = 0
 let potIslandScale = 0.8
@@ -882,12 +885,15 @@ function draw3D(viewX, viewY, viewSize, dir) {
           {
             const eSize = viewSizeY/(Math.pow(depthFactor,i-0.4))
             const left = viewXCentre - eSize/2 + j*eSize
-            const top = viewYCentre - eSize/2+eSize*(isHomeRow ? 0.4:0.2)
+            let top = viewYCentre - eSize/2+eSize*(isHomeRow ? 0.4:0.2) + eSize*tileSetHeightAdjust()
             if (tileSet==1) {
-              //draw island
-              tCtx.drawImage(spriteImage, 256*2, 1*256, 255, 256, left+ladderIslandLeft*eSize, top+ladderIslandTop*eSize, eSize*ladderIslandScale, eSize*ladderIslandScale) 
+              //island,ladder
+              tCtx.drawImage(spriteImage, 256*2, 1*256, 255, 256, left+ladderIslandLeft*eSize, top+ladderIslandTop*eSize, eSize*ladderIslandScale*extraScale, eSize*ladderIslandScale*extraScale)
+              tCtx.drawImage(spriteImage, 0, 6*256, 256, 256, left+ladderIslandLadderLeft*eSize, top, eSize*extraScale, eSize*extraScale)  
+            } else {
+              tCtx.drawImage(spriteImage, 0, 6*256, 256, 256, left, top, eSize, eSize)  
             }
-            tCtx.drawImage(spriteImage, 0, 6*256, 256, 256, left, top, eSize, eSize)
+            
           }
         }
         const e = enemies.find(e => e.x == cellPos.x && e.y == cellPos.y)
@@ -898,6 +904,7 @@ function draw3D(viewX, viewY, viewSize, dir) {
           const top = viewYCentre - eSize/2+eSize*0.2 + eSize*tileSetHeightAdjust()
           //draw island under some enemies
           if (tileSet==1 && et.special != undefined) {
+            //island
             tCtx.drawImage(spriteImage, 256*2, 1*256, 255, 256, left, top, eSize, eSize) 
             tCtx.drawImage(spriteImage, 256*et.sprite+1, et.tileSet*256, 255, 256, left+potIslandLeft*eSize, top+potIslandTop*eSize, eSize*potIslandScale, eSize*potIslandScale)
           } else if (et.boss != undefined) {
@@ -1257,11 +1264,12 @@ function cheat() {
 
 function cheat2() {
   tileSet=1
-  enemies[0].x = playerPos.x - 1
-  enemies[0].y = playerPos.y
+  changeLevelTo(4)
+  playerPos.y -= 3
+  laddersDown[0].x = playerPos.x - 2
+  laddersDown[0].y = playerPos.y
   playerPos.dir = dirs.left
-  map[playerPos.x-1][playerPos.y]=1
-  enemies[0].type = 17
+  map[playerPos.x-1][playerPos.y-1]=0
   cheat()
 }
 
