@@ -45,6 +45,28 @@ definitely:
 [x] iron giant level 4 - v slow, i got 6 attacks and killed it before it fought back. ok? could it have more health so it gets a hit off
 [x] everything this deep is a bit slow imo - some enemies should be as fast as the player - untested :/ :/
 
+more:
+[x] draw islands under water ladders and potion bearers <---
+[x] give more exp - sergio (== threshholds lower).
+[x] more gold? (err make it more consistent)
+[x] potion bearers miss too often
+[x] level up text should be white, not grey
+[x] shuffle monster positions after studying
+[x] random regen spell points
+[x] touch controls + wasd
+[x] glitch to revive after death by pressing 's'
+[x] don't let people cheat past death
+
+[ ] ceiling on lower trash levels
+[ ] make dungeon different on each life
+[ ] extinction spell?
+[ ] plant should not be drawn in shadow sprite
+[ ] killing the oxygen generator seems too hacky
+[ ] top level, no enemies (banana peels?)
+[ ] once we have pits - bottom floor should have 'fallen' enemies from earlier levels, still at lower level
+[ ] spell to ignore pits
+
+old:
 [ ] pits
 [ ] better spells
 
