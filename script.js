@@ -485,7 +485,7 @@ function draw() {
   }
   draw3D(col2X, 0, viewSize, playerPos.dir)
 
-  drawLadderPopups(col2X, 0, viewSize, viewSizeY)
+  drawLadderPopups()
 
   const ahead = move(playerPos, playerPos.dir)
   const target = enemyAt(ahead)
@@ -665,8 +665,7 @@ function draw() {
     t.print()
     t.print("Press [1] to heal 10 hp for " + healCost(10))
     t.print(`Press [2] to heal 50 for ${healCost(50)}`)
-    t.print()
-    t.print("Press [D] to go back to the dungeon")
+    drawPopup(false,"HIT D TO","GO BACK", down)
   }
 
   if (state===states.town) {
@@ -693,7 +692,7 @@ function draw() {
       }
       t.print()
     }
-    t.print("Press [D] to go back to the dungeon")
+    drawPopup(false,"HIT D TO","GO BACK", down)
   }
   
 }
@@ -728,26 +727,34 @@ function drawTitle(text, x, y) {
   ctx.fillText(text, x, y)
 }
 
-const popupWidth = 120
-const popupHeight = Math.floor(popupWidth*0.7)
-function drawLadderPopups(x,y,width,height) {
+function drawLadderPopups() {
+
   if (!state === states.main) return
 
-  const topPos = y + 20
-  const bottomPos = y + height - popupHeight - 20
+
   let already = false
   if (anyAtPos(laddersDown, playerPos)) {
-    drawPopup(x+40,bottomPos,"HIT D TO","GO DOWN")
+    drawPopup(false,"HIT D TO","GO DOWN", down)
     already = true
   }
   if (anyAtPos(laddersUp, playerPos)) {
-    drawPopup(x+40,already ? topPos: bottomPos," HIT 'U'","TO GO UP")
+    drawPopup(already," HIT 'U'","TO GO UP",up)
     already = true
   }
 }
 
-function drawPopup(x,y,text1,text2)
+function drawPopup(isTop,text1,text2, clickFunction)
 {
+  const popupWidth = 120
+  const popupHeight = Math.floor(popupWidth*0.7)
+  const x = col2X + 40
+  const topPos = 20
+  const bottomPos = viewSizeY - popupHeight - 20
+  const y = isTop ? topPos : bottomPos
+
+  const width = viewSize
+  const height = viewSizeY
+
   ctx.fillStyle="black"
   ctx.fillRect(x,y,popupWidth, popupHeight)
   ctx.fillStyle = getColors().textColor
@@ -755,6 +762,7 @@ function drawPopup(x,y,text1,text2)
   ctx.fillText(text1, x+20, y+35)
   ctx.fillText(text2, x+20, y+65)
   drawBorder(x, y, popupWidth, popupHeight)
+  button(x,y,popupWidth,popupHeight,clickFunction,null,true)
 }
 
 function getMainWindowTextTool() {
@@ -1022,7 +1030,6 @@ function cellIsEmpty(pos) {
 
 canvas.addEventListener("click", function (e) {
   //still to do:
-  //ladders up and down
   //healer and uni
   //waiting
   //UI help: show people where to click to wait
@@ -1035,14 +1042,17 @@ canvas.addEventListener("click", function (e) {
     doKey(32)//enter
     return
   }
+  let clickConsumed = false
   buttons.forEach(b => {
     if (debug) {
       ctx.strokeStyle = ["white","red","blue","green","orange","magenta","cyan","yellow"][trueRnd(8)]
       ctx.lineWidth=1
       ctx.strokeRect(b.x,b.y,b.width,b.height)
     }
-    if (x >= b.x && x <= b.x + b.width && y >= b.y && y <= b.y + b.height) {
+    if (!clickConsumed 
+      && x >= b.x && x <= b.x + b.width && y >= b.y && y <= b.y + b.height) {
       b.callback(b.arg1)
+      clickConsumed = true
     }
   })
 })
@@ -1079,6 +1089,7 @@ function doKey(keyCode) {
   if (state === states.healer) {
     switch (keyCode) {
       case 68: //down
+      //foobar: make this back()
         state = states.main
         draw()
         break
@@ -2116,6 +2127,10 @@ function shuffleArray(array) {
     }
 }
 
-function button(x,y,width,height,callback, arg1) {
+function button(x,y,width,height,callback, arg1, priority) {
   buttons.push({x:x,y:y,width:width,height:height,callback:callback, arg1:arg1})
+  if (priority) {
+    //move to front
+    buttons.unshift(buttons.pop())
+  }
 }
