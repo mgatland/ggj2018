@@ -1181,11 +1181,17 @@ function doKey(keyCode) {
     return
   }
   switch (keyCode) {
-    case 37: turnLeft()
+    case 37: //left
+    case 65: //a
+      turnLeft()
       break
-    case 38: forward()
+    case 38: //up
+    case 87: //w
+     forward()
       break
-    case 39: turnRight()
+    case 39: //right
+    case 68: //d
+      turnRight()
       break
     case 40: turnBack()
       break
