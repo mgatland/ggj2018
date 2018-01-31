@@ -2,7 +2,7 @@
 //DOM stuff
 const canvas = document.querySelector(".gameCanvas")
 
-let debug = true
+let debug = false
 
 const ctx = canvas.getContext('2d')
 ctx.webkitImageSmoothingEnabled = false
