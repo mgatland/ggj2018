@@ -1050,6 +1050,10 @@ canvas.addEventListener("click", function (e) {
     doKey(32)//enter
     return
   }
+  if (state===states.dead) {
+    restartIfDead()
+    return
+  }
   let clickConsumed = false
   buttons.forEach(b => {
     if (debug) {
@@ -1201,7 +1205,8 @@ function doKey(keyCode) {
       break
     case 85: up()
       break
-    case 82: restartIfDead()
+    case 82: //r
+      restartIfDead()
       break
     case 83: //s
         showSpellNotes()
