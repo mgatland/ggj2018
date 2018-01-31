@@ -176,6 +176,7 @@ function restart() {
   playerStats.spellKnown = [true,false,false,false,false,false,false,false,false,false]
   playerStats.bossesKilled = [false, false, false, false]
   playerStats.levelsVisited = []
+  playerStats.lootTimer = makeLootArray()
 
   clearMessages()
   storedEnemies.length = 0
@@ -338,7 +339,7 @@ function makeEnemy(fixedType) {
   enemy.power = et.power + Math.floor(enemy.level * et.power / 4)
   const baseExp = (et.end + et.power + et.speed + et.defence)
   enemy.exp = baseExp * (1+enemy.level/2)
-  enemy.gold = (trueRnd(100) < 25) ? trueRnd(enemy.exp) + 5 : 0
+  enemy.gold = trueRnd(enemy.exp) + 5 //note: this only occasionally drops, based on lootTimer
   enemies.push(enemy)
   return enemy
 }
@@ -1554,13 +1555,11 @@ function hitMonster(damage, e, text)
     playerStats.exp += e.exp
     playerStats.kills++
     state = states.foundSomething
-    if (e.gold > 0) {
-      playerStats.surprise.push({type:"gold", amount:e.gold})
-    }
     const bossId = getType(e).boss
     if (bossId != undefined) {
       playerStats.bossesKilled[bossId] = true
       playerStats.surprise.push({type:"boss", bossId:bossId})
+      playerStats.surprise.push({type:"gold", amount:e.gold})
       playerCombatMessage.push("The mighty Shadow Guardian is dead!")
       playerCombatMessage.push("You take its treasure... (PRESS A KEY)")
     } else {
@@ -1568,7 +1567,10 @@ function hitMonster(damage, e, text)
       playerCombatMessage.push("You found... (PRESS ANY KEY)")
       if (playerStats.kills / 10 > playerStats.spellKnown.filter(i => i === true).length && rnd(100) < 15) {
         playerStats.surprise.push({type:"spell"})
+      } else if (e.gold > 0 && playerStats.lootTimer.pop()===1) {
+        playerStats.surprise.push({type:"gold", amount:e.gold})
       }
+      if (playerStats.lootTimer.length===0) playerStats.lootTimer = makeLootArray();
     }
   }
 }
@@ -2019,4 +2021,17 @@ function saveSomeone() {
 }
 function startAge() {
   return 22 + getPeopleSaved()
+}
+
+function makeLootArray() {
+  const lootArray = [0,0,0,1]
+  shuffleArray(lootArray)
+  return lootArray
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
 }
