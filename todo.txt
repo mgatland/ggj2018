@@ -65,6 +65,8 @@ even more:
 [x] mouse hover effect
 [x] extinction spell - permanent cost?! kills everyone EXCEPT the target
 
+[ ] one-shot warning
+
 [ ] metrics
 [ ] ? pass through enemies spell (you swap places)
 [ ] ? oroborus - you can use sp as hp if you are killed

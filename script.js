@@ -1161,7 +1161,6 @@ function mouseMove(e) {
       mouseBox.style.width = Math.floor(b.width*ratio-2)+"px"
       mouseBox.style.height = Math.floor(b.height*ratio-2)+"px"
       mouseBox.classList.remove("hidden")
-      console.log(b.y)
     }
   })
   if (!clickConsumed) {
@@ -1828,20 +1827,18 @@ function playerAttack(e) {
 }
 
 function monsterAttack(e) {
+  console.log(maxEnemyDamage(e))
   if (e.hp <= 0) return
   const et = getType(e)
-  const attackRoll = rnd(80) + 20 + e.level * 2 
-  const defenceRoll = 32 + playerStats.level * 2 
-  + playerStats.speed * 3/2 + playerStats.luck
+  const attackRoll = trueRnd(80) + 20 + e.level * 2 
   //protection spells, body armour, armour enchantment
-  const result = attackRoll - defenceRoll
+  const result = attackRoll - playerDefenceRoll()
   let damage = 0
   if (result > 0) {
     damage++ //at least 1 damage!
-    times(Math.floor(result/40)+1, () => damage += rnd(e.power))
+    times(Math.floor(result/40)+1, () => damage += trueRnd(e.power))
     //add bonus damage
     if (depth > playerStats.level) damage += trueRnd(depth-playerStats.level)
-
   }
   //auto hit for 1 point, sometimes (no idea why, it's from moraffs...)
   if (trueRnd(500)<depth*2) { //in moraff's, it's just depth
@@ -1850,23 +1847,48 @@ function monsterAttack(e) {
   //25% chance of replacing all calculations with a standard hit (moraff's, IDK why)
   //means monsters hit at least 25% of the time?
   if (trueRnd(100)<25) {
-    damage = Math.floor(3+(depth)) //in moraff's, it's depth/2
+    console.log("(standardized hit)")
+    damage = standardHitDamage()
+  } else {
+    console.log("(normal hit)")
   }
 
   if (damage > 0) {
-    if (getType(e).special != undefined) {
-      specialHitEffect(getType(e).special)
+    if (et.special != undefined) {
+      specialHitEffect(et.special)
       e.hp = 0
       //FIXME: this should go to a 'press any key' state that makes the enemy disappear
     } else {
-      //player damage reduction (slightly different in moraff's, uses .con)
-      damage = Math.floor(Math.max(1, (damage*(50+Math.max(1, 100-playerStats.end)))/150))
+      damage = applyPlayerDamageReduction(damage)
       hitPlayer(damage)
       enemyCombatMessage.push("The " + getType(e).name + " deals " + damage + " damage")
     }
   } else {
     enemyCombatMessage.push("The " + getType(e).name + " missed!")
   }
+}
+
+function playerDefenceRoll() {
+  return 32 + playerStats.level * 2 + playerStats.speed * 3/2 + playerStats.luck
+}
+
+function standardHitDamage() {
+  return Math.floor(3+(depth)) //in moraff's, it's depth/2
+}
+
+function applyPlayerDamageReduction(damage) {
+  return Math.floor(Math.max(1, (damage*(50+Math.max(1, 100-playerStats.end)))/150))
+}
+
+//must be kept in sync with code above... need a better way to do this
+function maxEnemyDamage(e) {
+  if (getType(e).special) return 0
+  const attackRoll = 80 + 20 + e.level * 2
+  const result = attackRoll - playerDefenceRoll()
+  let damage = 2
+  times(Math.floor(result/40)+1, () => damage += e.power-1)
+  if (depth > playerStats.level) damage += (depth-playerStats.level)
+  return Math.max(damage, standardHitDamage())
 }
 
 function hitMonster(damage, e, text)
