@@ -42,10 +42,10 @@ spellNames.push({name:"Extinction", desc:"Target creature becomes the last of it
 spellNames.push({name:"Ouroboros", desc:"Does nothing"}) //enemy attacks itself
 spellNames.push({name:"Heartbeat", desc:"Heals 1 health point each turn, for 3 turns per intelligence point"})
 spellNames.push({name:"We See Things", fullName: "We don't see things as they are, we see them as we are.", desc:"Pretend you are one of them. Enemies will ignore you unless provoked."})
-spellNames.push({name:"What do we do now?", desc:"Teleport to a random position on this level.", desc2:"If a Shadow Guardian is present, it will draw you closer!"}) //teleport
-spellNames.push({name:"Ritual", desc:"Heals up to 3 health points per intelligence point"}) //heal (small)
-spellNames.push({name:"Waves", desc:"Deals 15-30 health points of damage"}) //damage
-spellNames.push({name:"Transmission", desc:"Detect the mind waves of a Shadow Guardian, so you can hunt it for its treasure"}) //detect boss
+spellNames.push({name:"What do we do now?", desc:"Teleport to a random position on this level.", desc2:"If a Shadow Guardian is present, it will draw you closer!"})
+spellNames.push({name:"Ritual", desc:"Heals up to 3 health points per intelligence point"})
+spellNames.push({name:"Waves", desc:"Deals 30 health points of damage"})
+spellNames.push({name:"Transmission", desc:"Detect the mind waves of a Shadow Guardian, so you can hunt it for its treasure"})
 spellNames.reverse()
 
 const effectNames = []
@@ -1561,7 +1561,7 @@ function castWaves() {
     playerCombatMessage.push("That spell requires a target")
     draw()
   } else if (trySpendSp(2)) {
-    hitMonster(trueRnd(15)+15, e, "You emit waves of energy!")
+    hitMonster(30, e, "You emit waves of energy!")
     monsterCombatTurn()
     draw()
   }
