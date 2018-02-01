@@ -124,6 +124,7 @@ spell thoughts:
 i only use healing - matt
 final spell to be renamed (short name) to either "problems" or "each other" depending on what we decide it should do
 sergio wants instant death resistance
+what do we do now - enemy joins your party, comes along and attacks with you
 [ ] the damage spell should be strong enough to get you out of a tough situation
 [ ] seeing monsters on map would be a useful power
 [ ] invisibility and teleport kinda solve the same problem?

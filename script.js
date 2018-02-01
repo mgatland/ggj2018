@@ -199,6 +199,7 @@ function tryLoad() {
   if (playerStats.effects === undefined) playerStats.effects = []
   if (playerStats.extinctions === undefined) playerStats.extinctions = []
   if (playerStats.burnedSp === undefined) playerStats.burnedSp = 0
+  if (playerStats.seed === undefined) playerStats.seed = 0
 
   //fixing up
   playerPos.dir = dirsList[playerPos.dir] //fix up serializable
@@ -241,13 +242,14 @@ function restart() {
   playerStats.hp = playerStats.maxHp
   playerStats.sp = playerStats.maxSp
 
-  playerPos = {x: 48, y: 21, dir: dirs.right}
+  playerPos = {x: -1, y: -1, dir: dirs.right}
   playerStats.spellKnown = [true,false,false,false,false,false,false,false,false,false]
   playerStats.bossesKilled = [false, false, false, false]
   playerStats.levelsVisited = []
   playerStats.lootTimer = makeLootArray()
   playerStats.effects = []
   playerStats.extinctions = []
+  playerStats.seed = trueRnd(1000)
   clearMessages()
   endState = ""
   endRuns = 0
@@ -283,7 +285,7 @@ function makeMap() {
   }
   //rooms
   let rooms = []
-  fixedRandom  = new Random(depth);
+  fixedRandom  = new Random(playerStats.seed+depth);
   times(140, () => addRoom(rooms))
   for(let r of rooms) {
     addCorridors(r)
@@ -307,19 +309,19 @@ function makeFinalMap() {
 
 function makeLadders(n) {
   laddersUp.length = 0
-  fixedRandom  = new Random(n-1);
+  fixedRandom  = new Random(playerStats.seed+n-1);
   times(50, () => addLadderUp())
   if (depth==0) {
     times(150, () => addLadderUp())
   }
   laddersDown.length = 0
-  fixedRandom  = new Random(n);
+  fixedRandom  = new Random(playerStats.seed+n);
   times(50, () => addLadderDown())
 }
 
 function removeOrphanRooms()
 {
-  fixedRandom  = new Random(depth);
+  fixedRandom  = new Random(playerStats.seed+depth);
   const roomStates = []
   for(let x = 0; x < mapSize; x++) {
     roomStates[x] = [];
@@ -1773,6 +1775,12 @@ function changeLevelTo(newLevel)
     endState = "shouldSpawn"
     showSpecialMessage(1002)
     endRuns++
+  }
+  //hack to spawn player before redraw
+  if (playerPos.x === -1) {
+    playerPos.x = laddersUp[0].x
+    playerPos.y = laddersUp[0].y
+    while (cellAt(move(playerPos, playerPos.dir))===0) playerPos.dir = playerPos.dir.cw
   }
   draw()
 }
