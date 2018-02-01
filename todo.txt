@@ -62,13 +62,12 @@ even more:
 [x] save the game (local storage)
 [x] fix layout on small screens
 [x] speed up saving on later levels (it's the enemies)
+[x] mouse hover effect
+[x] extinction spell - permanent cost?! kills everyone EXCEPT the target
 
 [ ] metrics
-[ ] extinction spell - permanent cost?! kills everyone EXCEPT the target
-[ ] require a click to focus
 [ ] ? pass through enemies spell (you swap places)
 [ ] ? oroborus - you can use sp as hp if you are killed
-
 
 [ ] speed up performance on slow devices - DrawWall obviously, but also drawMap's use of anyAtCell and general overdrawing
 [ ] fix touch controls (preventDefault and on touch down)

@@ -36,7 +36,7 @@ let loaded = false
 
 const spellNames = []
 // see enemies on map | no fog of war
-spellNames.push({name:"We are together", fullName:"As long as we have each other, we will never run out of problems", desc:"Does nothing"}) //instakill
+spellNames.push({name:"Out of Problems", fullName:"As long as we have each other, we will never run out of problems", desc:"Kill target creature"})
 spellNames.push({name:"Deception", desc:"Does nothing"}) // enemies stop hunting you
 spellNames.push({name:"Extinction", desc:"Target creature becomes the last of its kind. This spell is permanent. Spell points used will not regenerate!"})
 spellNames.push({name:"Ouroboros", desc:"Does nothing"}) //enemy attacks itself
@@ -1371,7 +1371,8 @@ function doKey(keyCode) {
     case 54: castHeartbeat(); break //6
 
     case 56: castExtinction(); break //8
-    case 48: //0
+    
+    case 48: castProblems(); break//0
 
   }
 }
@@ -1385,7 +1386,7 @@ function backToMain() {
 }
 
 const spellFunctionsAsList = [castTransmission, castWaves, castRitual, castWhatDo, castSeeThings, 
-  castHeartbeat, castNone, castExtinction, castNone, castNone]
+  castHeartbeat, castNone, castExtinction, castNone, castProblems]
 
 function castSpell(i) {
   spellFunctionsAsList[i]()
@@ -1447,6 +1448,20 @@ function cheatSpells() {
 
 function getPlayerTarget() {
   return findAtPos(enemies, move(playerPos, playerPos.dir))
+}
+
+function castProblems() {
+  if (!inGame()) return
+  clearMessages()
+  const e = getPlayerTarget()
+  if (e == undefined) {
+    playerCombatMessage.push("That spell requires a target")
+  } else if (trySpendSp(10)) {
+    hitMonster(1000, e, "You command it to die")
+    monsterCombatTurn()
+    draw()
+  }
+  draw()
 }
 
 function castExtinction() {
