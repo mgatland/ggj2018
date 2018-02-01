@@ -65,10 +65,16 @@ even more:
 [x] mouse hover effect
 [x] extinction spell - permanent cost?! kills everyone EXCEPT the target
 
+[ ] reset \ delete save \ save manager
+
+
+Moraff's help text in lower right:
 "If you see something in the left or right view, press one of the arrow keys to turn around so it appears in the main view."
 "How to play: use arrow keys to explore the dungeon. Use ladders to descend to deeper, more dangerous places"
+"You are in the town! Each colored square on the map is a ladder gonig up to to [sic] an inn, temple, bank or store"
+u => "there is no ladder here in this square. if you see a ladder in one of the views, ..."
+"on the left is a map showing the are around you. slanted lines show ladders going up and down"
 
-[ ] reset \ delete save \ save manager
 [ ] one-shot warning
 [ ] waiting next to an enemy, it should always attack
 

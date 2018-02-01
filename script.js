@@ -2174,7 +2174,8 @@ function hitPlayer(amount)
 }
 
 function healCost(amount) {
-  return Math.floor(14 + playerStats.level*2 + amount * 2.5 * (1 + playerStats.level*0.4))
+  if (amount > 40) amount *= 0.8 //20% bulk discount
+  return Math.floor(playerStats.level*2 + amount * 2)
 }
 
 function specialHitEffect(effect) {
