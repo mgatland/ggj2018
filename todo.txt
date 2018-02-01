@@ -67,7 +67,7 @@ even more:
 
 a:
 [x] bosses must not spawn in unreachable rooms. flood fill test the whole dungeon!
-[ ] make dungeon different on each life
+[x] make dungeon different on each life
 [ ] complete the set of spells
 	[x] teleport should teleport the monster, not you - that's much more useful. (can no longer be used to reach bosses though)
 	[x] err maybe it's both - with no target, it teleports you!

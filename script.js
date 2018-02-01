@@ -39,7 +39,7 @@ const spellNames = []
 spellNames.push({name:"Out of Problems", fullName:"As long as we have each other, we will never run out of problems", desc:"Kill target creature. This spell consumes half of your remaining health points."})
 spellNames.push({name:"Deception", desc:"Does nothing"}) // enemies stop hunting you
 spellNames.push({name:"Extinction", desc:"Target creature becomes the last of its kind. This spell is permanent. Spell points used will not regenerate!"})
-spellNames.push({name:"Ouroboros", desc:"Does nothing"}) //enemy attacks itself
+spellNames.push({name:"Ouroboros", desc:"Summon the World Eater Sword, the most powerful sword in the world!"})
 spellNames.push({name:"Heartbeat", desc:"Heal 1 health point each turn, for 3 turns per intelligence point"})
 spellNames.push({name:"We See Things", fullName: "We don't see things as they are, we see them as we are.", desc:"Pretend you are one of them. Enemies will ignore you unless provoked."})
 spellNames.push({name:"What do we do now?", desc:"Teleport target to a random location on this level. If there is no target, teleport yourself."})
@@ -49,7 +49,7 @@ spellNames.push({name:"Transmission", desc:"Detect the mind waves of a Shadow Gu
 spellNames.reverse()
 
 const effectNames = []
-effectNames.push("Heartbeat", "Disguised")
+effectNames.push("Heartbeat", "Disguised", "Oroboros")
 
 const spriteImage = new Image()
 spriteImage.addEventListener('load', function() {
@@ -1444,7 +1444,7 @@ function doKey(keyCode) {
     case 52: castWhatDo(); break //4
     case 53: castSeeThings(); break //5
     case 54: castHeartbeat(); break //6
-
+    case 55: castOroboros(); break //6
     case 56: castExtinction(); break //8
 
     case 48: castProblems(); break//0
@@ -1461,7 +1461,7 @@ function backToMain() {
 }
 
 const spellFunctionsAsList = [castTransmission, castWaves, castRitual, castWhatDo, castSeeThings, 
-  castHeartbeat, castNone, castExtinction, castNone, castProblems]
+  castHeartbeat, castOroboros, castExtinction, castNone, castProblems]
 
 function castSpell(i) {
   spellFunctionsAsList[i]()
@@ -1560,6 +1560,19 @@ function castExtinction() {
     monsterCombatTurn()
   }
   draw()
+}
+
+function castOroboros() {
+  if (!inGame()) return
+  clearMessages()
+  if (trySpendSp(7)) {
+    addEffect(2, 20)
+    playerCombatMessage.push(`You call forth Oroboros, World`)
+    playerCombatMessage.push(`Ender. It is a lovely sword, sharp`)
+    playerCombatMessage.push(`and pretty.`)
+    monsterCombatTurn()
+    draw()
+  }
 }
 
 function castHeartbeat() {
@@ -2043,7 +2056,11 @@ function cleanDeadEnemies() {
 }
 
 function playerDamageRoll() {
-  return rnd(6) //should be weapon power
+  let amount = trueRnd(6)
+  if (playerStats.effects[2] > 0) {
+    amount += 5
+  }
+  return amount
 }
 
 function effectExpired(i) {
