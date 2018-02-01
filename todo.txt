@@ -65,10 +65,14 @@ even more:
 [x] mouse hover effect
 [x] extinction spell - permanent cost?! kills everyone EXCEPT the target
 
+"If you see something in the left or right view, press one of the arrow keys to turn around so it appears in the main view."
+"How to play: use arrow keys to explore the dungeon. Use ladders to descend to deeper, more dangerous places"
+
+[ ] reset \ delete save \ save manager
 [ ] one-shot warning
 [ ] waiting next to an enemy, it should always attack
 
-[ ] potions - less frequent (1/20 in moraffs)
+[ ] potions - less frequent? (1/20 of enemies in moraffs)
 [ ] metrics
 [ ] ? pass through enemies spell (you swap places)
 [ ] ? oroborus - you can use sp as hp if you are killed
