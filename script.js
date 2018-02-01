@@ -288,8 +288,9 @@ function makeMap() {
   for(let r of rooms) {
     addCorridors(r)
   }
-  makeEnemies()
   makeLadders(depth)
+  removeOrphanRooms()
+  makeEnemies()
 }
 
 function makeFinalMap() {
@@ -299,9 +300,9 @@ function makeFinalMap() {
       map[x][y] = 1
     }
   }
-  makeEnemies()
   makeLadders(depth)
   laddersDown.length = 0 //hack out the down ladders
+  makeEnemies()
 }
 
 function makeLadders(n) {
@@ -314,6 +315,82 @@ function makeLadders(n) {
   laddersDown.length = 0
   fixedRandom  = new Random(n);
   times(50, () => addLadderDown())
+}
+
+function removeOrphanRooms()
+{
+  fixedRandom  = new Random(depth);
+  const roomStates = []
+  for(let x = 0; x < mapSize; x++) {
+    roomStates[x] = [];
+    for (let y = 0; y < mapSize; y++) {
+      roomStates[x][y] = false
+    }
+  }
+  //flood fill from up ladders with OKness
+  laddersUp.forEach(function (ladder) {
+    floodFillState(map, roomStates, "ok", ladder)
+  })
+  //for each non-OK downladder:
+  laddersDown.forEach(function (ladder) {
+    if (roomStates[ladder.x][ladder.y]===false) {
+      makePathToLadder(map, roomStates, ladder)
+    }
+  })
+
+  //remove non-ok cells
+  for(let x = 0; x < mapSize; x++) {
+    for (let y = 0; y < mapSize; y++) {
+      if (roomStates[x][y]===false) map[x][y] = 0
+    }
+  }
+}
+
+function makePathToLadder(map, roomStates, ladder) {
+  console.log('found orphaned down ladder at ' + ladder.x + "," + ladder.y)
+  //- find a close ok cell
+  let pos = {x:ladder.x, y:ladder.y}
+  while (roomStates[pos.x][pos.y]!=="ok") {
+    let nextPos = {x:-1,y:-1}
+    while (!isValidPos(nextPos)) {
+      nextPos = move(pos, pickRandom(dirsList))
+    }
+    pos = nextPos
+  }
+  console.log("carving path to " + pos.x + "," + pos.y)
+  //- carve a path there
+  let carve = {x:ladder.x, y:ladder.y}
+  while (carve.x != pos.x) {
+    carve.x += (pos.x > carve.x) ? 1 : -1
+    map[carve.x][carve.y]=1
+  }
+  while (carve.y != pos.y) {
+    carve.y += (pos.y > carve.y) ? 1 : -1
+    map[carve.x][carve.y]=1
+  }
+  //- flood fill okness 
+  floodFillState(map, roomStates, "ok", ladder) 
+}
+
+function floodFillState(map, states, state, pos)
+{
+  const open = [pos]
+  const closed = []
+  while (open.length > 0) {
+    let o = open.pop()
+    if (canFloodFillCell(map, states, state, o, closed)) {
+      states[o.x][o.y] = state
+      closed[o.x+o.y*mapSize]=true
+      open.push({x:o.x+1,y:o.y})
+      open.push({x:o.x-1,y:o.y})
+      open.push({x:o.x,y:o.y+1})
+      open.push({x:o.x,y:o.y-1})
+    }
+  }
+}
+
+function canFloodFillCell(map, states, state, c, closed) {
+  return (isValidPos(c) && map[c.x][c.y]===1&&states[c.x][c.y]!==state&&!closed[c.x+c.y*mapSize])
 }
 
 function addLadderDown() {
@@ -363,7 +440,6 @@ function addLadder(isUp) {
 }
 
 function makeEnemies() {  
-  console.log(storedEnemies)
   if (storedEnemies[depth] != undefined) {
     enemies = storedEnemies[depth]
     storedEnemies[depth] = undefined
@@ -1095,23 +1171,23 @@ function drawMap(viewX, viewY, viewSizeX, viewSizeY) {
 function drawCell(x, y) {
   const edgeLength = cellSize - 1
   tCtx.fillStyle = "black"
-  tCtx.fillRect(x*cellSize,y*cellSize,cellSize-1,cellSize-1)
+  tCtx.fillRect(x*cellSize+1,y*cellSize+1,cellSize-1,cellSize-1)
   tCtx.fillStyle = getColors().textColor
   if (cellAt(x-1, y) == 0) {
-    tCtx.fillRect(x*cellSize-1,y*cellSize,1,edgeLength)
+    tCtx.fillRect(x*cellSize,y*cellSize+1,1,edgeLength)
   }
   if (cellAt(x+1, y) == 0) {
-    tCtx.fillRect((x+1)*cellSize-1,y*cellSize,1,edgeLength)
+    tCtx.fillRect((x+1)*cellSize,y*cellSize+1,1,edgeLength)
   }
   if (cellAt(x, y-1) == 0) {
-    tCtx.fillRect(x*cellSize,y*cellSize-1,edgeLength,1)
+    tCtx.fillRect(x*cellSize+1,y*cellSize,edgeLength,1)
   }
   if (cellAt(x, y+1) == 0) {
-    tCtx.fillRect(x*cellSize,(y+1)*cellSize-1,edgeLength,1)
+    tCtx.fillRect(x*cellSize+1,(y+1)*cellSize,edgeLength,1)
   }
   if (debug && anyAtPos(enemies, {x:x, y:y})) {
     tCtx.fillStyle = "red"
-    tCtx.fillRect(x*cellSize+2, y*cellSize+2, cellSize - 4, cellSize - 4)
+    tCtx.fillRect(x*cellSize+3, y*cellSize+3, cellSize - 4, cellSize - 4)
   }
   if (anyAtPos(laddersUp, {x:x, y:y})) {
     if (depth == 0) {
@@ -1121,11 +1197,11 @@ function drawCell(x, y) {
     } else {
       tCtx.fillStyle = getColors().upLadder
     }
-    tCtx.fillRect(x*cellSize+1, y*cellSize+1, cellSize - 3, cellSize - 3)    
+    tCtx.fillRect(x*cellSize+2, y*cellSize+2, cellSize - 3, cellSize - 3)    
   }
   if (anyAtPos(laddersDown, {x:x, y:y})) {
     tCtx.fillStyle = getColors().downLadder
-    tCtx.fillRect(x*cellSize+1, y*cellSize+1, cellSize - 3, cellSize - 3)    
+    tCtx.fillRect(x*cellSize+2, y*cellSize+2, cellSize - 3, cellSize - 3)    
   }
 }
 
@@ -1135,7 +1211,7 @@ function cellAt(x, y) { //or {x,y} object
     y = x.y
     x = x.x
   }
-  if (x > 0 && x < mapSize && y > 0 && y < mapSize) {
+  if (x >= 0 && x < mapSize && y >= 0 && y < mapSize) {
     return map[x][y]
   }
   return 0
@@ -1743,7 +1819,7 @@ function wait() {
 }
 
 function pickRandom(list) {
-  return list[trueRnd(list.length)]
+  return list[rnd(list.length)]
 }
 
 function turnBack() {
