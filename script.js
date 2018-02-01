@@ -1097,9 +1097,10 @@ function cellIsEmpty(pos) {
 }
 
 canvas.addEventListener("click", function (e) {
+  const ratio = canvas.clientWidth/canvas.width
   //UI help: show people where to click to wait?
-  var x = e.pageX - this.offsetLeft;
-  var y = e.pageY - this.offsetTop;
+  var x = (e.pageX - this.offsetLeft) / ratio
+  var y = (e.pageY - this.offsetTop)  / ratio
   console.log(x+":"+y)
   //full screen press any key
   if (state===states.start||state===states.foundSomething
