@@ -259,7 +259,7 @@ function restart() {
 }
 
 function deriveMaxHpAndSp() {
-  playerStats.maxHp = 10 + Math.floor((8+playerStats.end/2)*playerStats.level)
+  playerStats.maxHp = 7 + Math.floor((8+playerStats.end/2)*playerStats.level)
   playerStats.maxSp = Math.floor(3+playerStats.int*playerStats.level*0.8) - playerStats.burnedSp
   if (playerStats.hp > playerStats.maxHp) playerStats.hp = playerStats.maxHp
   if (playerStats.sp > playerStats.maxSp) playerStats.sp = playerStats.maxSp
@@ -1877,7 +1877,11 @@ function standardHitDamage() {
 }
 
 function applyPlayerDamageReduction(damage) {
-  return Math.floor(Math.max(1, (damage*(50+Math.max(1, 100-playerStats.end)))/150))
+  let result = Math.floor(Math.max(1, (damage*(50+Math.max(1, 100-playerStats.end)))/150))
+  if (playerStats.level <= 2 && result > 10) {
+    result = Math.floor(result/2)
+  }
+  return result
 }
 
 //must be kept in sync with code above... need a better way to do this
