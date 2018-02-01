@@ -62,6 +62,7 @@ even more:
 [x] save the game (local storage)
 [x] fix layout on small screens
 
+[ ] speed up performance on slow devices - DrawWall obviously, but also drawMap's use of anyAtCell and general overdrawing
 [ ] speed up saving on later levels (it's the enemies)
 [ ] fix touch controls (preventDefault and on touch down)
 [ ] extinction spell - permanent cost?! kills everyone EXCEPT the target
