@@ -44,6 +44,8 @@ definitely:
 	could unlock at 1/2 the rate
 [x] iron giant level 4 - v slow, i got 6 attacks and killed it before it fought back. ok? could it have more health so it gets a hit off
 [x] everything this deep is a bit slow imo - some enemies should be as fast as the player - untested :/ :/
+[x] move enemies when you fall onto them from a ladder - sergio (is right)
+	(not fixed but should be super rare now)
 
 more:
 [x] draw islands under water ladders and potion bearers <---
@@ -54,8 +56,17 @@ more:
 [x] shuffle monster positions after studying
 [x] random regen spell points
 [x] touch controls + wasd
-[x] glitch to revive after death by pressing 's'
-[x] don't let people cheat past death
+[x] remove glitch to revive after death by pressing 's'
+
+[ ] save the game (local storage)
+[ ] fix touch controls (preventDefault and on touch down)
+[ ] fix layout on small screens
+[ ] extinction spell - permanent cost?! kills everyone EXCEPT the target
+[ ] ? pass through enemies spell (you swap places)
+[ ] ? oroborus - you can use sp as hp if you are killed
+[ ] metrics
+[ ] grey the stats text
+[ ] improve \ clarify the main quest
 
 [ ] ceiling on lower trash levels
 [ ] make dungeon different on each life
@@ -83,7 +94,6 @@ old:
 [ ] fog of war
 [ ] full screen map
 [ ] health drops from monsters (makes using a healing spell more debatable)
-[ ] move enemies when you fall onto them from a ladder - sergio (is right)
 
 
 spell thoughts:
@@ -97,7 +107,6 @@ sergio wants instant death resistance
 	waves - temporarily upgrade speed, that's versatile (and different from invisibility)
 [ ] health go red when low?!
 [ ] let the player dig downwards (if they get stuck) (we've never needed this)
-[ ] save the game (local storage)
 
 unlikely:
 [ ] cryptocurrencies

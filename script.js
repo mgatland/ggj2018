@@ -30,15 +30,9 @@ tCtx.imageSmoothingEnabled = false
 
 const width = canvas.width
 const height = canvas.height
-let loaded = false
-let playerCombatMessage = []
-let enemyCombatMessage = []
-let townMessage = []
-let flipped = false
-let buttons = []
 
-let endState = "" //hack for spawning final treasure
-let endRuns = 0
+let loaded = false
+
 const spellNames = []
 // see enemies on map | no fog of war
 spellNames.push({name:"We are together", fullName:"As long as we have each other, we will never run out of problems", desc:"Does nothing"}) //instakill
@@ -58,7 +52,11 @@ spriteImage.addEventListener('load', function() {
   loaded = true
   console.log("sprites loaded")
   if (state==states.colorPicker) {
-    restart()
+    if (!tryLoad()) {
+      console.log("no save file")
+      restart()
+    }
+    
   }
   draw()
 }, false)
@@ -91,9 +89,7 @@ const states = { main:"main", dead:"dead", start:"start",
   university:"university", healer:"healer", foundSomething:"foundSomething", 
   spellNotes:"spellNotes", colorPicker:"colorPicker",
   newLevel:"newLevel"}
-let state = states.start
 
-let playerStats = {}
 const mapSize = 100
 const cellSize = 10
 const dirs = {up:{name:"up", y:-1,i:0}, right:{name:"right",x:1,i:1}, down:{name:"down",y:1,i:2}, left:{name:"left",x:-1,i:3}}
@@ -155,15 +151,71 @@ enemyType.push({tileSet:3, sprite:1, end:9, speed:5, defence: 4, power:12, boss:
 enemyType.push({tileSet:3, sprite:5, end:0, speed:0, defence: 0, power:0, boss:4, isItem:true, name: "Oxygen Generator", desc:"This is it!!!"})
 
 //information you would save
+let state = states.start
+let playerStats = {}
+let playerCombatMessage = []
+let enemyCombatMessage = []
+let townMessage = []
+let endState = "" //hack for spawning final treasure
+let endRuns = 0
 let playerPos = {}
 let depth = -1
-let tileSet = 0
-let enemies = []
 let storedEnemies = []
+let newLevelMsg = -1
 
+//not saved
+let enemies = []
 const map = []
 const laddersUp = []
 const laddersDown = []
+let flipped = false
+let buttons = []
+let tileSet = 0
+
+function tryLoad() {
+  const save = getSave()
+  if (!save || !save.state) return false
+  console.log("loading save file")
+  state = save.state
+  playerStats = save.playerStats
+  playerCombatMessage = save.playerCombatMessage
+  enemyCombatMessage = save.enemyCombatMessage
+  townMessage = save.townMessage
+  endState = save.endState
+  endRuns = save.endRuns
+  playerPos = save.playerPos
+  depth = save.depth
+  enemies = save.enemies
+  storedEnemies = save.storedEnemies
+  newLevelMsg = save.newLevelMsg
+
+  //fixing up
+  playerPos.dir = dirsList[playerPos.dir] //fix up serializable
+  changeLevelTo(depth) //draws
+  return true
+}
+
+function save() {
+  var t0 = performance.now();
+  const save = {}
+  save.state = state
+  save.playerStats = playerStats
+  save.playerCombatMessage = playerCombatMessage
+  save.enemyCombatMessage = enemyCombatMessage
+  save.townMessage = townMessage
+  save.endState = endState
+  save.endRuns = endRuns
+  save.playerPos = playerPos
+  playerPos.dir = dirsList.indexOf(playerPos.dir) //make serializable
+  save.depth = depth
+  save.enemies = enemies
+  save.storedEnemies = storedEnemies
+  save.newLevelMsg = newLevelMsg
+  saveToLocal(save)
+  playerPos.dir = dirsList[playerPos.dir] //fix it up after
+  var t1 = performance.now();
+  if ((t1 - t0) > 5) console.log("slow save took " + (t1 - t0) + " milliseconds.")
+}
 
 function restart() {
   state = states.start
@@ -180,8 +232,12 @@ function restart() {
   playerStats.lootTimer = makeLootArray()
 
   clearMessages()
-  storedEnemies.length = 0
+  endState = ""
+  endRuns = 0
   depth=-1
+  enemies = []
+  storedEnemies.length = 0
+  newLevelMsg = -1
   changeLevelTo(0)
 }
 
@@ -289,13 +345,14 @@ function addLadder(isUp) {
 }
 
 function makeEnemies() {  
+  console.log(storedEnemies)
   if (storedEnemies[depth] != undefined) {
     enemies = storedEnemies[depth]
     storedEnemies[depth] = undefined
     //spawn more if there aren't many left
     times(180-enemies.length, makeEnemy)
   } else {
-    enemies.length = 0
+    enemies = []
     times(280+depth*30, makeEnemy)
     maybeGenerateBoss()
   }
@@ -598,6 +655,7 @@ function draw() {
       }
    
     }
+    save() ///eek, calling save from draw()?! but it's ok.
   }
 
   if (state===states.dead) {
@@ -817,16 +875,15 @@ function drawSpellUi(x, y, width, height) {
   ctx.fillText("[S] Show spell notes", tX, tY); tY += lineHeight
 }
 
+const ladderIslandTop = -0.85
+const ladderIslandLeft = -0.44
+const ladderIslandScale = 2.3
+const extraScale = 0.8
+const ladderIslandLadderLeft = 0.07
 
-let ladderIslandTop = -0.85
-let ladderIslandLeft = -0.44
-let ladderIslandScale = 2.3
-let extraScale = 0.8
-let ladderIslandLadderLeft = 0.07
-
-let potIslandLeft = 0.03
-let potIslandTop = 0
-let potIslandScale = 0.8
+const potIslandLeft = 0.03
+const potIslandTop = 0
+const potIslandScale = 0.8
 
 function draw3D(viewX, viewY, viewSize, dir) {
   const viewSizeX = viewSize
@@ -923,7 +980,7 @@ function draw3D(viewX, viewY, viewSize, dir) {
   drawBorder(viewX, viewY, viewSizeX, viewSizeY)
 }
 
-let waterHeightAdjust = -0.07
+const waterHeightAdjust = -0.07
 function tileSetHeightAdjust() {
   if (tileSet===1) return waterHeightAdjust
     return 0
@@ -1577,6 +1634,7 @@ function forward() {
 function clearMessages() {
   enemyCombatMessage.length = 0
   playerCombatMessage.length = 0
+  townMessage.length = 0 //for completeness, not actually needed except maybe on save\load
   cleanDeadEnemies()
 }
 
@@ -2114,7 +2172,6 @@ Random.prototype.nextFloat = function (opt_minOrMax, opt_max) {
 };
 
 const floorMsg = []
-let newLevelMsg = -1
 function addFloorMsg(n, list) {
     floorMsg[n]=list
 }
@@ -2132,14 +2189,28 @@ addFloorMsg(1001, ["The Oxygen Generator","Is Yours! Now Your","People Will Let 
 addFloorMsg(1002, ["\"You bring us an Oxygen","generator! As thanks,","you may live out your","days in the citadel.\"","","No! you say. Give my","place to another."])
 
 function getPeopleSaved() {
-  var out = parseInt(localStorage.getItem("peopleSaved"));
+  var out = parseInt(localStorage.getItem("peopleSaved"))
   if (isNaN(out)) return 0;
   return out
 }
 
 function saveSomeone() {
-  localStorage.setItem('peopleSaved', getPeopleSaved()+1);
+  localStorage.setItem('peopleSaved', getPeopleSaved()+1)
 }
+
+function getSave() {
+  try {
+    return JSON.parse(localStorage.getItem("save"))
+  }
+  catch (e) {
+    console.log('bad save')
+    return null
+  }
+}
+function saveToLocal(save) {
+  localStorage.setItem('save', JSON.stringify(save))
+}
+
 function startAge() {
   return 22 + getPeopleSaved()
 }
@@ -2153,7 +2224,7 @@ function makeLootArray() {
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         let j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+        [array[i], array[j]] = [array[j], array[i]]
     }
 }
 
