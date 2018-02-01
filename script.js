@@ -39,13 +39,16 @@ spellNames.push({name:"We are together", fullName:"As long as we have each other
 spellNames.push({name:"Deception", desc:"Does nothing"}) // enemies stop hunting you
 spellNames.push({name:"Extinction", desc:"Does nothing"}) //destroy all enemies of this type (op?)
 spellNames.push({name:"Ouroboros", desc:"Does nothing"}) //enemy attacks itself
-spellNames.push({name:"Heartbeat", desc:"Heals exactly 7 health points per level"}) //(todo: heal over time for a time)
+spellNames.push({name:"Heartbeat", desc:"Heals 1 health point each turn, to a total of 10 health points per level"})
 spellNames.push({name:"See things as we are", fullName: "We don't see things as they are, we see them as we are.", desc:"Disguise yourself as a monster. Monsters will ignore you unless provoked."})
 spellNames.push({name:"What do we do now?", desc:"Teleport to a random position on this level.", desc2:"If a Shadow Guardian is present, it will draw you closer!"}) //teleport
 spellNames.push({name:"Ritual", desc:"Heals up to 10 health points per level"}) //heal (small)
 spellNames.push({name:"Waves", desc:"Deals 15-30 health points of damage"}) //damage
 spellNames.push({name:"Transmission", desc:"Detect the mind waves of a Shadow Guardian, so you can hunt it for its treasure"}) //detect boss
 spellNames.reverse()
+
+const effectNames = []
+effectNames.push("heartbeat")
 
 const spriteImage = new Image()
 spriteImage.addEventListener('load', function() {
@@ -189,6 +192,9 @@ function tryLoad() {
   storedEnemies = save.storedEnemies
   newLevelMsg = save.newLevelMsg
 
+  //upgrade old saves here
+  if (playerStats.effects === undefined) playerStats.effects = []
+
   //fixing up
   playerPos.dir = dirsList[playerPos.dir] //fix up serializable
   changeLevelTo(depth) //draws
@@ -234,6 +240,7 @@ function restart() {
   playerStats.bossesKilled = [false, false, false, false]
   playerStats.levelsVisited = []
   playerStats.lootTimer = makeLootArray()
+  playerStats.effects = []
 
   clearMessages()
   endState = ""
@@ -575,18 +582,27 @@ function draw() {
     y+=lineHeight
     ctx.fillText(`Str: ${playerStats.strength}   Spd: ${playerStats.speed}   Int: ${playerStats.int}`, x, y);  y+=lineHeight
     ctx.fillText(`End: ${playerStats.end}   Luc: ${playerStats.luck}`, x, y);  y+=lineHeight
-    
-    y+=lineHeight
 
     ctx.font=smallFont
-    lineHeight = 16
+    lineHeight = 16    
+    y+=lineHeight
     ctx.fillText(`Arrow keys move and attack. Spacebar to wait.`, x, y);  y+=lineHeight
     if (anyAtPos(laddersUp, playerPos) || anyAtPos(laddersDown, playerPos)) {
       ctx.fillText(`[d] or [u] to go down or up a ladder.`, x, y);  y+=lineHeight
     }
+    ctx.font=mediumFont
+    lineHeight = 24
     y+=lineHeight
     if (playerStats.seeThingsSpellTimer > 0) {
       ctx.fillText(`Spell effect: disguised (${playerStats.seeThingsSpellTimer})`, x, y);  y+=lineHeight
+    }
+    if (playerStats.effects.some(x => x > 0)) {
+      ctx.fillText(`Status effects:`, x, y);  y+=lineHeight  
+      for(let i = 0; i < playerStats.effects.length; i++) {
+        if (playerStats.effects[i]>0) {
+          ctx.fillText(effectNames[i] + ` (${playerStats.effects[i]})`, x, y);  y+=lineHeight
+        }
+      }
     }
   }
 
@@ -1346,6 +1362,14 @@ function cheat2() {
   cheat()
 }
 
+function cheatSpells() {
+  playerStats.int=50
+  playerStats.sp = 50
+  playerStats.maxSp = 50
+  playerStats.spellKnown=[true,true,true,true,true,true,true,true,true,true]
+  draw()
+}
+
 function getPlayerTarget() {
   return findAtPos(enemies, move(playerPos, playerPos.dir))
 }
@@ -1354,13 +1378,17 @@ function castHeartbeat() {
   if (!inGame()) return
   clearMessages()
   if (trySpendSp(6)) {
-    const amount = playerStats.level*7
-    playerStats.hp = Math.min(playerStats.hp + amount, playerStats.maxHp)
-    playerCombatMessage.push(`You focus on your heart,`)
-    playerCombatMessage.push(`healing ${amount} health points.`)
+    addEffect(0, 10*playerStats.level)
+    playerCombatMessage.push(`You feel your heart pumping`)
+    playerCombatMessage.push(`with healing power`)
     monsterCombatTurn()
     draw()
   }
+}
+
+function addEffect(n, amount) {
+  if (playerStats.effects[n]===undefined) playerStats.effects[n] = 0
+  playerStats.effects[n] += amount
 }
 
 function castSeeThings() {
@@ -1772,9 +1800,29 @@ function playerDamageRoll() {
   return rnd(6) //should be weapon power
 }
 
+function effectExpired(i) {
+  playerCombatMessage.push(effectNames[i] + " expired")
+}
+
+function effectTicked(i) {
+  if (i===0) {
+    playerStats.hp++
+    deriveMaxHpAndSp()
+  }
+}
+
 function timePasses()
 {
-
+  for(let i = 0; i < playerStats.effects.length; i++) {
+    if (playerStats.effects[i]>0) {
+      playerStats.effects[i]--
+      if (playerStats.effects[i]==0) {
+        effectExpired(i)
+      } else {
+        effectTicked(i)
+      }
+    }
+  }
   if (playerStats.seeThingsSpellTimer > 0) {
     playerStats.seeThingsSpellTimer--
     draw()
