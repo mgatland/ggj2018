@@ -66,7 +66,9 @@ even more:
 [x] extinction spell - permanent cost?! kills everyone EXCEPT the target
 
 [ ] one-shot warning
+[ ] waiting next to an enemy, it should always attack
 
+[ ] potions - less frequent (1/20 in moraffs)
 [ ] metrics
 [ ] ? pass through enemies spell (you swap places)
 [ ] ? oroborus - you can use sp as hp if you are killed

@@ -259,8 +259,8 @@ function restart() {
 }
 
 function deriveMaxHpAndSp() {
-  playerStats.maxHp = 15 + Math.floor(10+(playerStats.end/2)*playerStats.level)
-  playerStats.maxSp = Math.floor((playerStats.int*3)/5)*playerStats.level - playerStats.burnedSp
+  playerStats.maxHp = 10 + Math.floor((8+playerStats.end/2)*playerStats.level)
+  playerStats.maxSp = Math.floor(3+playerStats.int*playerStats.level*0.8) - playerStats.burnedSp
   if (playerStats.hp > playerStats.maxHp) playerStats.hp = playerStats.maxHp
   if (playerStats.sp > playerStats.maxSp) playerStats.sp = playerStats.maxSp
 }
