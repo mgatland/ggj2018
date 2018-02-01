@@ -37,19 +37,19 @@ let loaded = false
 const spellNames = []
 // see enemies on map | no fog of war
 spellNames.push({name:"Out of Problems", fullName:"As long as we have each other, we will never run out of problems", desc:"Kill target creature. This spell consumes half of your remaining health points."})
-spellNames.push({name:"Deception", desc:"Does nothing"}) // enemies stop hunting you
+spellNames.push({name:"Deception", desc:"Pass through a wall to the other side"}) // enemies stop hunting you
 spellNames.push({name:"Extinction", desc:"Target creature becomes the last of its kind. This spell is permanent. Spell points used will not regenerate!"})
 spellNames.push({name:"Ouroboros", desc:"Summon the World Eater Sword, the most powerful sword in the world!"})
 spellNames.push({name:"Heartbeat", desc:"Heal 1 health point each turn, for 3 turns per intelligence point"})
-spellNames.push({name:"We See Things", fullName: "We don't see things as they are, we see them as we are.", desc:"Pretend you are one of them. Enemies will ignore you unless provoked."})
-spellNames.push({name:"What do we do now?", desc:"Teleport target to a random location on this level. If there is no target, teleport yourself."})
+spellNames.push({name:"We See Things", fullName: "We don't see things as they are, we see them as we are.", desc:"Let monsters think you are one of them. Enemies will ignore you unless provoked."})
+spellNames.push({name:"What do we do now?", desc:"Teleport target creature to a random location on this level. If there is no target, teleport yourself."})
 spellNames.push({name:"Ritual", desc:"Heal up to 3 health points per intelligence point"})
 spellNames.push({name:"Waves", desc:"Deal 30 health points of damage"})
 spellNames.push({name:"Transmission", desc:"Detect the mind waves of a Shadow Guardian, so you can hunt it for its treasure"})
 spellNames.reverse()
 
 const effectNames = []
-effectNames.push("Heartbeat", "Disguised", "Oroboros")
+effectNames.push("Heartbeat", "Disguised", "Ouroboros")
 
 const spriteImage = new Image()
 spriteImage.addEventListener('load', function() {
@@ -1444,7 +1444,7 @@ function doKey(keyCode) {
     case 52: castWhatDo(); break //4
     case 53: castSeeThings(); break //5
     case 54: castHeartbeat(); break //6
-    case 55: castOroboros(); break //6
+    case 55: castOuroboros(); break //6
     case 56: castExtinction(); break //8
 
     case 48: castProblems(); break//0
@@ -1461,7 +1461,7 @@ function backToMain() {
 }
 
 const spellFunctionsAsList = [castTransmission, castWaves, castRitual, castWhatDo, castSeeThings, 
-  castHeartbeat, castOroboros, castExtinction, castNone, castProblems]
+  castHeartbeat, castOuroboros, castExtinction, castNone, castProblems]
 
 function castSpell(i) {
   spellFunctionsAsList[i]()
@@ -1562,12 +1562,12 @@ function castExtinction() {
   draw()
 }
 
-function castOroboros() {
+function castOuroboros() {
   if (!inGame()) return
   clearMessages()
   if (trySpendSp(7)) {
     addEffect(2, 20)
-    playerCombatMessage.push(`You call forth Oroboros, World`)
+    playerCombatMessage.push(`You call forth Ouroboros, World`)
     playerCombatMessage.push(`Ender. It is a lovely sword, sharp`)
     playerCombatMessage.push(`and pretty.`)
     monsterCombatTurn()
