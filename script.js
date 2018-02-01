@@ -40,11 +40,11 @@ spellNames.push({name:"Out of Problems", fullName:"As long as we have each other
 spellNames.push({name:"Deception", desc:"Does nothing"}) // enemies stop hunting you
 spellNames.push({name:"Extinction", desc:"Target creature becomes the last of its kind. This spell is permanent. Spell points used will not regenerate!"})
 spellNames.push({name:"Ouroboros", desc:"Does nothing"}) //enemy attacks itself
-spellNames.push({name:"Heartbeat", desc:"Heals 1 health point each turn, for 3 turns per intelligence point"})
+spellNames.push({name:"Heartbeat", desc:"Heal 1 health point each turn, for 3 turns per intelligence point"})
 spellNames.push({name:"We See Things", fullName: "We don't see things as they are, we see them as we are.", desc:"Pretend you are one of them. Enemies will ignore you unless provoked."})
-spellNames.push({name:"What do we do now?", desc:"Teleport to a random position on this level.", desc2:"If a Shadow Guardian is present, it will draw you closer!"})
-spellNames.push({name:"Ritual", desc:"Heals up to 3 health points per intelligence point"})
-spellNames.push({name:"Waves", desc:"Deals 30 health points of damage"})
+spellNames.push({name:"What do we do now?", desc:"Teleport target to a random location on this level. If there is no target, teleport yourself."})
+spellNames.push({name:"Ritual", desc:"Heal up to 3 health points per intelligence point"})
+spellNames.push({name:"Waves", desc:"Deal 30 health points of damage"})
 spellNames.push({name:"Transmission", desc:"Detect the mind waves of a Shadow Guardian, so you can hunt it for its treasure"})
 spellNames.reverse()
 
@@ -1516,8 +1516,8 @@ function castWhatDo() {
   if (!inGame()) return
   clearMessages()
   if (trySpendSp(4)) {
-    const amount = playerStats.level*10
     const pos = {x:-1,y:-1}
+    const e = getPlayerTarget()
     const boss = enemies.find(x=>getType(x).boss != undefined)
     const startDist = boss != undefined ? distanceFromTo(playerPos, boss) : undefined
     let dist = 0
@@ -1526,16 +1526,23 @@ function castWhatDo() {
       pos.y = trueRnd(mapSize)
       dist = boss != undefined ? distanceFromTo(pos, boss) : undefined
     }
-    playerPos.x = pos.x
-    playerPos.y = pos.y
-    if (boss != undefined) {
-      playerCombatMessage.push(`You forget where you are,`)
-      playerCombatMessage.push(`and feel a cold presence calling you.`)
-      console.log(`old dist ${startDist}, new dist ${dist}`)
+    if (e) {
+      e.x = pos.x
+      e.y = pos.y
+      playerCombatMessage.push(`Your enemy forgets where it was.`)
     } else {
-      playerCombatMessage.push(`You forget where you are,`)
-      playerCombatMessage.push(`and you are somewhere else.`)
+      playerPos.x = pos.x
+      playerPos.y = pos.y
+      if (boss != undefined) {
+        playerCombatMessage.push(`You forget where you are, and feel`)
+        playerCombatMessage.push(`a cold voice pulling you closer.`)
+        console.log(`old dist ${startDist}, new dist ${dist}`)
+      } else {
+        playerCombatMessage.push(`You forget where you are,`)
+        playerCombatMessage.push(`and you are somewhere else.`)
+      }
     }
+
     monsterCombatTurn()
     draw()
   }
