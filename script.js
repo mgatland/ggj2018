@@ -1840,6 +1840,17 @@ function monsterAttack(e) {
     damage++ //at least 1 damage!
     times(Math.floor(result/40)+1, () => damage += rnd(e.power))
     //add bonus damage
+    if (depth > playerStats.level) damage += trueRnd(depth-playerStats.level)
+
+  }
+  //auto hit for 1 point, sometimes (no idea why, it's from moraffs...)
+  if (trueRnd(500)<depth*2) { //in moraff's, it's just depth
+    damage++
+  }
+  //25% chance of replacing all calculations with a standard hit (moraff's, IDK why)
+  //means monsters hit at least 25% of the time?
+  if (trueRnd(100)<25) {
+    damage = Math.floor(3+(depth)) //in moraff's, it's depth/2
   }
 
   if (damage > 0) {
@@ -1848,6 +1859,8 @@ function monsterAttack(e) {
       e.hp = 0
       //FIXME: this should go to a 'press any key' state that makes the enemy disappear
     } else {
+      //player damage reduction (slightly different in moraff's, uses .con)
+      damage = Math.floor(Math.max(1, (damage*(50+Math.max(1, 100-playerStats.end)))/150))
       hitPlayer(damage)
       enemyCombatMessage.push("The " + getType(e).name + " deals " + damage + " damage")
     }
