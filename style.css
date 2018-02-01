@@ -14,6 +14,17 @@ canvas {
 	right: 0;
 }
 
+.mouseBox {
+	position: absolute;
+	border: 1px solid white;
+	width: 10px;
+	height: 10px;
+	pointer-events: none;
+	animation:rainbow 0.5s infinite;
+}
+
+.hidden {display: none;}
+
 @media screen and (orientation: portrait) {
   canvas {
     max-width: 100%
@@ -41,4 +52,16 @@ canvas {
 	local("Wizard's Manse"),
 	url('wizards-manse.otf')
 	format('opentype');
+}
+
+
+
+.mouseBox {
+
+}
+
+@keyframes rainbow {
+0% {border-color: #ffffff;}
+50% {border-color: #ccc;}
+100% {border-color: #ffffff;}
 }

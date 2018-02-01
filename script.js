@@ -1,6 +1,7 @@
 "use strict"
 //DOM stuff
 const canvas = document.querySelector(".gameCanvas")
+const mouseBox = document.querySelector(".mouseBox")
 
 let debug = false
 
@@ -92,6 +93,8 @@ const states = { main:"main", dead:"dead", start:"start",
   university:"university", healer:"healer", foundSomething:"foundSomething", 
   spellNotes:"spellNotes", colorPicker:"colorPicker",
   newLevel:"newLevel"}
+
+const pressAnyKeyStates = [states.start, states.foundSomething, states.spellNotes, states.newLevel]
 
 const mapSize = 100
 const cellSize = 10
@@ -544,6 +547,7 @@ function draw() {
     t.print("Press any key to close")
 
     drawBorder(col2X, 0, viewSize, viewSizeY)
+    finishDraw()
     return //draw nothing else
   }
   
@@ -683,7 +687,6 @@ function draw() {
       }
    
     }
-    saveMain() ///eek, calling save from draw()?! but it's ok.
   }
 
   if (state===states.dead) {
@@ -784,7 +787,17 @@ function draw() {
     }
     drawPopup(false,"HIT D TO","GO BACK", backToMain)
   }
-  
+
+  finishDraw()
+}
+
+function finishDraw() {
+  //mouse Ui hacks
+  if (isPressAnyKeyState()) {
+    buttons.length = 0
+    button(0,0,canvas.width,canvas.height,pressAnyKey)
+  }
+  saveMain() ///eek, calling save from draw()?! but it's ok.
 }
 
 function drawMedium(text, x, y) {
@@ -1136,15 +1149,49 @@ function cellIsEmpty(pos) {
     && !anyAtPos(enemies, pos)
 }
 
-canvas.addEventListener("click", function (e) {
+document.addEventListener("mousemove", mouseMove)
+
+function mouseMove(e) {
+  let [x,y] = getMousePos(e)
+  let clickConsumed = false
+  buttons.forEach(b => {
+    if (!clickConsumed 
+      && x >= b.x && x <= b.x + b.width && y >= b.y && y <= b.y + b.height) {
+      clickConsumed = true
+      const ratio = canvas.clientWidth/canvas.width
+      mouseBox.style.left = Math.floor(b.x*ratio+canvas.offsetLeft)+"px"
+      mouseBox.style.top = Math.floor(b.y*ratio+canvas.offsetTop)+"px"
+      mouseBox.style.width = Math.floor(b.width*ratio-2)+"px"
+      mouseBox.style.height = Math.floor(b.height*ratio-2)+"px"
+      mouseBox.classList.remove("hidden")
+      console.log(b.y)
+    }
+  })
+  if (!clickConsumed) {
+    mouseBox.classList.add("hidden")
+  }
+}
+
+function getMousePos(e) {
   const ratio = canvas.clientWidth/canvas.width
   //UI help: show people where to click to wait?
-  var x = (e.pageX - this.offsetLeft) / ratio
-  var y = (e.pageY - this.offsetTop)  / ratio
-  console.log(x+":"+y)
+  var x = (e.pageX - canvas.offsetLeft) / ratio
+  var y = (e.pageY - canvas.offsetTop)  / ratio 
+  return [x, y]
+}
+
+function isPressAnyKeyState() {
+  return pressAnyKeyStates.indexOf(state)>=0;
+}
+
+function pressAnyKey() {
+  doKey(32) //enter
+}
+
+canvas.addEventListener("click", function (e) {
+  let [x,y] = getMousePos(e)
   //full screen press any key
-  if (state===states.start||state===states.foundSomething
-    || state === states.spellNotes || state === states.newLevel) {
+  if (isPressAnyKeyState()) {
     doKey(32)//enter
     return
   }
@@ -1165,10 +1212,15 @@ canvas.addEventListener("click", function (e) {
       clickConsumed = true
     }
   })
+  if (clickConsumed) {
+    //update mouse hover with new button positions
+    mouseMove(e)
+  }
 })
 
 window.addEventListener("keyup", function (e) {
   doKey(e.keyCode)
+  mouseBox.classList.add("hidden")
 })
 
 function doKey(keyCode) {
@@ -2255,6 +2307,12 @@ function setColorMode(mode) {
   loaded = false
   spriteImage.src =  'sprites' + colorModes[mode].fileName + '.png'
   colorMode = mode
+  if (state===states.colorPicker) {
+    buttons.length=0 //hack to disable mouse buttons because, unlike all other buttons,
+    //the color picker screen doesn't immediately update - 
+    //nothing changes until the file downloads
+  }
+
 }
 
 function nextColorMode() {
