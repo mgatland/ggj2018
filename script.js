@@ -36,7 +36,7 @@ let loaded = false
 
 const spellNames = []
 // see enemies on map | no fog of war
-spellNames.push({name:"Out of Problems", fullName:"As long as we have each other, we will never run out of problems", desc:"Kill target creature"})
+spellNames.push({name:"Out of Problems", fullName:"As long as we have each other, we will never run out of problems", desc:"Kill target creature. This spell consumes half of your remaining health points."})
 spellNames.push({name:"Deception", desc:"Does nothing"}) // enemies stop hunting you
 spellNames.push({name:"Extinction", desc:"Target creature becomes the last of its kind. This spell is permanent. Spell points used will not regenerate!"})
 spellNames.push({name:"Ouroboros", desc:"Does nothing"}) //enemy attacks itself
@@ -1531,6 +1531,7 @@ function castProblems() {
     playerCombatMessage.push("That spell requires a target")
   } else if (trySpendSp(10)) {
     hitMonster(1000, e, "You command it to die")
+    playerStats.hp = Math.ceil(playerStats.hp/2)
     monsterCombatTurn()
     draw()
   }
