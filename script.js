@@ -41,7 +41,7 @@ spellNames.push({name:"Deception", desc:"Does nothing"}) // enemies stop hunting
 spellNames.push({name:"Extinction", desc:"Target creature becomes the last of its kind. This spell is permanent. Spell points used will not regenerate!"})
 spellNames.push({name:"Ouroboros", desc:"Does nothing"}) //enemy attacks itself
 spellNames.push({name:"Heartbeat", desc:"Heals 1 health point each turn, for 3 turns per intelligence point"})
-spellNames.push({name:"See things as we are", fullName: "We don't see things as they are, we see them as we are.", desc:"Pretend to fit in with the crowd. Enemies will ignore you unless provoked."})
+spellNames.push({name:"We See Things", fullName: "We don't see things as they are, we see them as we are.", desc:"Pretend you are one of them. Enemies will ignore you unless provoked."})
 spellNames.push({name:"What do we do now?", desc:"Teleport to a random position on this level.", desc2:"If a Shadow Guardian is present, it will draw you closer!"}) //teleport
 spellNames.push({name:"Ritual", desc:"Heals up to 3 health points per intelligence point"}) //heal (small)
 spellNames.push({name:"Waves", desc:"Deals 15-30 health points of damage"}) //damage

@@ -66,6 +66,19 @@ even more:
 [x] extinction spell - permanent cost?! kills everyone EXCEPT the target
 
 [ ] reset \ delete save \ save manager
+[ ] complete the set of spells
+	teleport should teleport the monster, not you - that's much more useful. (can no longer be used to reach bosses though)
+		err maybe it's both - with no target, it teleports you!
+	ok, maybe 'seeing' spell should remove fog of war. it fits the price better. make deception invisibility, because it's very powerful
+	[ ] bosses must not spawn in unreachable rooms. flood fill test the whole dungeon!
+[ ] improve \ clarify the main quest
+[ ] plant should not be drawn in shadow sprite
+[ ] killing the oxygen generator seems too hacky
+[ ] pits
+[ ] poison - sporangium, bee, trash?
+[ ] fog of war
+[ ] full screen map
+[ ] rebalance
 
 
 Moraff's help text in lower right:
@@ -77,7 +90,6 @@ u => "there is no ladder here in this square. if you see a ladder in one of the 
 
 [ ] one-shot warning
 [ ] waiting next to an enemy, it should always attack
-
 [ ] potions - less frequent? (1/20 of enemies in moraffs)
 [ ] metrics
 [ ] ? pass through enemies spell (you swap places)
@@ -86,13 +98,12 @@ u => "there is no ladder here in this square. if you see a ladder in one of the 
 [ ] speed up performance on slow devices - DrawWall obviously, but also drawMap's use of anyAtCell and general overdrawing
 [ ] fix touch controls (preventDefault and on touch down)
 [ ] grey the stats text
-[ ] improve \ clarify the main quest
+
 
 [ ] ceiling on lower trash levels
 [ ] make dungeon different on each life
 [ ] extinction spell?
-[ ] plant should not be drawn in shadow sprite
-[ ] killing the oxygen generator seems too hacky
+
 [ ] top level, no enemies (banana peels?)
 [ ] once we have pits - bottom floor should have 'fallen' enemies from earlier levels, still at lower level
 [ ] spell to ignore pits
@@ -108,11 +119,6 @@ old:
 	Power to disable one enemy only | Power to disable all enemies 
 	Poison as a countdown to get to the surface - do i run or cast cure poison, it's a tough decision
 	Ascend spells are too good if you can use in combat (get out of any trouble instantly)
-
-[ ] poison - sporangium, bee, trash?
-
-[ ] fog of war
-[ ] full screen map
 [ ] health drops from monsters (makes using a healing spell more debatable)
 
 
