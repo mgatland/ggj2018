@@ -37,7 +37,7 @@ const spellNames = []
 // see enemies on map | no fog of war
 spellNames.push({name:"We are together", fullName:"As long as we have each other, we will never run out of problems", desc:"Does nothing"}) //instakill
 spellNames.push({name:"Deception", desc:"Does nothing"}) // enemies stop hunting you
-spellNames.push({name:"Extinction", desc:"Does nothing"}) //destroy all enemies of this type (op?)
+spellNames.push({name:"Extinction", desc:"Target creature becomes the last of its kind. This spell is permanent. Spell points used will not regenerate!"})
 spellNames.push({name:"Ouroboros", desc:"Does nothing"}) //enemy attacks itself
 spellNames.push({name:"Heartbeat", desc:"Heals 1 health point each turn, to a total of 10 health points per level"})
 spellNames.push({name:"See things as we are", fullName: "We don't see things as they are, we see them as we are.", desc:"Disguise yourself as a monster. Monsters will ignore you unless provoked."})
@@ -194,6 +194,8 @@ function tryLoad() {
 
   //upgrade old saves here
   if (playerStats.effects === undefined) playerStats.effects = []
+  if (playerStats.extinctions === undefined) playerStats.extinctions = []
+  if (playerStats.burnedSp === undefined) playerStats.burnedSp = 0
 
   //fixing up
   playerPos.dir = dirsList[playerPos.dir] //fix up serializable
@@ -231,17 +233,18 @@ function restart() {
   state = states.start
   playerStats = {speed:10, strength: 10, luck: 10, int:10, end:10, 
                   level:1, sp:0, maxSp:0, hp:0, maxHp:0, exp:0, gold: 50, age:startAge(),
-                  surprise:[], kills:0}
+                  surprise:[], kills:0, burnedSp:0}
   deriveMaxHpAndSp()
   playerStats.hp = playerStats.maxHp
   playerStats.sp = playerStats.maxSp
+
   playerPos = {x: 48, y: 21, dir: dirs.right}
   playerStats.spellKnown = [true,false,false,false,false,false,false,false,false,false]
   playerStats.bossesKilled = [false, false, false, false]
   playerStats.levelsVisited = []
   playerStats.lootTimer = makeLootArray()
   playerStats.effects = []
-
+  playerStats.extinctions = []
   clearMessages()
   endState = ""
   endRuns = 0
@@ -254,7 +257,7 @@ function restart() {
 
 function deriveMaxHpAndSp() {
   playerStats.maxHp = 15 + Math.floor(playerStats.end/2)*playerStats.level
-  playerStats.maxSp = Math.floor((playerStats.int*3)/5)*playerStats.level
+  playerStats.maxSp = Math.floor((playerStats.int*3)/5)*playerStats.level - playerStats.burnedSp
   if (playerStats.hp > playerStats.maxHp) playerStats.hp = playerStats.maxHp
   if (playerStats.sp > playerStats.maxSp) playerStats.sp = playerStats.maxSp
 }
@@ -401,6 +404,10 @@ function makeEnemy(fixedType) {
   }
 
   const et = getType(enemy)
+  if (playerStats.extinctions.indexOf(enemy.type) >= 0) {
+    console.log("tried to generate extinct creature! lol no")
+    return
+  }
   enemy.level = depth + 1 + trueRnd(2)
   if (et.boss != undefined) enemy.level += 5
   enemy.maxHp = 5 + Math.floor(et.end/2*enemy.level)
@@ -412,6 +419,7 @@ function makeEnemy(fixedType) {
   const baseExp = (et.end + et.power + et.speed + et.defence)
   enemy.exp = Math.floor(baseExp * (1+enemy.level/2))
   enemy.gold = trueRnd(enemy.exp) + 5 //note: this only occasionally drops, based on lootTimer
+
   enemies.push(enemy)
   return enemy
 }
@@ -559,7 +567,7 @@ function draw() {
   const ahead = move(playerPos, playerPos.dir)
   const target = enemyAt(ahead)
 
-  if (state !== states.start) {
+  if (state !== states.start && state != states.spellNotes) {
     drawSpellUi(0, 0, smallColWidth, smallViewY)
   }
 
@@ -709,7 +717,7 @@ function draw() {
   }
 
   if (state===states.spellNotes) {
-    const t = getMainWindowTextTool()
+    const t = getSpellNotesTextTool()
     t.print("Spell Notes")
     t.setFont(smallFont)
     //t.print()
@@ -845,6 +853,18 @@ function drawPopup(isTop,text1,text2, clickFunction)
   ctx.fillText(text2, x+20, y+65)
   drawBorder(x, y, popupWidth, popupHeight)
   button(x,y,popupWidth,popupHeight,clickFunction,null,true)
+}
+
+function getSpellNotesTextTool() {
+  const out = getMainWindowTextTool()
+  //this is a bit hacky, it's already been drawn
+  ctx.fillStyle = "black"
+  ctx.fillRect(col1X, 0, viewSize+smallColWidth, viewSizeY)
+  drawBorder(col1X, 0, viewSize+smallColWidth, viewSizeY)
+  ctx.fillStyle=getColors().textColor
+  out.x -= smallColWidth
+  console.log('hi')
+  return out
 }
 
 function getMainWindowTextTool() {
@@ -1297,6 +1317,8 @@ function doKey(keyCode) {
     case 52: castWhatDo(); break //4
     case 53: castSeeThings(); break //5
     case 54: castHeartbeat(); break //6
+
+    case 56: castExtinction(); break //8
     case 48: //0
 
   }
@@ -1311,14 +1333,15 @@ function backToMain() {
 }
 
 const spellFunctionsAsList = [castTransmission, castWaves, castRitual, castWhatDo, castSeeThings, 
-  castHeartbeat, castNone, castNone, castNone, castNone]
+  castHeartbeat, castNone, castExtinction, castNone, castNone]
 
 function castSpell(i) {
   spellFunctionsAsList[i]()
 }
 
 function castNone() {
-  trySpendSp(99999)
+  playerCombatMessage.push(`That spell just doesn't work.`)
+  draw()
 }
 
 function showSpellNotes() {
@@ -1372,6 +1395,28 @@ function cheatSpells() {
 
 function getPlayerTarget() {
   return findAtPos(enemies, move(playerPos, playerPos.dir))
+}
+
+function castExtinction() {
+  if (!inGame()) return
+
+  clearMessages()
+  const e = getPlayerTarget()
+  if (e == undefined) {
+    playerCombatMessage.push("That spell requires a target")
+  } else if (getType(e).boss != undefined || playerStats.extinctions.indexOf(e.type)>=0) {
+    showSpecialMessage(2000)
+  } else if (trySpendSp(8)) {
+    playerStats.burnedSp += 8
+    deriveMaxHpAndSp()
+    playerStats.extinctions.push(e.type)
+    enemies.forEach(m => {if (m.type===e.type&&m!=e) {m.hp=0}})
+    playerCombatMessage.push("You say the forbidden words")
+    playerCombatMessage.push("And this " + getType(e).name)
+    playerCombatMessage.push("becomes the last of its kind")
+    monsterCombatTurn()
+  }
+  draw()
 }
 
 function castHeartbeat() {
@@ -1578,17 +1623,23 @@ function changeLevelTo(newLevel)
   if(depth==0 && endState === "hasFlower") {
     //win message
     endState = "shouldSpawn"
-    state = states.newLevel
-    newLevelMsg=1002
+    showSpecialMessage(1002)
     endRuns++
   }
   draw()
 }
 
+function showSpecialMessage(n) {
+  if (state !== states.main) {
+    console.log("Warning: showing a message from weird state " + state + ", message is " + floorMsg[n][0] + "...")
+  }  
+  state = states.newLevel
+  newLevelMsg = n
+}
+
 function firstTimeOnLevel() {
   if (floorMsg[depth] != undefined) {
-    state = states.newLevel
-    newLevelMsg = depth
+    showSpecialMessage(depth)
   }
 }
 
@@ -1783,8 +1834,7 @@ function hitMonster(damage, e, text)
 function hitItem(e) {
   e.hp=0
   endState = "hasFlower"
-  newLevelMsg = 1001 //special end message
-  state = states.newLevel
+  showSpecialMessage(1001)
 }
 
 function cleanDeadEnemies() {
@@ -1842,8 +1892,7 @@ function checkEndState() {
     makeEnemy(bossEnemyStartCount+tileSetCount)
   }
   if (endState === "showMessage") {
-    state = states.newLevel
-    newLevelMsg = 1000
+    showSpecialMessage(1000)
     endState = "shouldSpawn"
     return
   }
@@ -2229,7 +2278,7 @@ const floorMsg = []
 function addFloorMsg(n, list) {
     floorMsg[n]=list
 }
-//HEY if you're rewriting these, set the floor number 0 for testing - it will show as soon as you start the game.
+//test with: showSpecialMessage(n); draw()
 addFloorMsg(1, ["A Little Snake Says:","    \"Such a Shame You","Had to Leave Home! ","There might be a way","to Get Back... But You","Don't Look Tough","Enough!\""])
 addFloorMsg(2, ["A Note:", "    \"Find Me On","This Level! I Have a","Crush on You! Or, Will","I Crush You? Puns Aside,","You Are Doomed.\"","- The Shadow Guardian"])
 addFloorMsg(3, ["A Little Snake Says:","    \"If You Can Find An","Oxygen Generator, You","Will Be Welcomed Back","Home At The Citidel!\"","But It Won't Be Easy.\""])
@@ -2241,6 +2290,10 @@ addFloorMsg(11, floorMsg[5])//repeats
 addFloorMsg(1000, ["\"You killed us all...","Now our shadow magic","is gone. Anyone can find","and steal our Oxygen","Generator from the","lowest level of the","dungeon.\""])
 addFloorMsg(1001, ["The Oxygen Generator","Is Yours! Now Your","People Will Let You","Return Home And Live","Out Your Years."])
 addFloorMsg(1002, ["\"You bring us an Oxygen","generator! As thanks,","you may live out your","days in the citadel.\"","","No! you say. Give my","place to another."])
+
+//
+addFloorMsg(2000, ["That spell won't work","on me! I'm already the","last of my kind :("])
+
 
 function getPeopleSaved() {
   var out = parseInt(localStorage.getItem("peopleSaved"))
