@@ -40,10 +40,10 @@ spellNames.push({name:"Out of Problems", fullName:"As long as we have each other
 spellNames.push({name:"Deception", desc:"Does nothing"}) // enemies stop hunting you
 spellNames.push({name:"Extinction", desc:"Target creature becomes the last of its kind. This spell is permanent. Spell points used will not regenerate!"})
 spellNames.push({name:"Ouroboros", desc:"Does nothing"}) //enemy attacks itself
-spellNames.push({name:"Heartbeat", desc:"Heals 1 health point each turn, to a total of 10 health points per level"})
+spellNames.push({name:"Heartbeat", desc:"Heals 1 health point each turn, for 3 turns per intelligence point"})
 spellNames.push({name:"See things as we are", fullName: "We don't see things as they are, we see them as we are.", desc:"Pretend to fit in with the crowd. Enemies will ignore you unless provoked."})
 spellNames.push({name:"What do we do now?", desc:"Teleport to a random position on this level.", desc2:"If a Shadow Guardian is present, it will draw you closer!"}) //teleport
-spellNames.push({name:"Ritual", desc:"Heals up to 10 health points per level"}) //heal (small)
+spellNames.push({name:"Ritual", desc:"Heals up to 3 health points per intelligence point"}) //heal (small)
 spellNames.push({name:"Waves", desc:"Deals 15-30 health points of damage"}) //damage
 spellNames.push({name:"Transmission", desc:"Detect the mind waves of a Shadow Guardian, so you can hunt it for its treasure"}) //detect boss
 spellNames.reverse()
@@ -1487,7 +1487,7 @@ function castHeartbeat() {
   if (!inGame()) return
   clearMessages()
   if (trySpendSp(6)) {
-    addEffect(0, 10*playerStats.level)
+    addEffect(0, 3*playerStats.int)
     playerCombatMessage.push(`You feel your heart pumping`)
     playerCombatMessage.push(`with healing power`)
     monsterCombatTurn()
@@ -1545,7 +1545,7 @@ function castRitual() {
   if (!inGame()) return
   clearMessages()
   if (trySpendSp(3)) {
-    const amount = trueRnd(playerStats.level*10) + 1
+    const amount = trueRnd(playerStats.int*3) + 1
     playerStats.hp = Math.min(playerStats.hp + amount, playerStats.maxHp)
     playerCombatMessage.push(`The ritual heals ${amount} health points.`)
     monsterCombatTurn()
