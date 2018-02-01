@@ -41,7 +41,7 @@ spellNames.push({name:"Deception", desc:"Does nothing"}) // enemies stop hunting
 spellNames.push({name:"Extinction", desc:"Target creature becomes the last of its kind. This spell is permanent. Spell points used will not regenerate!"})
 spellNames.push({name:"Ouroboros", desc:"Does nothing"}) //enemy attacks itself
 spellNames.push({name:"Heartbeat", desc:"Heals 1 health point each turn, to a total of 10 health points per level"})
-spellNames.push({name:"See things as we are", fullName: "We don't see things as they are, we see them as we are.", desc:"Disguise yourself as a monster. Monsters will ignore you unless provoked."})
+spellNames.push({name:"See things as we are", fullName: "We don't see things as they are, we see them as we are.", desc:"Pretend to fit in with the crowd. Enemies will ignore you unless provoked."})
 spellNames.push({name:"What do we do now?", desc:"Teleport to a random position on this level.", desc2:"If a Shadow Guardian is present, it will draw you closer!"}) //teleport
 spellNames.push({name:"Ritual", desc:"Heals up to 10 health points per level"}) //heal (small)
 spellNames.push({name:"Waves", desc:"Deals 15-30 health points of damage"}) //damage
@@ -49,7 +49,7 @@ spellNames.push({name:"Transmission", desc:"Detect the mind waves of a Shadow Gu
 spellNames.reverse()
 
 const effectNames = []
-effectNames.push("heartbeat")
+effectNames.push("Heartbeat", "Disguised")
 
 const spriteImage = new Image()
 spriteImage.addEventListener('load', function() {
@@ -605,9 +605,6 @@ function draw() {
     ctx.font=mediumFont
     lineHeight = 24
     y+=lineHeight
-    if (playerStats.seeThingsSpellTimer > 0) {
-      ctx.fillText(`Spell effect: disguised (${playerStats.seeThingsSpellTimer})`, x, y);  y+=lineHeight
-    }
     if (playerStats.effects.some(x => x > 0)) {
       ctx.fillText(`Status effects:`, x, y);  y+=lineHeight  
       for(let i = 0; i < playerStats.effects.length; i++) {
@@ -1371,7 +1368,7 @@ function doKey(keyCode) {
     case 54: castHeartbeat(); break //6
 
     case 56: castExtinction(); break //8
-    
+
     case 48: castProblems(); break//0
 
   }
@@ -1509,7 +1506,7 @@ function castSeeThings() {
   if (trySpendSp(5)) {
     playerCombatMessage.push(`What if we are all monsters?`)
     playerCombatMessage.push(`You pretend to fit in.`)
-    playerStats.seeThingsSpellTimer = 15
+    addEffect(1, 15)
     monsterCombatTurn()
     draw()
   }
@@ -1940,12 +1937,10 @@ function timePasses()
       }
     }
   }
-  if (playerStats.seeThingsSpellTimer > 0) {
-    playerStats.seeThingsSpellTimer--
-    draw()
-    return
+  let amount = playerMoveTime()
+  if (playerStats.effects[1] > 0) {
+    amount = 0 //we are disguised, which actually freezes enemies
   }
-  const amount = playerMoveTime()
   for (let e of enemies) {
     passTimeForEnemy(amount, e)
   }
