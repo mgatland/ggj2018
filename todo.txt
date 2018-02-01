@@ -61,14 +61,16 @@ more:
 even more:
 [x] save the game (local storage)
 [x] fix layout on small screens
+[x] speed up saving on later levels (it's the enemies)
 
-[ ] speed up performance on slow devices - DrawWall obviously, but also drawMap's use of anyAtCell and general overdrawing
-[ ] speed up saving on later levels (it's the enemies)
-[ ] fix touch controls (preventDefault and on touch down)
+[ ] metrics
 [ ] extinction spell - permanent cost?! kills everyone EXCEPT the target
 [ ] ? pass through enemies spell (you swap places)
 [ ] ? oroborus - you can use sp as hp if you are killed
-[ ] metrics
+
+
+[ ] speed up performance on slow devices - DrawWall obviously, but also drawMap's use of anyAtCell and general overdrawing
+[ ] fix touch controls (preventDefault and on touch down)
 [ ] grey the stats text
 [ ] improve \ clarify the main quest
 

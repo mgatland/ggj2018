@@ -160,11 +160,11 @@ let endState = "" //hack for spawning final treasure
 let endRuns = 0
 let playerPos = {}
 let depth = -1
-let storedEnemies = []
 let newLevelMsg = -1
+let enemies = []
+let storedEnemies = [] //saved on level change only
 
 //not saved
-let enemies = []
 const map = []
 const laddersUp = []
 const laddersDown = []
@@ -195,7 +195,8 @@ function tryLoad() {
   return true
 }
 
-function save() {
+//does not update enemies on other levels!
+function saveMain() {
   var t0 = performance.now();
   const save = {}
   save.state = state
@@ -209,12 +210,15 @@ function save() {
   playerPos.dir = dirsList.indexOf(playerPos.dir) //make serializable
   save.depth = depth
   save.enemies = enemies
-  save.storedEnemies = storedEnemies
   save.newLevelMsg = newLevelMsg
-  saveToLocal(save)
+  localStorage.setItem('saveMain', JSON.stringify(save))
   playerPos.dir = dirsList[playerPos.dir] //fix it up after
   var t1 = performance.now();
   if ((t1 - t0) > 5) console.log("slow save took " + (t1 - t0) + " milliseconds.")
+}
+
+function saveWorld() {
+  localStorage.setItem('saveWorld', JSON.stringify(storedEnemies))
 }
 
 function restart() {
@@ -655,7 +659,7 @@ function draw() {
       }
    
     }
-    save() ///eek, calling save from draw()?! but it's ok.
+    saveMain() ///eek, calling save from draw()?! but it's ok.
   }
 
   if (state===states.dead) {
@@ -1531,6 +1535,7 @@ function changeLevelTo(newLevel)
     storedEnemies[depth] = enemies
     enemies = []
   }
+  saveWorld()
   depth = newLevel
   tileSet = Math.floor(depth / 3) % tileSetCount
   playAudio(tileSet)
@@ -2201,15 +2206,15 @@ function saveSomeone() {
 
 function getSave() {
   try {
-    return JSON.parse(localStorage.getItem("save"))
+    const save = JSON.parse(localStorage.getItem("saveMain"))
+    const storedEnemies = JSON.parse(localStorage.getItem("saveWorld"))
+    save.storedEnemies = storedEnemies
+    return save
   }
   catch (e) {
     console.log('bad save')
     return null
   }
-}
-function saveToLocal(save) {
-  localStorage.setItem('save', JSON.stringify(save))
 }
 
 function startAge() {
