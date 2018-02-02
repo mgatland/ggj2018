@@ -154,7 +154,7 @@ enemyType.push({tileSet:0, sprite:4, end:6, speed:2, defence: 3, power:8, boss:0
 enemyType.push({tileSet:1, sprite:1, end:7, speed:6, defence: 3, power:9, boss:1, name: "Shadow Prawn", desc:"It demands blood for its barbequed brethren"})
 enemyType.push({tileSet:2, sprite:4, end:8, speed:2, defence: 3, power:10, boss:2, name: "Moonstar", desc:"Its gaze crosses dimensions"})
 enemyType.push({tileSet:3, sprite:1, end:9, speed:5, defence: 4, power:12, boss:3, name: "Audrey IV", desc:"It fights as if protecting its kin"})
-enemyType.push({tileSet:3, sprite:5, end:0, speed:0, defence: 0, power:0, boss:4, isItem:true, name: "Oxygen Generator", desc:"This is it!!!"})
+enemyType.push({tileSet:3, sprite:5, end:0, speed:0, defence: 0, power:0, isItem:true, name: "Oxygen Generator", desc:"This is it!!!"})
 
 //information you would save
 let state = states.start
@@ -793,6 +793,9 @@ function draw() {
         }
       }
    
+    }
+    if (endState === "hasFlower") {
+      ctx.drawImage(spriteImage, 256*5, 3*256, 255, 256, rearViewX, viewSizeY+smallViewSizeY+20, smallColWidth, smallColWidth)
     }
   }
 
@@ -2133,6 +2136,8 @@ function hitMonster(damage, e, text)
 //hack for final flower
 function hitItem(e) {
   e.hp=0
+  //teleport away so you can' see its dead body
+  e.x = -1
   endState = "hasFlower"
   showSpecialMessage(1001)
 }
