@@ -1307,8 +1307,29 @@ function cellIsEmpty(pos) {
 
 document.addEventListener("mousemove", mouseMove)
 
+let soreWristMode=false
+function s() {soreWristMode = true; console.log("clickless mode enabled")}
+let swmSet = false
+let oldMouseE = {}
+let smeTimer = null
+
 function mouseMove(e) {
   let [x,y] = getMousePos(e)
+
+  if (soreWristMode && e.screenX != oldMouseE.screenX) {
+    if (swmSet) {
+      clearTimeout(smeTimer)
+    }
+    swmSet = true
+    smeTimer = setTimeout(function () {
+      console.log("click")
+      const event = new MouseEvent("click", {screenX:oldMouseE.screenX, screenY:oldMouseE.screenY, clientX:oldMouseE.clientX, clientY:oldMouseE.clientY})
+      canvas.dispatchEvent(event)
+      swmSet=false
+    }, 100)
+    oldMouseE = e
+  }
+
   let clickConsumed = false
   buttons.forEach(b => {
     if (!clickConsumed 
