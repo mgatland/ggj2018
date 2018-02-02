@@ -673,7 +673,9 @@ function draw() {
   }
   draw3D(col2X, 0, viewSize, playerPos.dir)
 
-  drawLadderPopups()
+  if (menuState !== menuStates.start) {
+    drawLadderPopups()
+  }
 
   const ahead = move(playerPos, playerPos.dir)
   const target = enemyAt(ahead)
