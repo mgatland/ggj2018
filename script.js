@@ -535,7 +535,7 @@ function makeEnemy(fixedType) {
   enemy.power = et.power + Math.floor(enemy.level * et.power / 4)
   const baseExp = (et.end + et.power + et.speed + et.defence)
   enemy.exp = Math.floor(baseExp * (1+enemy.level/2))
-  enemy.gold = trueRnd(enemy.exp) + 5 //note: this only occasionally drops, based on lootTimer
+  enemy.gold = trueRnd(enemy.exp*2) + 5 //note: this only occasionally drops, based on lootTimer (25% chance last i looked)
 
   enemies.push(enemy)
   return enemy
