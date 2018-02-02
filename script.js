@@ -1484,6 +1484,9 @@ function doKey(keyCode) {
     if (playerStats.surprise.length ==0) {
       playerCombatMessage.push("nothing!")
     }
+    for(let i = 0; i < playerCombatMessage.length; i++) {
+      playerCombatMessage[i] = playerCombatMessage[i].replace("(PRESS ANY KEY)", "")
+    }
     for(let thing of playerStats.surprise) {
       if (thing.type==="boss") {
         switch (thing.bossId) {
@@ -2209,7 +2212,7 @@ function hitMonster(damage, e, text)
       playerStats.surprise.push({type:"boss", bossId:bossId})
       playerStats.surprise.push({type:"gold", amount:e.gold}) //bosses always give gold
       playerCombatMessage.push("The mighty Shadow Guardian is dead!")
-      playerCombatMessage.push("You take its treasure... (PRESS A KEY)")
+      playerCombatMessage.push("You take its treasure... (PRESS ANY KEY)")
     } else {
       playerCombatMessage.push("You killed it!")
       playerCombatMessage.push("You found... (PRESS ANY KEY)")
