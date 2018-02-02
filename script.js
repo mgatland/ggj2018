@@ -93,7 +93,7 @@ function trueRnd(n) {
 const states = { main:"main", dead:"dead",  
   university:"university", healer:"healer", foundSomething:"foundSomething", 
   spellNotes:"spellNotes",
-  newLevel:"newLevel", falling:"falling"}
+  newLevel:"newLevel", falling:"falling", endChoice:"endChoice", retireScreen:"retireScreen"}
 
 const menuStates = { ok:"ok", start:"start", colorPicker:"colorPicker"}
 
@@ -187,33 +187,39 @@ let tileSet = 0
 let frozen = false
 
 function tryLoad() {
-  const save = getSave()
-  if (!save || !save.state) return false
-  console.log("loading save file")
-  state = save.state
-  playerStats = save.playerStats
-  playerCombatMessage = save.playerCombatMessage
-  enemyCombatMessage = save.enemyCombatMessage
-  townMessage = save.townMessage
-  endState = save.endState
-  endRuns = save.endRuns
-  playerPos = save.playerPos
-  depth = save.depth
-  enemies = save.enemies
-  storedEnemies = save.storedEnemies
-  newLevelMsg = save.newLevelMsg
+  try {
+    const save = getSave()
+    if (!save || !save.state) return false
+    console.log("loading save file")
+    state = save.state
+    playerStats = save.playerStats
+    playerCombatMessage = save.playerCombatMessage
+    enemyCombatMessage = save.enemyCombatMessage
+    townMessage = save.townMessage
+    endState = save.endState
+    endRuns = save.endRuns
+    playerPos = save.playerPos
+    depth = save.depth
+    enemies = save.enemies
+    storedEnemies = save.storedEnemies
+    newLevelMsg = save.newLevelMsg
 
-  //upgrade old saves here
-  if (playerStats.effects === undefined) playerStats.effects = []
-  if (playerStats.extinctions === undefined) playerStats.extinctions = []
-  if (playerStats.burnedSp === undefined) playerStats.burnedSp = 0
-  if (playerStats.seed === undefined) playerStats.seed = 0
-  if (playerStats.knownPits === undefined) playerStats.knownPits = []
+    //upgrade old saves here
+    if (playerStats.effects === undefined) playerStats.effects = []
+    if (playerStats.extinctions === undefined) playerStats.extinctions = []
+    if (playerStats.burnedSp === undefined) playerStats.burnedSp = 0
+    if (playerStats.seed === undefined) playerStats.seed = 0
+    if (playerStats.knownPits === undefined) playerStats.knownPits = []
 
-  //fixing up
-  playerPos.dir = dirsList[playerPos.dir] //fix up serializable
-  changeLevelTo(depth) //draws
-  return true
+    //fixing up
+    playerPos.dir = dirsList[playerPos.dir] //fix up serializable
+    changeLevelTo(depth) //draws
+    return true
+    } catch (e) {
+      console.log("Loading failed somehow")
+      console.log(e)
+      return false
+    }
 }
 
 //does not update enemies on other levels!
@@ -640,7 +646,7 @@ function draw() {
   buttons.length=0
   ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-  if (state===states.newLevel) {
+  if (state===states.newLevel || state===states.endChoice || state===states.retireScreen) {
     const t = getMainWindowTextTool()
     t.setFont(specialFont)
     t.y += 20
@@ -651,8 +657,17 @@ function draw() {
 
     t.setFont(smallFont)
     t.print()
-    t.print("Press any key to close")
-
+    if (state===states.endChoice) {
+      button(col2X, t.y-t.lineHeight+2, viewSize, t.lineHeight, endRetire)
+      t.print("Press [R] to retire in peace")
+      button(col2X, t.y-t.lineHeight+2, viewSize, t.lineHeight, endContinue)
+      t.print("Press [D] to stay in the dungeon")
+    } else if (state===states.retireScreen) {
+      button(col2X, t.y-t.lineHeight+2, viewSize, t.lineHeight, endRestart)
+      t.print("Press [R] to restart")
+    } else {
+      t.print("Press any key to close")
+    }
     drawBorder(col2X, 0, viewSize, viewSizeY)
     finishDraw()
     return //draw nothing else
@@ -1388,6 +1403,21 @@ function doKey(keyCode) {
     }
     return
   }
+  if (state === states.endChoice) {
+    if (keyCode===82) {//r
+      endRetire()
+    }
+    if (keyCode===68) { //d
+      endContinue()
+    }
+    return
+  }
+  if (state === states.retireScreen) {
+    if (keyCode===82) {//r
+      endRestart()
+    }
+    return
+  }
   if (state === states.spellNotes || state === states.newLevel) {
     state = states.main
     draw()
@@ -1828,8 +1858,13 @@ function trySpendSp(n) {
 
 function restartIfDead() {
   if (state !== states.dead) return
-  restart()
   menuState = menuStates.start
+  restart()
+}
+
+function endRestart() {
+  menuState = menuStates.start
+  restart()
 }
 
 function townLadderType(pos) {
@@ -1872,11 +1907,12 @@ function changeLevelTo(newLevel, isFalling)
   }
   saveWorld()
   depth = newLevel
+  console.log("now on level " + depth)
   tileSet = Math.floor(depth / 3) % tileSetCount
   makeMap()
 
   if (!isFalling) {
-    playAudio(tileSet)
+    playAudio()
     //sneaky: preload the audio for the level below!
     const preLoadTileSet = Math.floor((depth+1) / 3) % tileSetCount
     loadAudio(preLoadTileSet)
@@ -1885,9 +1921,9 @@ function changeLevelTo(newLevel, isFalling)
       firstTimeOnLevel(newLevel)
     }
     if(depth==0 && endState === "hasFlower") {
-      //win message
       endState = "shouldSpawn"
-      showSpecialMessage(1002)
+      saveSomeone()
+      showEndChoice()
       endRuns++
     }
   }
@@ -1913,6 +1949,12 @@ function showSpecialMessage(n) {
   newLevelMsg = n
 }
 
+function showEndChoice() {
+  state = states.endChoice
+  newLevelMsg = 1002
+  stopAudio()
+}
+
 function firstTimeOnLevel() {
   if (floorMsg[depth] != undefined) {
     showSpecialMessage(depth)
@@ -1927,7 +1969,16 @@ function loadAudio(tileSet) {
   }  
 }
 
-function playAudio(tileSet) {
+function stopAudio() {
+  console.log("stop")
+  if (currentAudio != undefined) {
+    audios[currentAudio].pause()
+    audios[currentAudio].currentTime = 0;
+  }
+  currentAudio = undefined  
+}
+
+function playAudio() {
   console.log("play")
   if (currentAudio==tileSet) return
   if (currentAudio != undefined) {
@@ -2612,23 +2663,31 @@ Random.prototype.nextFloat = function (opt_minOrMax, opt_max) {
 
 const floorMsg = []
 function addFloorMsg(n, list) {
-    floorMsg[n]=list
+    floorMsg[n]=list.replace(/\^/g, '    ').split("|")
 }
 //test with: showSpecialMessage(n); draw()
-addFloorMsg(1, ["A Little Snake Says:","    \"Such a Shame You","Had to Leave Home! ","There might be a way","to Get Back... But You","Don't Look Tough","Enough!\""])
-addFloorMsg(2, ["A Note:", "    \"Find Me On","This Level! I Have a","Crush on You! Or, Will","I Crush You? Puns Aside,","You Are Doomed.\"","- The Shadow Guardian"])
-addFloorMsg(3, ["A Little Snake Says:","    \"If You Can Find An","Oxygen Generator, You","Will Be Welcomed Back","Home At The Citidel!\"","But It Won't Be Easy.\""])
-addFloorMsg(4, ["A Little Snake Says:", "    \"The Four Shadow","Guardians Protect An","Oxygen Generator! If","You Kill Them All, You","Can Claim It!\""])
-addFloorMsg(5, ["A Little Snake Says:", "    \"A Shadow Guardian","Dwells On This Level!","Hunting Them Is Your","Ticket Out Of Here!","But Be Careful!\""])
-addFloorMsg(8, floorMsg[5])//repeats
-addFloorMsg(11, floorMsg[5])//repeats
+addFloorMsg(1, `A Little Snake Says:|^"Such a Shame You|Had to Leave Home! |There might be a way|to Get Back... But You|Don't Look Tough|Enough!"`)
+addFloorMsg(2, `A Note:|^"Find Me On This|Level! I Have a Crush|on You! Or, Will I|Crush You? Puns Aside,|You Are Doomed."|- The Shadow Guardian`)
+
+addFloorMsg(3, `A Little Snake Says:|^"If You Had Your|Own Oxygen Generator,|You Would Be Allowed|Back Into The Citidel!"|I Know Where One Is."`)
+addFloorMsg(4, `A Little Snake Says:|^"The Four Shadow|Guardians Protect An|Oxygen Generator! If|You Kill Them All, You|Can Claim It!"`)
+addFloorMsg(5, `A Little Snake Says:|^"A Shadow Guardian|Dwells On This Level!|Hunting Them Is Your|Ticket Out Of Here!|But Be Careful!"`)
+
+addFloorMsg(8, `A Little Snake Says:|^"A Shadow Guardian|Dwells On This Level!|Hunting Them Is Your|Ticket Out Of Here!|But Be Careful!"`)//repeats
+
+addFloorMsg(11, `A Little Snake Says:|^"A Shadow Guardian|Dwells On This Level!|Hunting Them Is Your|Ticket Out Of Here!|But Be Careful!"`)//repeats
 //special
-addFloorMsg(1000, ["\"You killed us all...","Now our shadow magic","is gone. Anyone can find","and steal our Oxygen","Generator from the","lowest level of the","dungeon.\""])
-addFloorMsg(1001, ["The Oxygen Generator","Is Yours! Now Your","People Will Let You","Return Home And Live","Out Your Years."])
-addFloorMsg(1002, ["\"You bring us an Oxygen","generator! As thanks,","you may live out your","days in the citadel.\"","","No! you say. Give my","place to another."])
+addFloorMsg(1000, `"You killed us all...|Now our shadow magic|is gone. Anyone can find|and steal our Oxygen|Generator from the|lowest level of the|dungeon.\"`)
+addFloorMsg(1001, `The Oxygen Generator|Is Yours! Now Your|People Will Let You|Return Home And Live|Out Your Years.`)
+addFloorMsg(1002, `"You have your own|Oxygen supply! We Will|Let You Live In The|Citadel, If You Promise|To Donate It To Our|People When You Die."`)
+addFloorMsg(1003, `|   Congratulations!|||||         The End`)
+addFloorMsg(1004, `"No," you say, "Give|this Oxygen To Someone|In Need. My Place Is|Here, In The:|| |   `)
+addFloorMsg(1005, `"No," you say, "Give|this Oxygen To Someone|In Need. My Place Is|Here, In The:||     Dungeons Of|   The Unforgiven!"`)
+//
 
 //
-addFloorMsg(2000, ["That spell won't work","on me! I'm already the","last of my kind :("])
+addFloorMsg(2000, `That spell won't work|on me! I'm already the|last of my kind :(`)
+
 
 
 function getPeopleSaved() {
@@ -2679,10 +2738,30 @@ function button(x,y,width,height,callback, arg1, priority) {
   }
 }
 
-function freeze(callback) {
+function freeze(callback,n) {
   frozen = true
   setTimeout(function () {
     frozen = false
-    callback()
-  }, 1000)
+    if (callback != undefined) callback()
+  }, n||1000)
+}
+
+function endRetire() {
+  showRetireMessage()
+  draw()
+}
+
+function showRetireMessage() {
+  state = states.retireScreen
+  newLevelMsg = 1003  
+}
+
+function endContinue() {
+  showSpecialMessage(1004)
+  freeze(function () {
+    showSpecialMessage(1005)
+    draw()
+    playAudio()
+  })
+  draw()
 }

@@ -79,8 +79,7 @@ a:
 [x] killing the oxygen generator seems too hacky
 [x] reset \ delete save \ save manager
 [x] ceiling on lower trash levels
-
-[ ] improve \ clarify the main quest
+[x] improve \ clarify the main quest
 [ ] rebalance
 
 [ ] 'what do we do now' - remove a monster's urge to kill. it won't attach unless provoked
