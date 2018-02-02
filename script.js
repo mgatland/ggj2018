@@ -1067,13 +1067,21 @@ function draw3D(viewX, viewY, viewSize, dir) {
 
   //floor and ceiling
 
+  const flipX = flipped ? -1 : 1
+  if (flipped) {
+    tCtx.scale(-1,1) 
+  }
+  tCtx.drawImage(spriteImage, 256*6, 512*tileSet, 512, 512, 0, 0, viewSizeX*flipX, viewSizeY)
+  if (tileSet===0&&depth>0) {
+    //hack to draw the floor on the ceiling in trash land
+    tCtx.scale(1,-1)
+    tCtx.drawImage(spriteImage, 256*6, 512*tileSet+256, 512, 256, 0, -0, viewSizeX*flipX, -viewSizeY/2) 
+    tCtx.scale(1,-1)
+  }
   if (flipped) {
     tCtx.scale(-1,1)
-    tCtx.drawImage(spriteImage, 256*6, 512*tileSet, 512, 512, 0, 0, viewSizeX*-1, viewSizeY)
-    tCtx.scale(-1,1)    
-  } else {
-    tCtx.drawImage(spriteImage, 256*6, 512*tileSet, 512, 512, 0, 0, viewSizeX, viewSizeY)
   }
+
 
   const across = [-8,-7,-6,-5,-4,-3,-2,-1,7,6,5,4,3,2,1,0]
   for (let i = 15; i >= 0; i--) { //depth
