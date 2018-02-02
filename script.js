@@ -33,6 +33,7 @@ const width = canvas.width
 const height = canvas.height
 
 let loaded = false
+let justRestarted = false
 
 const spellNames = []
 // see enemies on map | no fog of war
@@ -55,12 +56,12 @@ const spriteImage = new Image()
 spriteImage.addEventListener('load', function() {
   loaded = true
   console.log("sprites loaded")
-  if (state==states.colorPicker) {
+  if (menuState === menuStates.colorPicker) {
     if (!tryLoad()) {
       console.log("no save file")
       restart()
     }
-    
+    menuState = menuStates.start
   }
   draw()
 }, false)
@@ -89,12 +90,15 @@ function trueRnd(n) {
   return Math.floor(Math.random() * n)
 }
 
-const states = { main:"main", dead:"dead", start:"start", 
+const states = { main:"main", dead:"dead",  
   university:"university", healer:"healer", foundSomething:"foundSomething", 
-  spellNotes:"spellNotes", colorPicker:"colorPicker",
+  spellNotes:"spellNotes",
   newLevel:"newLevel", falling:"falling"}
 
-const pressAnyKeyStates = [states.start, states.foundSomething, states.spellNotes, states.newLevel, states.falling]
+const menuStates = { ok:"ok", start:"start", colorPicker:"colorPicker"}
+
+//start state
+const pressAnyKeyStates = [states.foundSomething, states.spellNotes, states.newLevel, states.falling]
 
 const mapSize = 100
 const cellSize = 10
@@ -157,7 +161,7 @@ enemyType.push({tileSet:3, sprite:1, end:9, speed:5, defence: 4, power:12, boss:
 enemyType.push({tileSet:3, sprite:5, end:0, speed:0, defence: 0, power:0, isItem:true, name: "Oxygen Generator", desc:"This is it!!!"})
 
 //information you would save
-let state = states.start
+let state = states.main
 let playerStats = {}
 let playerCombatMessage = []
 let enemyCombatMessage = []
@@ -171,6 +175,8 @@ let enemies = []
 let storedEnemies = [] //saved on level change only
 
 //not saved
+let menuState = menuStates.colorPicker
+console.log(menuState)
 const map = []
 const pits = []
 const laddersUp = []
@@ -237,7 +243,8 @@ function saveWorld() {
 }
 
 function restart() {
-  state = states.start
+  justRestarted = true
+  state = states.main
   playerStats = {speed:10, strength: 10, luck: 10, int:10, end:10, 
                   level:1, sp:0, maxSp:0, hp:0, maxHp:0, exp:0, gold: 50, age:startAge(),
                   surprise:[], kills:0, burnedSp:0}
@@ -651,7 +658,7 @@ function draw() {
     return //draw nothing else
   }
   
-  if (state !== states.start) {
+  if (menuState !== menuStates.start) {
     draw3D(col1X, smallViewY, smallColWidth, playerPos.dir.ccw)
     draw3D(col3X, smallViewY, smallColWidth, playerPos.dir.cw)
     
@@ -671,12 +678,12 @@ function draw() {
   const ahead = move(playerPos, playerPos.dir)
   const target = enemyAt(ahead)
 
-  if (state !== states.start && state != states.spellNotes) {
+  if (menuState !== menuStates.start && state != states.spellNotes) {
     drawSpellUi(0, 0, smallColWidth, smallViewY)
   }
 
   //lower left HUD
-  if (state !== states.start) {
+  if (menuState !== menuStates.start) {
     ctx.fillStyle=getColors().textColor
     ctx.font=mediumFont
     let lineHeight = 24
@@ -726,7 +733,7 @@ function draw() {
     freeze(function () {
       ctx.fillText("(press any key)", x, y); y+=lineHeight  
     })
-  } else if (state !== states.start) {
+  } else if (menuState !== menuStates.start) {
     const x = rearViewX + smallColWidth + 20
     let y = lowerHudY
     ctx.font=mediumFont
@@ -805,31 +812,36 @@ function draw() {
     ctx.textAlign="left"
   }
 
-  if (state===states.start) {
+  if (menuState === menuStates.start) {
+    button(0, 0, canvas.width, canvas.height, pressAnyKey)
     drawTitle("Matthew's", centerX, 80)
     drawTitle("Dungeons of", centerX, 80+90)
     drawTitle("the Unforgiven", centerX, 80+90+70)
-    drawMedium("Press [spacebar] to start", centerX, viewSizeY - 20)
     let y = viewSizeY + 50
     const lineHeight = 30
-    drawMedium("Life in the citadel is hard but fair.", centerX, y); y += lineHeight
-    //works up to 1099
-    drawMedium(`There is only enough air for one thousand and ${numberToWords.toWords(12+getPeopleSaved())} people.`, centerX, y); y += lineHeight
-    drawMedium("When a baby is born, the oldest citizen is sent into the Depths.", centerX, y); y += lineHeight
-    y += lineHeight
-    drawMedium("Today is your turn to be exiled.", centerX, y); y += lineHeight
-    y += lineHeight
-    drawMedium("You have 50 coins and know 1 spell.", centerX, y); y += lineHeight
-    drawMedium(`You are ${startAge()} years old.`, centerX, y); y += lineHeight
-    drawMedium(" Good luck!", centerX, y); y += lineHeight
-    drawMedium("", centerX, y); y += lineHeight
-    drawMedium("", centerX, y); y += lineHeight
-    drawMedium("", centerX, y); y += lineHeight
-
+    if (justRestarted) {
+      drawMedium("Press [spacebar] to start", centerX, viewSizeY - 20)
+      drawMedium("Life in the citadel is hard but fair.", centerX, y); y += lineHeight
+      //works up to 1099
+      drawMedium(`There is only enough air for one thousand and ${numberToWords.toWords(12+getPeopleSaved())} people.`, centerX, y); y += lineHeight
+      drawMedium("When a baby is born, the oldest citizen is sent into the Depths.", centerX, y); y += lineHeight
+      y += lineHeight
+      drawMedium("Today is your turn to be exiled.", centerX, y); y += lineHeight
+      y += lineHeight
+      drawMedium("You have 50 coins and know 1 spell.", centerX, y); y += lineHeight
+      drawMedium(`You are ${startAge()} years old.`, centerX, y); y += lineHeight
+      drawMedium(" Good luck!", centerX, y); y += lineHeight
+    } else {
+      button(0, y-lineHeight+5, canvas.width, lineHeight, pressAnyKey, null, true)
+      drawMedium("Press [spacebar] to continue this game.", centerX, y); y += lineHeight
+      button(0, y-lineHeight+5, canvas.width, lineHeight, doKey, 82, true) //r for restart
+      drawMedium("Press [R] to abandon this character and start again.", centerX, y); y += lineHeight
+      y+=lineHeight*2
+      const kills = playerStats.bossesKilled.filter(x=>x===true).length
+      drawMedium(`You are level ${playerStats.level} and have killed ${kills} shadow guardian${plural(kills)}`, centerX, y); y += lineHeight
+    }
     ctx.textAlign="left"
-  }
-
-  if (state===states.spellNotes) {
+  } else if (state===states.spellNotes) {
     const t = getSpellNotesTextTool()
     t.print("Spell Notes")
     t.setFont(smallFont)
@@ -847,9 +859,7 @@ function draw() {
     t.print()
     t.print("Each spell costs as many spell points as its number")
     t.print("Press any key to close")
-  }
-
-  if (state===states.healer) {
+  } else if (state===states.healer) {
     const t = getMainWindowTextTool()
     t.print("The Therapist")
     t.setFont(mediumFont)
@@ -868,9 +878,7 @@ function draw() {
     button(col2X, t.y-t.lineHeight,viewSize,t.lineHeight,buyHealing,50,true)
     t.print(`Press [2] to heal 50 for ${healCost(50)}`)
     drawPopup(false,"HIT D TO","GO BACK", backToMain)
-  }
-
-  if (state===states.university) {
+  } else if (state===states.university) {
     const t = getMainWindowTextTool()
     t.print("Survivor's Technical College")
     t.setFont(mediumFont)
@@ -1354,16 +1362,19 @@ function doKey(keyCode) {
     return
   }
 
-  if (state === states.colorPicker) {
+  if (menuState === menuStates.colorPicker) {
     doKeyColorPicker(keyCode)
     return
   }
   if (!loaded) return
 
-  if (state === states.start) {
+  if (menuState === menuStates.start) {
     if (keyCode===32) {
-      state = states.main
+      menuState = menuState.ok
       draw()
+    }
+    if (keyCode===82) {
+      restart()
     }
     return
   }
@@ -1808,6 +1819,7 @@ function trySpendSp(n) {
 function restartIfDead() {
   if (state !== states.dead) return
   restart()
+  menuState = menuStates.start
 }
 
 function townLadderType(pos) {
@@ -2485,7 +2497,7 @@ const mfYellow = "#FFAA01"
 const mfOrange = "#FF5500"
 const mBlue = "#00AAFF"
 function showColorPicker() {
-  state = states.colorPicker
+  menuState = menuStates.colorPicker
   ctx.fillStyle = "black"
   ctx.fillRect(0, 0, canvas.width, canvas.height)
   ctx.fillStyle=mfYellow
@@ -2563,7 +2575,7 @@ function setColorMode(mode) {
   loaded = false
   spriteImage.src =  'sprites' + colorModes[mode].fileName + '.png'
   colorMode = mode
-  if (state===states.colorPicker) {
+  if (menuState === menuStates.colorPicker) {
     buttons.length=0 //hack to disable mouse buttons because, unlike all other buttons,
     //the color picker screen doesn't immediately update - 
     //nothing changes until the file downloads

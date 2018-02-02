@@ -75,16 +75,20 @@ a:
 	[x] oroboros
 [x] pits
 [x] spawn player near center
+[x] plant should not be drawn in shadow sprite
+[x] killing the oxygen generator seems too hacky
 
 [ ] reset \ delete save \ save manager
 [ ] ceiling on lower trash levels
 [ ] improve \ clarify the main quest
-[ ] plant should not be drawn in shadow sprite
-[ ] killing the oxygen generator seems too hacky
+[ ] rebalance
+
+[ ] 'what do we do now' - remove a monster's urge to kill. it won't attach unless provoked
+	(if the current version is too powerful, this would be a good alternative)
 [ ] poison - sporangium, bee, trash?
 [ ] fog of war
 [ ] full screen map
-[ ] rebalance
+
 
 ---------
 
@@ -95,8 +99,6 @@ Moraff's help text in lower right:
 u => "there is no ladder here in this square. if you see a ladder in one of the views, ..."
 "on the left is a map showing the are around you. slanted lines show ladders going up and down"
 
-[ ] one-shot warning
-[ ] waiting next to an enemy, it should always attack
 [ ] potions - less frequent? (1/20 of enemies in moraffs)
 [ ] metrics
 [ ] ? pass through enemies spell (you swap places)
@@ -118,7 +120,6 @@ old:
 	Power to disable one enemy only | Power to disable all enemies 
 	Poison as a countdown to get to the surface - do i run or cast cure poison, it's a tough decision
 	Ascend spells are too good if you can use in combat (get out of any trouble instantly)
-[ ] health drops from monsters (makes using a healing spell more debatable)
 
 
 spell thoughts:
