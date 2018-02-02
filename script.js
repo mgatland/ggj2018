@@ -1223,10 +1223,9 @@ function drawCell(x, y) {
     tCtx.fillRect(x*cellSize+3, y*cellSize+3, cellSize - 4, cellSize - 4)
   }
   const posKey = x+y*mapSize
-  if (pits[posKey]){//} playerStats.knownPits[depth]&&playerStats.knownPits[depth][posKey]===1) {
-    //todo: use a white sprite or set appropriate colors
-    tCtx.fillStyle = "red"
-    tCtx.fillRect(x*cellSize+3, y*cellSize+3, cellSize - 4, cellSize - 4)
+  if ((playerStats.knownPits[depth]&&playerStats.knownPits[depth][posKey]===1)
+    || (debug && pits[posKey])) {
+    drawCross(x,y)
   }
   if (anyAtPos(laddersUp, {x:x, y:y})) {
     if (depth == 0) {
@@ -1241,6 +1240,14 @@ function drawCell(x, y) {
   if (anyAtPos(laddersDown, {x:x, y:y})) {
     tCtx.fillStyle = getColors().downLadder
     tCtx.fillRect(x*cellSize+2, y*cellSize+2, cellSize - 3, cellSize - 3)    
+  }
+}
+
+function drawCross(x, y) {
+  tCtx.fillStyle = "white"
+  for (let i = 0; i < cellSize-3; i++) {
+    tCtx.fillRect(x*cellSize+2+i, y*cellSize+1+i, 1, 1)  
+    tCtx.fillRect(x*cellSize+2+i, y*cellSize+cellSize-i-2, 1, 1)  
   }
 }
 
