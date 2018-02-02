@@ -92,9 +92,9 @@ function trueRnd(n) {
 const states = { main:"main", dead:"dead", start:"start", 
   university:"university", healer:"healer", foundSomething:"foundSomething", 
   spellNotes:"spellNotes", colorPicker:"colorPicker",
-  newLevel:"newLevel"}
+  newLevel:"newLevel", falling:"falling"}
 
-const pressAnyKeyStates = [states.start, states.foundSomething, states.spellNotes, states.newLevel]
+const pressAnyKeyStates = [states.start, states.foundSomething, states.spellNotes, states.newLevel, states.falling]
 
 const mapSize = 100
 const cellSize = 10
@@ -172,11 +172,13 @@ let storedEnemies = [] //saved on level change only
 
 //not saved
 const map = []
+const pits = []
 const laddersUp = []
 const laddersDown = []
 let flipped = false
 let buttons = []
 let tileSet = 0
+let frozen = false
 
 function tryLoad() {
   const save = getSave()
@@ -200,6 +202,7 @@ function tryLoad() {
   if (playerStats.extinctions === undefined) playerStats.extinctions = []
   if (playerStats.burnedSp === undefined) playerStats.burnedSp = 0
   if (playerStats.seed === undefined) playerStats.seed = 0
+  if (playerStats.knownPits === undefined) playerStats.knownPits = []
 
   //fixing up
   playerPos.dir = dirsList[playerPos.dir] //fix up serializable
@@ -250,6 +253,7 @@ function restart() {
   playerStats.effects = []
   playerStats.extinctions = []
   playerStats.seed = trueRnd(1000)
+  playerStats.knownPits = []
   clearMessages()
   endState = ""
   endRuns = 0
@@ -273,6 +277,7 @@ function isLastLevel() {
 }
 
 function makeMap() {
+  pits.length = 0
   if (isLastLevel()) {
     makeFinalMap()
     return
@@ -292,7 +297,23 @@ function makeMap() {
   }
   makeLadders(depth)
   removeOrphanRooms()
+  makePits()
   makeEnemies()
+}
+
+function makePits() {
+  if (depth===0) return
+  times(80, () => makePit())
+}
+
+function makePit() {
+  let x = -1
+  let y = -1
+  while(cellAt({x:x,y:y})==0 || anyAtPos(laddersUp, {x:x, y:y}) || anyAtPos(laddersDown, {x:x, y:y})) {
+    x = rnd(mapSize)
+    y = rnd(mapSize)
+  }
+  pits[x+y*mapSize]=true
 }
 
 function makeFinalMap() {
@@ -695,7 +716,17 @@ function draw() {
   }
 
   //lower rightHUD
-  if (state !== states.start) {
+  if (state == states.falling) {
+    const x = rearViewX + smallColWidth + 20
+    let y = lowerHudY
+    ctx.font=mediumFont
+    let lineHeight = 24
+    ctx.fillText("Uh Oh...", x, y); y+=lineHeight
+    ctx.fillText("A sinking feeling!", x, y); y+=lineHeight
+    freeze(function () {
+      ctx.fillText("(press any key)", x, y); y+=lineHeight  
+    })
+  } else if (state !== states.start) {
     const x = rearViewX + smallColWidth + 20
     let y = lowerHudY
     ctx.font=mediumFont
@@ -1191,6 +1222,12 @@ function drawCell(x, y) {
     tCtx.fillStyle = "red"
     tCtx.fillRect(x*cellSize+3, y*cellSize+3, cellSize - 4, cellSize - 4)
   }
+  const posKey = x+y*mapSize
+  if (pits[posKey]){//} playerStats.knownPits[depth]&&playerStats.knownPits[depth][posKey]===1) {
+    //todo: use a white sprite or set appropriate colors
+    tCtx.fillStyle = "red"
+    tCtx.fillRect(x*cellSize+3, y*cellSize+3, cellSize - 4, cellSize - 4)
+  }
   if (anyAtPos(laddersUp, {x:x, y:y})) {
     if (depth == 0) {
       const ladderType = townLadderType({x:x, y:y})
@@ -1264,6 +1301,7 @@ function pressAnyKey() {
 }
 
 canvas.addEventListener("click", function (e) {
+  if (frozen) return
   let [x,y] = getMousePos(e)
   //full screen press any key
   if (isPressAnyKeyState()) {
@@ -1294,6 +1332,7 @@ canvas.addEventListener("click", function (e) {
 })
 
 window.addEventListener("keyup", function (e) {
+  if (frozen) return
   doKey(e.keyCode)
   mouseBox.classList.add("hidden")
 })
@@ -1322,6 +1361,15 @@ function doKey(keyCode) {
     state = states.main
     draw()
     return
+  }
+  if (state === states.falling) {
+    changeLevelTo(depth + 1, true)
+    while (cellAt(playerPos)===0) {
+      changeLevelTo(depth + 1, true)
+    }
+    //we loaded those in quick loading mode (no sprites or audio), so reload the level for real
+    state = states.main
+    changeLevelTo(depth)
   }
   if (state === states.healer) {
     switch (keyCode) {
@@ -1784,7 +1832,7 @@ function down() {
   changeLevelTo(depth+1)
 }
 
-function changeLevelTo(newLevel)
+function changeLevelTo(newLevel, isFalling)
 {
   if (depth != -1) {
     storedEnemies[depth] = enemies
@@ -1793,20 +1841,23 @@ function changeLevelTo(newLevel)
   saveWorld()
   depth = newLevel
   tileSet = Math.floor(depth / 3) % tileSetCount
-  playAudio(tileSet)
-  //sneaky: preload the audio for the level below!
-  const preLoadTileSet = Math.floor((depth+1) / 3) % tileSetCount
-  loadAudio(preLoadTileSet)
   makeMap()
-  if (playerStats.levelsVisited.indexOf(newLevel)==-1) {
-    playerStats.levelsVisited.push(newLevel)
-    firstTimeOnLevel(newLevel)
-  }
-  if(depth==0 && endState === "hasFlower") {
-    //win message
-    endState = "shouldSpawn"
-    showSpecialMessage(1002)
-    endRuns++
+
+  if (!isFalling) {
+    playAudio(tileSet)
+    //sneaky: preload the audio for the level below!
+    const preLoadTileSet = Math.floor((depth+1) / 3) % tileSetCount
+    loadAudio(preLoadTileSet)
+    if (playerStats.levelsVisited.indexOf(newLevel)==-1) {
+      playerStats.levelsVisited.push(newLevel)
+      firstTimeOnLevel(newLevel)
+    }
+    if(depth==0 && endState === "hasFlower") {
+      //win message
+      endState = "shouldSpawn"
+      showSpecialMessage(1002)
+      endRuns++
+    }
   }
   //hack to spawn player before redraw
   if (playerPos.x === -1) {
@@ -1814,7 +1865,7 @@ function changeLevelTo(newLevel)
     playerPos.y = laddersUp[0].y
     while (cellAt(move(playerPos, playerPos.dir))===0) playerPos.dir = playerPos.dir.cw
   }
-  draw()
+  if (!isFalling) draw()
 }
 
 function showSpecialMessage(n) {
@@ -1892,6 +1943,7 @@ function forward() {
   clearMessages()
 
   const dest = move(playerPos, playerPos.dir)
+
   if (enemies.some(e => e.x == dest.x && e.y == dest.y)) {
     fight(enemies.find(e => e.x == dest.x && e.y == dest.y))
     return
@@ -1900,7 +1952,15 @@ function forward() {
     flipped = !flipped
     playerPos.x += playerPos.dir.x
     playerPos.y += playerPos.dir.y
-    timePasses()
+    const posKey = playerPos.x+playerPos.y*mapSize
+    if (pits[posKey]) {
+      if (playerStats.knownPits[depth]===undefined) playerStats.knownPits[depth]={}
+      playerStats.knownPits[depth][posKey]=1
+      state = states.falling
+      draw()
+    } else {
+      timePasses()  
+    }
   }
 }
 
@@ -2578,4 +2638,12 @@ function button(x,y,width,height,callback, arg1, priority) {
     //move to front
     buttons.unshift(buttons.pop())
   }
+}
+
+function freeze(callback) {
+  frozen = true
+  setTimeout(function () {
+    frozen = false
+    callback()
+  }, 1000)
 }

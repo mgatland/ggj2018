@@ -68,18 +68,18 @@ even more:
 a:
 [x] bosses must not spawn in unreachable rooms. flood fill test the whole dungeon!
 [x] make dungeon different on each life
-[ ] complete the set of spells
+[x] complete the set of spells
 	[x] teleport should teleport the monster, not you - that's much more useful. (can no longer be used to reach bosses though)
 	[x] err maybe it's both - with no target, it teleports you!
-	ok, maybe 'seeing' spell should remove fog of war. it fits the price better. make deception invisibility, because it's very powerful
-	[ ] deception
-	[ ] oroboros
+	[x] deception
+	[x] oroboros
+[x] pits
+[ ] spawn player near center
 [ ] reset \ delete save \ save manager
 [ ] ceiling on lower trash levels
 [ ] improve \ clarify the main quest
 [ ] plant should not be drawn in shadow sprite
 [ ] killing the oxygen generator seems too hacky
-[ ] pits
 [ ] poison - sporangium, bee, trash?
 [ ] fog of war
 [ ] full screen map
