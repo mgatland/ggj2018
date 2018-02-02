@@ -102,6 +102,7 @@ const pressAnyKeyStates = [states.foundSomething, states.spellNotes, states.newL
 
 const mapSize = 100
 const cellSize = 10
+const levelsPerTileset = 3
 const dirs = {up:{name:"up", y:-1,i:0}, right:{name:"right",x:1,i:1}, down:{name:"down",y:1,i:2}, left:{name:"left",x:-1,i:3}}
 const dirsList = [dirs.up, dirs.right, dirs.down, dirs.left]
 setupDirs(dirsList)
@@ -286,7 +287,7 @@ function deriveMaxHpAndSp() {
 }
 
 function isLastLevel() {
-  return depth >= tileSetCount*3-1
+  return depth >= tileSetCount*levelsPerTileset-1
 }
 
 function makeMap() {
@@ -491,7 +492,7 @@ function makeEnemies() {
 
 function maybeGenerateBoss() {
   if (isBossLevel(depth)) {
-    const bossN = (Math.floor(depth/3))%tileSetCount
+    const bossN = (Math.floor(depth/levelsPerTileset))%tileSetCount
     if (!playerStats.bossesKilled[bossN]) {
       makeEnemy(bossEnemyStartCount+bossN)
     }
@@ -1827,7 +1828,7 @@ function castTransmission() {
       playerCombatMessage.push("No signal. You killed them all!")
     } else {
       const bossN = playerStats.bossesKilled.indexOf(false)
-      const dist = (bossN+1)*3 - 1 - depth
+      const dist = (bossN+1)*levelsPerTileset - 1 - depth
       if (dist==0) {
         playerCombatMessage.push("You hear the Shadow Guardian's mind!")
         const boss = enemies.find(x=>getType(x).boss != undefined)
@@ -1932,13 +1933,13 @@ function changeLevelTo(newLevel, isFalling)
   saveWorld()
   depth = newLevel
   console.log("now on level " + depth)
-  tileSet = Math.floor(depth / 3) % tileSetCount
+  tileSet = Math.floor(depth / levelsPerTileset) % tileSetCount
   makeMap()
 
   if (!isFalling) {
     playAudio()
     //sneaky: preload the audio for the level below!
-    const preLoadTileSet = Math.floor((depth+1) / 3) % tileSetCount
+    const preLoadTileSet = Math.floor((depth+1) / levelsPerTileset) % tileSetCount
     loadAudio(preLoadTileSet)
     if (playerStats.levelsVisited.indexOf(newLevel)==-1) {
       playerStats.levelsVisited.push(newLevel)
@@ -2135,7 +2136,7 @@ function monsterAttack(e) {
     damage++ //at least 1 damage!
     times(Math.floor(result/40)+1, () => damage += trueRnd(e.power))
     //add bonus damage
-    if (depth > playerStats.level) damage += trueRnd(depth-playerStats.level)
+    //no, it's already super hard - if (depth > playerStats.level) damage += trueRnd(depth-playerStats.level)
   }
   //auto hit for 1 point, sometimes (no idea why, it's from moraffs...)
   if (trueRnd(500)<depth*2) { //in moraff's, it's just depth
@@ -2170,7 +2171,7 @@ function playerDefenceRoll() {
 }
 
 function standardHitDamage() {
-  return Math.floor(3+(depth)) //in moraff's, it's depth/2
+  return Math.floor(3+(depth/2)) //same as moraff's
 }
 
 function applyPlayerDamageReduction(damage) {
@@ -2188,7 +2189,7 @@ function maxEnemyDamage(e) {
   const result = attackRoll - playerDefenceRoll()
   let damage = 2
   times(Math.floor(result/40)+1, () => damage += e.power-1)
-  if (depth > playerStats.level) damage += (depth-playerStats.level)
+  //no it was too hard - if (depth > playerStats.level) damage += (depth-playerStats.level)
   return Math.max(damage, standardHitDamage())
 }
 
@@ -2693,7 +2694,7 @@ function addFloorMsg(n, list) {
 addFloorMsg(1, `A Little Snake Says:|^"Such a Shame You|Had to Leave Home! |There might be a way|to Get Back... But You|Don't Look Tough|Enough!"`)
 addFloorMsg(2, `A Note:|^"Find Me On This|Level! I Have a Crush|on You! Or, Will I|Crush You? Puns Aside,|You Are Doomed."|- The Shadow Guardian`)
 
-addFloorMsg(3, `A Little Snake Says:|^"If You Had Your|Own Oxygen Generator,|You Would Be Allowed|Back Into The Citidel!"|I Know Where One Is."`)
+addFloorMsg(3, `A Little Snake Says:|^"If You Had Your|Own Oxygen Generator,|You Would Be Allowed|Back Into The Citidel!|I Know Where One Is."`)
 addFloorMsg(4, `A Little Snake Says:|^"The Four Shadow|Guardians Protect An|Oxygen Generator! If|You Kill Them All, You|Can Claim It!"`)
 addFloorMsg(5, `A Little Snake Says:|^"A Shadow Guardian|Dwells On This Level!|Hunting Them Is Your|Ticket Out Of Here!|But Be Careful!"`)
 
