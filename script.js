@@ -1859,10 +1859,15 @@ function changeLevelTo(newLevel, isFalling)
       endRuns++
     }
   }
-  //hack to spawn player before redraw
+  //hack to move player before first draw on new game
   if (playerPos.x === -1) {
-    playerPos.x = laddersUp[0].x
-    playerPos.y = laddersUp[0].y
+    let pos = {x:Math.floor(mapSize/2),y:Math.floor(mapSize/2)}
+    while (!cellIsEmpty(pos)) {
+      pos = move(pos, pickRandom(dirsList))
+    }
+    playerPos.x = pos.x
+    playerPos.y = pos.y
+    //face away from walls
     while (cellAt(move(playerPos, playerPos.dir))===0) playerPos.dir = playerPos.dir.cw
   }
   if (!isFalling) draw()

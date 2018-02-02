@@ -74,6 +74,7 @@ a:
 	[x] deception
 	[x] oroboros
 [x] pits
+
 [ ] spawn player near center
 [ ] reset \ delete save \ save manager
 [ ] ceiling on lower trash levels
