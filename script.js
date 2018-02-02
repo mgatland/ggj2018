@@ -1446,7 +1446,7 @@ function doKey(keyCode) {
     case 54: castHeartbeat(); break //6
     case 55: castOuroboros(); break //6
     case 56: castExtinction(); break //8
-
+    case 57: castDeception(); break //9
     case 48: castProblems(); break//0
 
   }
@@ -1461,15 +1461,10 @@ function backToMain() {
 }
 
 const spellFunctionsAsList = [castTransmission, castWaves, castRitual, castWhatDo, castSeeThings, 
-  castHeartbeat, castOuroboros, castExtinction, castNone, castProblems]
+  castHeartbeat, castOuroboros, castExtinction, castDeception, castProblems]
 
 function castSpell(i) {
   spellFunctionsAsList[i]()
-}
-
-function castNone() {
-  playerCombatMessage.push(`That spell just doesn't work.`)
-  draw()
 }
 
 function showSpellNotes() {
@@ -1540,9 +1535,33 @@ function castProblems() {
   draw()
 }
 
+function castDeception() {
+  if (!inGame()) return
+  clearMessages()
+  let wall = move(playerPos, playerPos.dir)
+  if (cellAt(wall)!=0) {
+    playerCombatMessage.push("That spell must be cast on a wall")
+  } else {
+    let dist = 0
+    while (dist < 15 && isValidPos(wall) && cellAt(wall)==0) {
+      console.log(wall.x+":"+wall.y)
+      wall = move(wall, playerPos.dir)
+      dist++
+    }
+    if (!isValidPos(wall) || cellAt(wall)==0) {
+      playerCombatMessage.push("The wall is too thick.")
+    } else if (trySpendSp(9)) {
+      playerCombatMessage.push("Wall? What wall?")
+      playerCombatMessage.push("You step through.")
+      playerPos.x = wall.x
+      playerPos.y = wall.y
+    }
+  }
+  draw()
+}
+
 function castExtinction() {
   if (!inGame()) return
-
   clearMessages()
   const e = getPlayerTarget()
   if (e == undefined) {
