@@ -74,8 +74,8 @@ a:
 	[x] deception
 	[x] oroboros
 [x] pits
+[x] spawn player near center
 
-[ ] spawn player near center
 [ ] reset \ delete save \ save manager
 [ ] ceiling on lower trash levels
 [ ] improve \ clarify the main quest
