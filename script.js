@@ -303,7 +303,7 @@ function makeMap() {
 
 function makePits() {
   if (depth===0) return
-  times(80, () => makePit())
+  times(40, () => makePit())
 }
 
 function makePit() {
@@ -331,13 +331,13 @@ function makeFinalMap() {
 function makeLadders(n) {
   laddersUp.length = 0
   fixedRandom  = new Random(playerStats.seed+n-1);
-  times(50, () => addLadderUp())
+  times(100, () => addLadderUp())
   if (depth==0) {
     times(150, () => addLadderUp())
   }
   laddersDown.length = 0
   fixedRandom  = new Random(playerStats.seed+n);
-  times(50, () => addLadderDown())
+  times(100, () => addLadderDown())
 }
 
 function removeOrphanRooms()
