@@ -130,7 +130,7 @@ enemyType.push({tileSet:0, sprite:4, end:5, speed:2, defence: 3, power:5, name: 
 enemyType.push({tileSet:1, sprite:1, end:3, speed:15, defence: 6, power:8, name: "Killer Prawn", desc:"It snarls at your presence"})
 enemyType.push({tileSet:1, sprite:2, end:2, speed:5, defence: 2, power:10, name: "Island Mimic", desc:"Its sandy shore has claimed many victims"})
 enemyType.push({tileSet:1, sprite:3, end:3, speed:10, defence: 12, power:10, name: "Purple Tentacle", desc:"Does it belong to something bigger?"})
-enemyType.push({tileSet:1, sprite:4, end:12, speed:2, defence: 2, power:16, name: "Iron Giant", desc:"You hear grinding gears from the depths"})
+enemyType.push({tileSet:1, sprite:4, end:15, speed:2, defence: 2, power:16, name: "Iron Giant", desc:"You hear grinding gears from the depths"})
 
 enemyType.push({tileSet:2, sprite:1, end:3, speed:10, defence: 13, power:8, name: "Sporangium Warrior", desc:"A cloud of toxic spores surrounds it"})
 enemyType.push({tileSet:2, sprite:2, end:3, speed:10, defence: 5, power:11, name: "Aspergillus Philosopher", desc:"It quivers threateningly"})
