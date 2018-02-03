@@ -92,13 +92,13 @@ function trueRnd(n) {
 
 const states = { main:"main", dead:"dead",  
   university:"university", healer:"healer", foundSomething:"foundSomething", 
-  spellNotes:"spellNotes",
+  spellNotes:"spellNotes", fullMap:"fullMap",
   newLevel:"newLevel", falling:"falling", endChoice:"endChoice", retireScreen:"retireScreen"}
 
 const menuStates = { ok:"ok", start:"start", colorPicker:"colorPicker"}
 
 //start state
-const pressAnyKeyStates = [states.foundSomething, states.spellNotes, states.newLevel, states.falling]
+const pressAnyKeyStates = [states.foundSomething, states.spellNotes, states.fullMap, states.newLevel, states.falling]
 
 const mapSize = 100
 const cellSize = 10
@@ -684,7 +684,7 @@ function draw() {
     draw3D(col3X, smallViewY, smallColWidth, playerPos.dir.cw)
     
     draw3D(rearViewX, viewSizeY, smallColWidth, playerPos.dir.reverse)
-    drawMap(col3X, 0, canvas.width - col3X, smallViewY)
+    drawMap(col3X, 0, canvas.width - col3X, smallViewY, true)
 
     button(col1X, viewSizeY-smallViewSizeY, smallColWidth, smallViewSizeY, turnLeft)
     button(col2X, 0, viewSize, viewSizeY, forward)
@@ -701,7 +701,7 @@ function draw() {
   const ahead = move(playerPos, playerPos.dir)
   const target = enemyAt(ahead)
 
-  if (menuState !== menuStates.start && state != states.spellNotes) {
+  if (menuState !== menuStates.start && state != states.spellNotes && state != states.fullMap) {
     drawSpellUi(0, 0, smallColWidth, smallViewY)
   }
 
@@ -728,10 +728,8 @@ function draw() {
     ctx.font=smallFont
     lineHeight = 16    
     y+=lineHeight
-    ctx.fillText(`Arrow keys move and attack. Spacebar to wait.`, x, y);  y+=lineHeight
-    if (anyAtPos(laddersUp, playerPos) || anyAtPos(laddersDown, playerPos)) {
-      ctx.fillText(`[d] or [u] to go down or up a ladder.`, x, y);  y+=lineHeight
-    }
+    ctx.fillText(`Arrow keys move and attack. `, x, y);  y+=lineHeight
+    ctx.fillText(`[spacebar] to wait. [m] to show map.`, x, y);  y+=lineHeight
     ctx.font=mediumFont
     lineHeight = 24
     y+=lineHeight
@@ -864,6 +862,8 @@ function draw() {
       drawMedium(`You are level ${playerStats.level} and have killed ${kills} shadow guardian${plural(kills)}`, centerX, y); y += lineHeight
     }
     ctx.textAlign="left"
+  } else if (state===states.fullMap) {
+    drawMap(0,0,canvas.width,canvas.height, false)
   } else if (state===states.spellNotes) {
     const t = getSpellNotesTextTool()
     t.print("Spell Notes")
@@ -1215,7 +1215,8 @@ function viewCellPos(pos, viewDir, i, j)
   }
 }
 
-function drawMap(viewX, viewY, viewSizeX, viewSizeY) {
+function drawMap(viewX, viewY, viewSizeX, viewSizeY, hasButton) {
+  if (hasButton) button(viewX, viewY, viewSizeX, viewSizeY, showFullMap)
   tCtx.fillStyle = getColors().mapBack
   tCtx.fillRect(0, 0, mapSize*cellSize+viewSizeX, mapSize*cellSize+viewSizeY)
   for (let x = 0; x < mapSize; x++) {
@@ -1445,7 +1446,7 @@ function doKey(keyCode) {
     }
     return
   }
-  if (state === states.spellNotes || state === states.newLevel) {
+  if (state === states.spellNotes || state === states.newLevel || state === states.fullMap) {
     state = states.main
     draw()
     return
@@ -1577,7 +1578,7 @@ function doKey(keyCode) {
     case 83: //s
         showSpellNotes()
         break
-    case 77: showMap()
+    case 77: showFullMap()
       break
     case 49: castTransmission(); break //1
     case 50: castWaves(); break //2
@@ -1611,6 +1612,12 @@ function castSpell(i) {
 function showSpellNotes() {
   if (!inGame()) return
   state = states.spellNotes
+  draw()  
+}
+
+function showFullMap() {
+  if (!inGame()) return
+  state = states.fullMap
   draw()  
 }
 
