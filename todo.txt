@@ -96,17 +96,12 @@ saturday playtest:
 [x] wedge of cheese - didn't do plural correctly for 1 hp
 [x] push enemies you step onto (via ladder or wall-walk)
 [x] i don't notice spells unlock
+[x] full screen map
 
 
-
-[ ] 'what do we do now' - remove a monster's urge to kill. it won't attach unless provoked
-	(if the current version is too powerful, this would be a good alternative)
 [ ] poison - sporangium, bee, trash?
 [ ] fog of war
-[ ] full screen map
-
-
----------
+[ ] help text
 
 Moraff's help text in lower right:
 "If you see something in the left or right view, press one of the arrow keys to turn around so it appears in the main view."
@@ -115,16 +110,16 @@ Moraff's help text in lower right:
 u => "there is no ladder here in this square. if you see a ladder in one of the views, ..."
 "on the left is a map showing the are around you. slanted lines show ladders going up and down"
 
+[ ] top level, no enemies (banana peels?)
+[ ] 'what do we do now' - remove a monster's urge to kill. it won't attach unless provoked
+	(if the current version is too powerful, this would be a good alternative)
 [ ] potions - less frequent? (1/20 of enemies in moraffs)
 [ ] metrics
 [ ] ? pass through enemies spell (you swap places)
 [ ] ? oroborus - you can use sp as hp if you are killed
-
 [ ] speed up performance on slow devices - DrawWall obviously, but also drawMap's use of anyAtCell and general overdrawing
 [ ] grey the stats text
 [ ] extinction spell?
-
-[ ] top level, no enemies (banana peels?)
 [ ] once we have pits - bottom floor should have 'fallen' enemies from earlier levels, still at lower level
 [ ] spell to ignore pits
 
