@@ -1079,12 +1079,36 @@ const potIslandLeft = 0.03
 const potIslandTop = 0
 const potIslandScale = 0.8
 
+let oldGraphics = false
+let nearPlaneDist = 0.5
+
+function graphics() {
+  oldGraphics =  !oldGraphics
+  console.log("old graphics: " + oldGraphics)
+  draw()
+}
+
+//distance from camera to front of cell.
+//at distance 0, the front is 0.5 behind you!
+//at distance 1, it's 0.5 cells away
+function sizeAtDist(size, distance) {
+  if (oldGraphics) {
+    const depthFactor = 2
+    return size / Math.pow(depthFactor, distance-1)
+  } else {
+    //hack for walls going behind camera
+    if (distance<=0.5) return size*2
+    //proper
+    return size*nearPlaneDist/(distance-0.5)
+  }
+}
+
 function draw3D(viewX, viewY, viewSize, dir) {
   const viewSizeX = viewSize
   const viewSizeY = Math.floor(viewSize / 1.5)
   const viewXCentre = viewSizeX / 2
   const viewYCentre = viewSizeY / 2
-  const depthFactor = 2
+  
 
   //floor and ceiling
 
@@ -1103,11 +1127,10 @@ function draw3D(viewX, viewY, viewSize, dir) {
     tCtx.scale(-1,1)
   }
 
-
   const across = [-8,-7,-6,-5,-4,-3,-2,-1,7,6,5,4,3,2,1,0]
   for (let i = 15; i >= 0; i--) { //depth
     const isHomeRow = (i == 0)
-    const size = viewSizeY/(Math.pow(depthFactor,i-1))
+    const size = sizeAtDist(viewSizeY, i)
     //draw edges
     for (let j of across) {
       const cellPos = viewCellPos(playerPos, dir, i, j)
@@ -1115,7 +1138,7 @@ function draw3D(viewX, viewY, viewSize, dir) {
       if (cell == 0) {
         const left = viewXCentre - size/2 + j*size
         const top = viewYCentre - size/2
-        const behindSize = size / depthFactor
+        const behindSize = sizeAtDist(viewSizeY, i+1)
         if (j > 0) {
           const backLeft = viewXCentre - behindSize/2 + j*behindSize
           const backTop = viewYCentre - behindSize/2
@@ -1125,14 +1148,16 @@ function draw3D(viewX, viewY, viewSize, dir) {
           const pixelWidth = (viewXCentre - behindSize/2 + (j+1)*behindSize) - (left+size)
           drawWall(tCtx, tileSet, left+size, top, pixelWidth, size, behindSize)
         }
-        //front
-        tCtx.drawImage(spriteImage, 0, 256*tileSet, 256, 256, left, top, size, size)
+        //front //-size*0.02*(8-Math.abs(j))
+        if (i>0) {
+          tCtx.drawImage(spriteImage, 0, 256*tileSet, 256, 256, left, top, size, size)
+        }
       } else {
         {
           const l = findAtPos(laddersUp, cellPos)
           if (l != undefined)
           {
-            const eSize = viewSizeY/(Math.pow(depthFactor,i-0.4))
+            const eSize = sizeAtDist(viewSizeY, i+0.6)
             const left = viewXCentre - eSize/2 + j*eSize
             const top = viewYCentre - eSize/2-eSize*(isHomeRow ? 0.4:0.2)
             tCtx.drawImage(spriteImage, 0, 5*256, 256, 256, left, top, eSize, eSize)
@@ -1142,7 +1167,7 @@ function draw3D(viewX, viewY, viewSize, dir) {
           const l = findAtPos(laddersDown, cellPos)
           if (l != undefined)
           {
-            const eSize = viewSizeY/(Math.pow(depthFactor,i-0.4))
+            const eSize = sizeAtDist(viewSizeY, i+0.6)
             const left = viewXCentre - eSize/2 + j*eSize
             let top = viewYCentre - eSize/2+eSize*(isHomeRow ? 0.4:0.2) + eSize*tileSetHeightAdjust()
             if (tileSet==1) {
@@ -1158,7 +1183,7 @@ function draw3D(viewX, viewY, viewSize, dir) {
         const e = enemies.find(e => e.x == cellPos.x && e.y == cellPos.y)
         if (e != undefined) {
           const et = enemyType[e.type]
-          const eSize = viewSizeY/(Math.pow(depthFactor,i-0.4))
+          const eSize = sizeAtDist(viewSizeY, i+0.5)
           const left = viewXCentre - eSize/2 + j*eSize
           const top = viewYCentre - eSize/2+eSize*0.2 + eSize*tileSetHeightAdjust()
           //draw island under some enemies
@@ -1412,6 +1437,10 @@ function doKey(keyCode) {
 
   if (keyCode==67) {
     nextColorMode()
+    return
+  }
+  if (keyCode==71) {
+    graphics()
     return
   }
 
