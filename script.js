@@ -1530,7 +1530,7 @@ function doKey(keyCode) {
       if (thing.type==="hp") {
         const amount = trueRnd(9)+1
         playerCombatMessage.push("A wedge of muscle cheese...")
-        playerCombatMessage.push(`You chew it, gaining ${amount} health points.`)
+        playerCombatMessage.push(`You chew it, gaining ${amount} health point${plural(amount)}.`)
         playerStats.hp += amount
         deriveMaxHpAndSp()
       }
