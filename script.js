@@ -644,7 +644,8 @@ const centerX = Math.floor(canvas.width/2)
 const rearViewX = Math.floor(centerX-smallColWidth/2)
 function draw() {
   buttons.length=0
-  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  ctx.fillStyle = "black"
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
 
   if (state===states.newLevel || state===states.endChoice || state===states.retireScreen) {
     const t = getMainWindowTextTool()
