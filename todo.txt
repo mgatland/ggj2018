@@ -80,7 +80,24 @@ a:
 [x] reset \ delete save \ save manager
 [x] ceiling on lower trash levels
 [x] improve \ clarify the main quest
-[ ] rebalance
+[x] rebalance
+
+saturday playtest:
+90m - got to level 7. It's hard to get to 8. Died.
+[x] It was mostly fine except i didn't get enough XP to level up by the time i ran out of spell points
+[x] i'd like 0.5x XP from low level enemies, same at level 4, more from there on
+[x] enemy defence, speed and power should not scale with level. The player's stats don't!
+[x] *** level up costs: was cheap up to level 5, but 5->6 is too expensive for the first time. should be $300 max
+[x] low level enemies too slow - high level enemies too fast
+[x] tentacles have v high defence - less hp to compensate? like, 4-5hp
+[x] enemies feel too tough on level 5+. I am level 7 but dungeon depth 7 is really hard for me
+[x] iron giant - even more health?
+[x] fill background in black so save-as-image takes screenshots correctly
+[x] wedge of cheese - didn't do plural correctly for 1 hp
+[x] push enemies you step onto (via ladder or wall-walk)
+[x] i don't notice spells unlock
+
+
 
 [ ] 'what do we do now' - remove a monster's urge to kill. it won't attach unless provoked
 	(if the current version is too powerful, this would be a good alternative)

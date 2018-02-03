@@ -875,7 +875,7 @@ function draw() {
         t.print("    " + spellNames[i].desc)
         if (spellNames[i].desc2 != null) t.print("    " +spellNames[i].desc2)
       } else {
-        t.print((i+1) + " " + "???")
+        t.print((i+1))
         t.print()
       }
     }
@@ -1522,6 +1522,8 @@ function doKey(keyCode) {
         if (spellToGet >= 0) {
           playerCombatMessage.push("A spell: " + spellNames[spellToGet].name + "!")
           playerStats.spellKnown[spellToGet] = true
+          //very hacky: open the spellbook
+          state = states.spellNotes
         } else {
           playerCombatMessage.push("A spell, but you already knew it.")  
         }
