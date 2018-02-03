@@ -314,6 +314,11 @@ function makeMap() {
   makeEnemies()
 }
 
+function moveToPos(one, two) {
+  one.x = two.x
+  one.y = two.y
+}
+
 function makePits() {
   if (depth===0) return
   times(40, () => makePit())
@@ -1687,8 +1692,8 @@ function castDeception() {
     } else if (trySpendSp(9)) {
       playerCombatMessage.push("Wall? What wall?")
       playerCombatMessage.push("You step through.")
-      playerPos.x = wall.x
-      playerPos.y = wall.y
+      moveToPos(playerPos, wall)
+      smooshOverlappingEnemies()
     }
   }
   draw()
@@ -1951,6 +1956,7 @@ function changeLevelTo(newLevel, isFalling)
       showEndChoice()
       endRuns++
     }
+    smooshOverlappingEnemies()
   }
   //hack to move player before first draw on new game
   if (playerPos.x === -1) {
@@ -1964,6 +1970,23 @@ function changeLevelTo(newLevel, isFalling)
     while (cellAt(move(playerPos, playerPos.dir))===0) playerPos.dir = playerPos.dir.cw
   }
   if (!isFalling) draw()
+}
+
+function smooshOverlappingEnemies() {
+  const enemy = findAtPos(enemies, playerPos)
+  if (enemy) {
+    for(let dir of dirsList) {
+      const pos = move(playerPos, dir)
+      if (cellIsEmpty(pos)) {
+        moveToPos(enemy, pos)
+        enemy.x = pos.x
+        enemy.y = pos.y
+        console.log("smooshed enemy moved")
+        return
+      }
+    }
+    console.log("smooshed enemy could not move")
+  }
 }
 
 function showSpecialMessage(n) {
