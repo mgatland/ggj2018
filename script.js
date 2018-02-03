@@ -2133,7 +2133,8 @@ function monsterAttack(e) {
   let damage = 0
   if (result > 0) {
     damage++ //at least 1 damage!
-    times(Math.floor(result/40)+1, () => damage += trueRnd(e.power))
+    //less swingy: instead of 0-to-power, it's 0.25power to 0.75power
+    times(Math.floor(result/40)+1, () => damage += Math.floor(trueRnd(e.power)/2+e.power/4))
     //add bonus damage
     //no, it's already super hard - if (depth > playerStats.level) damage += trueRnd(depth-playerStats.level)
   }
@@ -2187,7 +2188,7 @@ function maxEnemyDamage(e) {
   const attackRoll = 80 + 20 + e.level * 2
   const result = attackRoll - playerDefenceRoll()
   let damage = 2
-  times(Math.floor(result/40)+1, () => damage += e.power-1)
+  times(Math.floor(result/40)+1, () => damage += Math.floor(e.power/2-1+e.power/4))
   //no it was too hard - if (depth > playerStats.level) damage += (depth-playerStats.level)
   return Math.max(damage, standardHitDamage())
 }
