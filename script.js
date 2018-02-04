@@ -776,7 +776,6 @@ function draw() {
       }
       if (playerCombatMessage.length < 2) times(2-playerCombatMessage.length, () => {y+=lineHeight})
       y+=lineHeight
-      y+=lineHeight
       ctx.fillText("Experience value: " + target.exp, x, y);  y+=lineHeight
       ctx.fillText(et.desc, x, y);  y+=lineHeight
     } else {
@@ -1561,8 +1560,7 @@ function doKey(keyCode) {
       }
       if (thing.type==="spell") {
         var spellToGet = playerStats.spellKnown.indexOf(false)
-        console.log(spellToGet)
-        if (spellToGet >= 0) {
+        if (spellToGet >= 0 && spellToGet < (1+depth)*3) {
           playerCombatMessage.push("A spell: " + spellNames[spellToGet].name + "!")
           playerStats.spellKnown[spellToGet] = true
           //very hacky: open the spellbook
