@@ -2566,7 +2566,7 @@ function specialHitEffect(effect) {
     case 2: playerStats.strength++
     enemyCombatMessage.push("Strength raised by potion!")
     break
-    case 3: playerStats.Luck++
+    case 3: playerStats.luck++
     enemyCombatMessage.push("Luck raised by potion!")
     break
     case 4: playerStats.int++
@@ -2583,7 +2583,7 @@ function specialHitEffect(effect) {
     case 6: playerStats.strength--
     enemyCombatMessage.push("Strength lowered by potion!")
     break
-    case 7: playerStats.Luck--
+    case 7: playerStats.luck--
     enemyCombatMessage.push("Luck lowered by potion!")
     break
     case 8: playerStats.int--
