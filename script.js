@@ -1193,7 +1193,7 @@ function draw3D(viewX, viewY, viewSize, dir) {
           }
         }
         const e = enemies.find(e => e.x == cellPos.x && e.y == cellPos.y)
-        if (e != undefined) {
+        if (e != undefined && (!isHomeRow||j==0)) {
           const et = enemyType[e.type]
           const eSize = sizeAtDist(viewSizeY, i+creatureOffset())
           const left = viewXCentre - eSize/2 + j*eSize
