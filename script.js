@@ -172,7 +172,9 @@ let playerPos = {}
 let depth = -1
 let newLevelMsg = -1
 let enemies = []
+let fog = []
 let storedEnemies = [] //saved on level change only
+let storedFog = []
 
 //not saved
 let menuState = menuStates.colorPicker
@@ -201,7 +203,9 @@ function tryLoad() {
     playerPos = save.playerPos
     depth = save.depth
     enemies = save.enemies
+    fog = save.fog
     storedEnemies = save.storedEnemies
+    storedFog = save.storedFog
     newLevelMsg = save.newLevelMsg
 
     //upgrade old saves here
@@ -210,6 +214,8 @@ function tryLoad() {
     if (playerStats.burnedSp === undefined) playerStats.burnedSp = 0
     if (playerStats.seed === undefined) playerStats.seed = 0
     if (playerStats.knownPits === undefined) playerStats.knownPits = []
+    if (fog === undefined) fog = []
+    if (storedFog === undefined) storedFog = []
 
     //fixing up
     playerPos.dir = dirsList[playerPos.dir] //fix up serializable
@@ -237,6 +243,7 @@ function saveMain() {
   playerPos.dir = dirsList.indexOf(playerPos.dir) //make serializable
   save.depth = depth
   save.enemies = enemies
+  save.fog = fog
   save.newLevelMsg = newLevelMsg
   localStorage.setItem('saveMain', JSON.stringify(save))
   playerPos.dir = dirsList[playerPos.dir] //fix it up after
@@ -245,7 +252,7 @@ function saveMain() {
 }
 
 function saveWorld() {
-  localStorage.setItem('saveWorld', JSON.stringify(storedEnemies))
+  localStorage.setItem('saveWorld', JSON.stringify({storedEnemies:storedEnemies, storedFog:storedFog}))
 }
 
 function restart() {
@@ -272,7 +279,9 @@ function restart() {
   endRuns = 0
   depth=-1
   enemies = []
+  fog = []
   storedEnemies.length = 0
+  storedFog.length = 0
   newLevelMsg = -1
   changeLevelTo(0)
 }
@@ -483,11 +492,14 @@ function addLadder(isUp) {
 function makeEnemies() {  
   if (storedEnemies[depth] != undefined) {
     enemies = storedEnemies[depth]
+    fog = storedFog[depth]
     storedEnemies[depth] = undefined
+    storedFog[depth] = undefined
     //spawn more if there aren't many left
     times(180-enemies.length, makeEnemy)
   } else {
     enemies = []
+    fog = []
     times(280+depth*30, makeEnemy)
     maybeGenerateBoss()
   }
@@ -1744,7 +1756,8 @@ function castDeception() {
       playerCombatMessage.push("Wall? What wall?")
       playerCombatMessage.push("You step through.")
       moveToPos(playerPos, wall)
-      smooshOverlappingEnemies()
+      afterPlayerMovement()
+      return //because function above does the draw
     }
   }
   draw()
@@ -1842,6 +1855,9 @@ function castWhatDo() {
         playerCombatMessage.push(`You forget where you are,`)
         playerCombatMessage.push(`and you are somewhere else.`)
       }
+      afterPlayerMovement()
+      return //it does monsterCombatTurn and draw
+      //foobar
     }
 
     monsterCombatTurn()
@@ -1984,7 +2000,9 @@ function changeLevelTo(newLevel, isFalling)
 {
   if (depth != -1) {
     storedEnemies[depth] = enemies
+    storedFog[depth] = fog
     enemies = []
+    fog = []
   }
   saveWorld()
   depth = newLevel
@@ -1992,15 +2010,25 @@ function changeLevelTo(newLevel, isFalling)
   tileSet = Math.floor(depth / levelsPerTileset) % tileSetCount
   makeMap()
 
+  if (depth>0&&depth<9) pits[playerPos.x+playerPos.y*mapSize]=true
   if (!isFalling) {
+
+    //hack to move player before first draw on new game
+    if (playerPos.x === -1) {
+      let pos = {x:Math.floor(mapSize/2),y:Math.floor(mapSize/2)}
+      while (!cellIsEmpty(pos)) {
+        pos = move(pos, pickRandom(dirsList))
+      }
+      playerPos.x = pos.x
+      playerPos.y = pos.y
+      //face away from walls
+      while (cellAt(move(playerPos, playerPos.dir))===0) playerPos.dir = playerPos.dir.cw
+    }
+
     playAudio()
     //sneaky: preload the audio for the level below!
     const preLoadTileSet = Math.floor((depth+1) / levelsPerTileset) % tileSetCount
     loadAudio(preLoadTileSet)
-    if (playerStats.levelsVisited.indexOf(newLevel)==-1) {
-      playerStats.levelsVisited.push(newLevel)
-      firstTimeOnLevel(newLevel)
-    }
     if(depth==0 && endState === "hasFlower") {
       endState = "shouldSpawn"
       saveSomeone()
@@ -2008,19 +2036,14 @@ function changeLevelTo(newLevel, isFalling)
       endRuns++
     }
     smooshOverlappingEnemies()
-  }
-  //hack to move player before first draw on new game
-  if (playerPos.x === -1) {
-    let pos = {x:Math.floor(mapSize/2),y:Math.floor(mapSize/2)}
-    while (!cellIsEmpty(pos)) {
-      pos = move(pos, pickRandom(dirsList))
+    checkForPits()
+    //trigger first visit, UNLESS we landed on a pit - then it doesn't count as a visit
+    if (state !== states.falling && playerStats.levelsVisited.indexOf(newLevel)==-1) {
+      playerStats.levelsVisited.push(newLevel)
+      firstTimeOnLevel(newLevel)
     }
-    playerPos.x = pos.x
-    playerPos.y = pos.y
-    //face away from walls
-    while (cellAt(move(playerPos, playerPos.dir))===0) playerPos.dir = playerPos.dir.cw
+    draw()
   }
-  if (!isFalling) draw()
 }
 
 function smooshOverlappingEnemies() {
@@ -2139,16 +2162,28 @@ function forward() {
     flipped = !flipped
     playerPos.x += playerPos.dir.x
     playerPos.y += playerPos.dir.y
-    const posKey = playerPos.x+playerPos.y*mapSize
-    if (pits[posKey]) {
-      if (playerStats.knownPits[depth]===undefined) playerStats.knownPits[depth]={}
-      playerStats.knownPits[depth][posKey]=1
-      state = states.falling
-      draw()
-    } else {
-      timePasses()  
-    }
+    afterPlayerMovement()
   }
+}
+
+function afterPlayerMovement() {
+  smooshOverlappingEnemies()
+  if (checkForPits()) {
+    draw()
+  } else {
+    timePasses()  //includes draw
+  }
+}
+
+function checkForPits() {
+  const posKey = playerPos.x+playerPos.y*mapSize
+  if (pits[posKey]) {
+    if (playerStats.knownPits[depth]===undefined) playerStats.knownPits[depth]={}
+    playerStats.knownPits[depth][posKey]=1
+    state = states.falling
+    return true
+  }
+  return false
 }
 
 function clearMessages() {
@@ -2811,8 +2846,15 @@ function saveSomeone() {
 function getSave() {
   try {
     const save = JSON.parse(localStorage.getItem("saveMain"))
-    const storedEnemies = JSON.parse(localStorage.getItem("saveWorld"))
-    save.storedEnemies = storedEnemies
+    const world = JSON.parse(localStorage.getItem("saveWorld"))
+    if (world.storedFog) {
+      save.storedFog = world.storedFog
+      save.storedEnemies = world.storedEnemies
+    } else {
+    //old save format, no fog
+      save.storedEnemies = world
+      save.storedFog = []  
+    }
     return save
   }
   catch (e) {
