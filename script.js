@@ -714,7 +714,7 @@ function draw() {
     const rightX = x + 290
     let y = lowerHudY
     ctx.fillText(`Health points: ${playerStats.hp} of ${playerStats.maxHp}`, x, y)
-    ctx.fillText(`Gold: ${playerStats.gold}`, rightX, y);  y+=lineHeight
+    ctx.fillText(`Gold: ${formatGold(playerStats.gold)}`, rightX, y);  y+=lineHeight
     ctx.fillText(`Spell points: ${playerStats.sp} of ${playerStats.maxSp}`, x, y);
     ctx.fillText(`Level: ${playerStats.level}`, rightX, y);  y+=lineHeight
     ctx.fillText(`Exp: ${playerStats.exp} of ${expNeeded()}`, x, y);  y+=lineHeight
@@ -2866,4 +2866,9 @@ function endContinue() {
     playAudio()
   })
   draw()
+}
+
+function formatGold(n) {
+  if (n < 10000) return n
+  return Math.floor(n/1000) + "k"
 }
