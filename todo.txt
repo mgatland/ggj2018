@@ -110,6 +110,14 @@ sunday playtest
 [ ] (move enemies when you pitfall onto them)
 [ ] stack repeated attacks from the same enemy
 
+show tips?
+use space to wait to get first strike
+watch your health! Health is like fuel, save half of it for the journey home!
+save some spell points to help you get out of trouble
+understanding potions is the most important skill in the game!
+maybe: if you're deeper than you should be, stay close to a downwards ladder - if you fall down a pit, you can climb it back up
+
+
 [ ] poison - sporangium, bee, trash?
 [ ] fog of war
 [ ] help text

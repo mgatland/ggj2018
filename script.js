@@ -658,7 +658,7 @@ function draw() {
     t.y += 20
     t.lineHeight += 12
     for (let i = 0; i < floorMsg[newLevelMsg].length; i++) {
-      t.print(floorMsg[newLevelMsg][i])
+      t.print(floorMsg[newLevelMsg][i].replace('$age', playerStats.age))
     }
 
     t.setFont(smallFont)
@@ -843,7 +843,9 @@ function draw() {
       drawMedium("Press [spacebar] to start", centerX, viewSizeY - 20)
       drawMedium("Life in the citadel is hard but fair.", centerX, y); y += lineHeight
       //works up to 1099
-      drawMedium(`There is only enough air for one thousand and ${numberToWords.toWords(12+getPeopleSaved())} people.`, centerX, y); y += lineHeight
+      const num = getPeopleSaved()
+      const numText = num > 0 ? " and " + numberToWords.toWords(num) : ""
+      drawMedium(`There is only enough air for one thousand${numText} people.`, centerX, y); y += lineHeight
       drawMedium("When a baby is born, the oldest citizen is sent into the Depths.", centerX, y); y += lineHeight
       y += lineHeight
       drawMedium("Today is your turn to be exiled.", centerX, y); y += lineHeight
@@ -2771,7 +2773,7 @@ function addFloorMsg(n, list) {
 addFloorMsg(1, `A Little Snake Says:|^"Such a Shame You|Had to Leave Home! |There might be a way|to Get Back... But You|Don't Look Tough|Enough!"`)
 addFloorMsg(2, `A Note:|^"Find Me On This|Level! I Have a Crush|on You! Or, Will I|Crush You? Puns Aside,|You Are Doomed."|- The Shadow Guardian`)
 
-addFloorMsg(3, `A Little Snake Says:|^"If You Had Your|Own Oxygen Generator,|You Would Be Allowed|Back Into The Citidel!|I Know Where One Is."`)
+addFloorMsg(3, `A Little Snake Says:|^"If You Had Your|Own Oxygen Generator,|You Would Be Allowed|Back Into The Citadel!|I Know Where One Is."`)
 addFloorMsg(4, `A Little Snake Says:|^"The Four Shadow|Guardians Protect An|Oxygen Generator! If|You Kill Them All, You|Can Claim It!"`)
 addFloorMsg(5, `A Little Snake Says:|^"A Shadow Guardian|Dwells On This Level!|Hunting Them Is Your|Ticket Out Of Here!|But Be Careful!"`)
 
@@ -2782,7 +2784,7 @@ addFloorMsg(11, `A Little Snake Says:|^"A Shadow Guardian|Dwells On This Level!|
 addFloorMsg(1000, `"You killed us all...|Now our shadow magic|is gone. Anyone can find|and steal our Oxygen|Generator from the|lowest level of the|dungeon.\"`)
 addFloorMsg(1001, `The Oxygen Generator|Is Yours! Now Your|People Will Let You|Return Home And Live|Out Your Years.`)
 addFloorMsg(1002, `"You have your own|Oxygen supply! We Will|Let You Live In The|Citadel, If You Promise|To Donate It To Our|People When You Die."`)
-addFloorMsg(1003, `|   Congratulations!|||||         The End`)
+addFloorMsg(1003, `At $age, you are now the|oldest person in the|citadel. You become a|Teacher, helping each|new generation prepare|for life - and exile.||Your tales inspire all.`)
 addFloorMsg(1004, `"No," you say, "Give|this Oxygen To Someone|In Need. My Place Is|Here, In The:|| |   `)
 addFloorMsg(1005, `"No," you say, "Give|this Oxygen To Someone|In Need. My Place Is|Here, In The:||     Dungeons Of|   The Unforgiven!"`)
 //
