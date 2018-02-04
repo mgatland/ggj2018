@@ -1272,9 +1272,11 @@ function drawMap(viewX, viewY, viewSizeX, viewSizeY, hasButton) {
   tCtx.fillRect(0, 0, mapSize*cellSize+viewSizeX, mapSize*cellSize+viewSizeY)
   for (let x = 0; x < mapSize; x++) {
     for (let y = 0; y < mapSize; y++) {
-      const cell = cellAt(x, y)
-      if (cell == 1) {
-        drawCell(x, y)
+      if (fog[x+y*mapSize]) {
+        const cell = cellAt(x, y)
+        if (cell == 1) {
+          drawCell(x, y)
+        }        
       }
     }
   }
@@ -2037,6 +2039,7 @@ function changeLevelTo(newLevel, isFalling)
     }
     smooshOverlappingEnemies()
     checkForPits()
+    updateFog()
     //trigger first visit, UNLESS we landed on a pit - then it doesn't count as a visit
     if (state !== states.falling && playerStats.levelsVisited.indexOf(newLevel)==-1) {
       playerStats.levelsVisited.push(newLevel)
@@ -2060,6 +2063,49 @@ function smooshOverlappingEnemies() {
       }
     }
     console.log("smooshed enemy could not move")
+  }
+}
+
+function updateFog() {
+  const fogRange = 15
+  for (let x = playerPos.x - fogRange; x < playerPos.x + fogRange; x++) {
+    for (let y = playerPos.y - fogRange; y < playerPos.y + fogRange; y++) {
+      if (fog[x+y*mapSize]!=1) {
+        const points = walk_grid(playerPos, {x:x, y:y})
+        if (points.every(p => cellAt(p)===1)) {
+          //optmization: mark every visited point,
+          //not only the end
+          points.forEach(p => fog[p.x+p.y*mapSize]=1)
+        }
+      }
+    }
+  }
+}
+
+//https://www.redblobgames.com/grids/line-drawing.html
+//todo: handle diagonals correctly - you can look through either corner
+function walk_grid(p0, p1) {
+  var dx = p1.x-p0.x, dy = p1.y-p0.y;
+  var nx = Math.abs(dx), ny = Math.abs(dy);
+  var sign_x = dx > 0? 1 : -1, sign_y = dy > 0? 1 : -1;
+
+  var p = new Point(p0.x, p0.y);
+  var points = [new Point(p.x, p.y)];
+  for (var ix = 0, iy = 0; ix < nx || iy < ny;) {
+    if ((0.5+ix) / nx < (0.5+iy) / ny) {
+      // next step is horizontal
+      p.x += sign_x;
+      ix++;
+    } else {
+      // next step is vertical
+      p.y += sign_y;
+      iy++;
+    }
+    points.push(new Point(p.x, p.y));
+  }
+  return points;
+  function Point(x,y) {
+    this.x = x; this.y = y;
   }
 }
 
@@ -2168,6 +2214,7 @@ function forward() {
 
 function afterPlayerMovement() {
   smooshOverlappingEnemies()
+  updateFog()
   if (checkForPits()) {
     draw()
   } else {
