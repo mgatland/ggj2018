@@ -1081,6 +1081,7 @@ const potIslandScale = 0.8
 
 let oldGraphics = false
 let nearPlaneDist = 0.5
+let gfxHackFix=0.5
 
 function graphics() {
   oldGraphics =  !oldGraphics
@@ -1130,12 +1131,16 @@ function draw3D(viewX, viewY, viewSize, dir) {
   const across = [-8,-7,-6,-5,-4,-3,-2,-1,7,6,5,4,3,2,1,0]
   for (let i = 15; i >= 0; i--) { //depth
     const isHomeRow = (i == 0)
-    const size = sizeAtDist(viewSizeY, i)
     //draw edges
     for (let j of across) {
+      let size = sizeAtDist(viewSizeY, i)
       const cellPos = viewCellPos(playerPos, dir, i, j)
       const cell = cellAt(cellPos)
       if (cell == 0) {
+        //hack for special distorted edge of camera
+        if (i==1&&Math.abs(j)==2&&!oldGraphics) {
+          size = size*gfxHackFix
+        }
         const left = viewXCentre - size/2 + j*size
         const top = viewYCentre - size/2
         const behindSize = sizeAtDist(viewSizeY, i+1)
