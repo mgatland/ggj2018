@@ -2773,13 +2773,17 @@ function addFloorMsg(n, list) {
 addFloorMsg(1, `A Little Snake Says:|^"Such a Shame You|Had to Leave Home! |There might be a way|to Get Back... But You|Don't Look Tough|Enough!"`)
 addFloorMsg(2, `A Note:|^"Find Me On This|Level! I Have a Crush|on You! Or, Will I|Crush You? Puns Aside,|You Are Doomed."|- The Shadow Guardian`)
 
-addFloorMsg(3, `A Little Snake Says:|^"If You Had Your|Own Oxygen Generator,|You Would Be Allowed|Back Into The Citadel!|I Know Where One Is."`)
-addFloorMsg(4, `A Little Snake Says:|^"The Four Shadow|Guardians Protect An|Oxygen Generator! If|You Kill Them All, You|Can Claim It!"`)
+addFloorMsg(3, `A Little Snake Says:|^"Careful down this|deep! Save some health|points and spell points|for the trip back up!"`)
+//4
 addFloorMsg(5, `A Little Snake Says:|^"A Shadow Guardian|Dwells On This Level!|Hunting Them Is Your|Ticket Out Of Here!|But Be Careful!"`)
 
-addFloorMsg(8, `A Little Snake Says:|^"A Shadow Guardian|Dwells On This Level!|Hunting Them Is Your|Ticket Out Of Here!|But Be Careful!"`)//repeats
+addFloorMsg(6, `A Little Snake Says:|^"If You Had Your|Own Oxygen Generator,|You Would Be Allowed|Back Into The Citadel!|I Know Where One Is."`)
+addFloorMsg(7, `A Little Snake Says:|^"The Four Shadow|Guardians Protect An|Oxygen Generator! If|You Kill Them All, You|Can Claim It!"`)
+addFloorMsg(8, `A Note:|^"You Don't Belong|Here. You Must Be|Stopped. I See Your End|in My Future. Soon.||- The Shadow Guardian"`)
 
-addFloorMsg(11, `A Little Snake Says:|^"A Shadow Guardian|Dwells On This Level!|Hunting Them Is Your|Ticket Out Of Here!|But Be Careful!"`)//repeats
+addFloorMsg(9, `A Little Snake Says:|^"You Must Kill All|Four Shadow Guardians|And Take Their Oxygen|Generator. With Your|Own Oxygen, You'll Be|Let Into the Citadel!"`)
+//10
+addFloorMsg(11, `A Note:|^"Did you come to|fight and steal? I'll|drink your blood as my|next meal.||- The Shadow Guardian"`)
 //special
 addFloorMsg(1000, `"You killed us all...|Now our shadow magic|is gone. Anyone can find|and steal our Oxygen|Generator from the|lowest level of the|dungeon.\"`)
 addFloorMsg(1001, `The Oxygen Generator|Is Yours! Now Your|People Will Let You|Return Home And Live|Out Your Years.`)
