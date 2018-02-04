@@ -1097,6 +1097,8 @@ function sizeAtDist(size, distance) {
     const depthFactor = 2
     return size / Math.pow(depthFactor, distance-1)
   } else {
+    //hack for objects in player cell - use old algorithm
+    if (distance>0.49&&distance<0.61) return size / Math.pow(2, distance-1)
     //hack for walls going behind camera
     if (distance<=0.5) return size*2
     //proper
