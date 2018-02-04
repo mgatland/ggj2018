@@ -132,8 +132,8 @@ enemyType.push({tileSet:1, sprite:2, end:2, speed:5, defence: 2, power:10, name:
 enemyType.push({tileSet:1, sprite:3, end:3, speed:9, defence: 12, power:10, name: "Purple Tentacle", desc:"Does it belong to something bigger?"})
 enemyType.push({tileSet:1, sprite:4, end:20, speed:2, defence: 2, power:16, name: "Iron Giant", desc:"You hear grinding gears from the depths"})
 
-enemyType.push({tileSet:2, sprite:1, end:3, speed:10, defence: 13, power:8, name: "Sporangium Warrior", desc:"A cloud of toxic spores surrounds it"})
-enemyType.push({tileSet:2, sprite:2, end:3, speed:10, defence: 5, power:11, name: "Aspergillus Philosopher", desc:"It quivers threateningly"})
+enemyType.push({tileSet:2, sprite:1, end:3, speed:10, defence: 13, power:8, name: "Sporangium Warrior", shortName:"Sporangium", desc:"A cloud of toxic spores surrounds it"})
+enemyType.push({tileSet:2, sprite:2, end:3, speed:10, defence: 5, power:11, name: "Aspergillus Philosopher", shortName:"Aspergillus", desc:"It quivers threateningly"})
 enemyType.push({tileSet:2, sprite:3, end:2, speed:5, defence: 5, power:19, name: "Elder Shroom", desc:"It doesn't want you here"})
 enemyType.push({tileSet:2, sprite:4, end:6, speed:5, defence: 13, power:16, name: "Earthstar", desc:"It stares expectantly"})
 
@@ -2232,11 +2232,15 @@ function monsterAttack(e) {
     } else {
       damage = applyPlayerDamageReduction(damage)
       hitPlayer(damage)
-      enemyCombatMessage.push("The " + getType(e).name + " deals " + damage + " damage")
+      enemyCombatMessage.push("The " + getShortName(et) + " deals " + damage + " damage")
     }
   } else {
     enemyCombatMessage.push("The " + getType(e).name + " missed!")
   }
+}
+
+function getShortName(et) {
+  return et.shortName || et.name
 }
 
 function playerDefenceRoll() {
