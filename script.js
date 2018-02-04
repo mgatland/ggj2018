@@ -2012,7 +2012,6 @@ function changeLevelTo(newLevel, isFalling)
   tileSet = Math.floor(depth / levelsPerTileset) % tileSetCount
   makeMap()
 
-  if (depth>0&&depth<9) pits[playerPos.x+playerPos.y*mapSize]=true
   if (!isFalling) {
 
     //hack to move player before first draw on new game
