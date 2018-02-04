@@ -102,6 +102,9 @@ sunday playtest
 [ ] ladders are not fixed in space correctly - must be centered on center of the hole
 [ ] down ladders clip through walls - 2 pixels too low?
 
+[ ] fog of war
+	it's done, but: if you see a ladder down, add the matching ladder up to the map below
+
 [ ] game is too easy if you get too many upgrades
 [x] too much gold at around level 8 - ui clipping
 [x] earthstar never hit me
@@ -120,7 +123,6 @@ maybe: if you're deeper than you should be, stay close to a downwards ladder - i
 
 
 [ ] poison - sporangium, bee, trash?
-[ ] fog of war
 [ ] help text
 
 Moraff's help text in lower right:

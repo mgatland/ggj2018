@@ -175,6 +175,8 @@ let enemies = []
 let fog = []
 let storedEnemies = [] //saved on level change only
 let storedFog = []
+let fogBelow = []
+let fogAbove = []
 
 //not saved
 let menuState = menuStates.colorPicker
@@ -204,6 +206,8 @@ function tryLoad() {
     depth = save.depth
     enemies = save.enemies
     fog = save.fog
+    fogAbove = save.fogAbove
+    fogBelow = save.fogBelow
     storedEnemies = save.storedEnemies
     storedFog = save.storedFog
     newLevelMsg = save.newLevelMsg
@@ -215,6 +219,8 @@ function tryLoad() {
     if (playerStats.seed === undefined) playerStats.seed = 0
     if (playerStats.knownPits === undefined) playerStats.knownPits = []
     if (fog === undefined) fog = []
+    if (fogAbove === undefined) fogAbove = []
+    if (fogBelow === undefined) fogBelow = []
     if (storedFog === undefined) storedFog = []
 
     //fixing up
@@ -244,6 +250,8 @@ function saveMain() {
   save.depth = depth
   save.enemies = enemies
   save.fog = fog
+  save.fogBelow = fogBelow
+  save.fogAbove = fogAbove
   save.newLevelMsg = newLevelMsg
   localStorage.setItem('saveMain', JSON.stringify(save))
   playerPos.dir = dirsList[playerPos.dir] //fix it up after
@@ -280,6 +288,8 @@ function restart() {
   depth=-1
   enemies = []
   fog = []
+  fogAbove=[]
+  fogBelow=[]
   storedEnemies.length = 0
   storedFog.length = 0
   newLevelMsg = -1
@@ -321,6 +331,19 @@ function makeMap() {
   removeOrphanRooms()
   makePits()
   makeEnemies()
+}
+
+function makeFog() {
+  if (storedFog[depth]) {
+    fog = storedFog[depth]
+    storedFog[depth] = undefined
+    console.log(`loaded fog (${fog.filter(x=>x===1).length})`)
+  } else {
+    fog = []
+    console.log("no fog to load fog")
+  }
+  fogBelow = []
+  fogAbove = []
 }
 
 function moveToPos(one, two) {
@@ -492,18 +515,14 @@ function addLadder(isUp) {
 function makeEnemies() {  
   if (storedEnemies[depth] != undefined) {
     enemies = storedEnemies[depth]
-    fog = storedFog[depth]
     storedEnemies[depth] = undefined
-    storedFog[depth] = undefined
     //spawn more if there aren't many left
     times(180-enemies.length, makeEnemy)
   } else {
     enemies = []
-    fog = []
     times(280+depth*30, makeEnemy)
     maybeGenerateBoss()
   }
-  
 }
 
 function maybeGenerateBoss() {
@@ -2002,15 +2021,15 @@ function changeLevelTo(newLevel, isFalling)
 {
   if (depth != -1) {
     storedEnemies[depth] = enemies
-    storedFog[depth] = fog
     enemies = []
-    fog = []
+    processFogProgress()
   }
   saveWorld()
   depth = newLevel
   console.log("now on level " + depth)
   tileSet = Math.floor(depth / levelsPerTileset) % tileSetCount
   makeMap()
+  makeFog()
 
   if (!isFalling) {
 
@@ -2048,6 +2067,27 @@ function changeLevelTo(newLevel, isFalling)
   }
 }
 
+function processFogProgress() {
+  function addFog(list, fogDepth) {
+    if (storedFog[fogDepth]===undefined) {
+      storedFog[fogDepth]=[]
+    }
+    list.forEach(f => {
+      for (let x = -1; x < 2; x++) {
+        for (let y = -1; y < 2; y++) {
+          storedFog[fogDepth][f+x+y*mapSize] = 1
+        }
+      }
+    })
+  }
+  if (depth > 0) addFog(fogAbove, depth - 1)
+  addFog(fogBelow, depth + 1)
+  console.log(`processed fogBelow (${fogBelow.length})`)
+  console.log(`storing fog (${fog.filter(x=>x===1).length})`)
+  storedFog[depth]=fog
+  fog = []
+}
+
 function smooshOverlappingEnemies() {
   const enemy = findAtPos(enemies, playerPos)
   if (enemy) {
@@ -2074,7 +2114,16 @@ function updateFog() {
         if (points.every(p => cellAt(p)===1)) {
           //optmization: mark every visited point,
           //not only the end
-          points.forEach(p => fog[p.x+p.y*mapSize]=1)
+          points.forEach(p => {
+            const key = p.x+p.y*mapSize
+            fog[key]=1
+            if (anyAtPos(laddersUp, p)) {
+              fogAbove.push(key)
+            }
+            if (anyAtPos(laddersDown, p)) {
+              fogBelow.push(key)
+            }
+          })
         }
       }
     }
