@@ -139,7 +139,7 @@ enemyType.push({tileSet:2, sprite:4, end:6, speed:7, defence: 13, power:40, name
 
 enemyType.push({tileSet:3, sprite:1, end:5, speed:12, defence: 10, power:28, name: "Triffid", desc:"It smells angry"})
 enemyType.push({tileSet:3, sprite:2, end:4, speed:10, defence: 28, power:17, name: "Dumble-Dor", desc:"It clutches a crude spear"})
-enemyType.push({tileSet:3, sprite:3, end:10, speed:6, defence: 7, power:24, name: "Honey Golem", desc:"It looks delicious"})
+enemyType.push({tileSet:3, sprite:3, end:10, speed:6, defence: 7, power:50, name: "Honey Golem", desc:"It looks delicious"})
 enemyType.push({tileSet:3, sprite:4, end:2, speed:5, defence: 10, power:14, name: "Larva", desc:"It writhes with ecstasy"})
 
 //potions

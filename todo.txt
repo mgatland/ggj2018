@@ -98,6 +98,15 @@ saturday playtest:
 [x] i don't notice spells unlock
 [x] full screen map
 
+sunday playtest
+[ ] ladders are not fixed in space correctly
+[ ] down ladders clip through walls - 2 pixels too low?
+[ ] too much gold at around level 8 - ui clipping
+[x] earthstar never hit me
+[x] luck potions do not work
+[ ] you don't fall through a pit you land on via a pit
+[ ] (move enemies when you pitfall onto them)
+[ ] stack repeated attacks from the same enemy
 
 [ ] poison - sporangium, bee, trash?
 [ ] fog of war
