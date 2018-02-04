@@ -128,9 +128,9 @@ enemyType.push({tileSet:0, sprite:3, end:4, speed:4, defence: 2, power:5, name: 
 enemyType.push({tileSet:0, sprite:4, end:5, speed:2, defence: 3, power:5, name: "Canbion", desc:"It shuffles back and forth"})
 
 enemyType.push({tileSet:1, sprite:1, end:3, speed:11, defence: 6, power:8, name: "Killer Prawn", desc:"It snarls at your presence"})
-enemyType.push({tileSet:1, sprite:2, end:2, speed:5, defence: 2, power:10, name: "Island Mimic", desc:"Its sandy shore has claimed many victims"})
+enemyType.push({tileSet:1, sprite:2, end:2, speed:5, defence: 2, power:10, name: "Island Mimic", desc:"Its shore has claimed many victims"})
 enemyType.push({tileSet:1, sprite:3, end:3, speed:9, defence: 12, power:10, name: "Purple Tentacle", desc:"Does it belong to something bigger?"})
-enemyType.push({tileSet:1, sprite:4, end:20, speed:2, defence: 2, power:16, name: "Iron Giant", desc:"You hear grinding gears from the depths"})
+enemyType.push({tileSet:1, sprite:4, end:20, speed:2, defence: 2, power:16, name: "Iron Giant", desc:"You hear grinding gears from below"})
 
 enemyType.push({tileSet:2, sprite:1, end:3, speed:9, defence: 13, power:8, name: "Sporangium Warrior", shortName:"Sporangium", desc:"A cloud of toxic spores surrounds it"})
 enemyType.push({tileSet:2, sprite:2, end:3, speed:10, defence: 5, power:11, name: "Aspergillus Philosopher", shortName:"Aspergillus", desc:"It quivers threateningly"})
@@ -155,7 +155,7 @@ enemyType.push({tileSet:3, sprite:4, end:2, speed:5, defence: 10, power:14, name
 
 //bosses
 enemyType.push({tileSet:0, sprite:4, end:6, speed:9, defence: 13, power:36, boss:0, name: "Alumincubus", desc:"It hurts to look at"})
-enemyType.push({tileSet:1, sprite:1, end:7, speed:11, defence: 15, power:47, boss:1, name: "Shadow Prawn", desc:"It demands blood for its barbequed brethren"})
+enemyType.push({tileSet:1, sprite:1, end:7, speed:11, defence: 15, power:47, boss:1, name: "Shadow Prawn", desc:"It demands blood for its brethren"})
 enemyType.push({tileSet:2, sprite:4, end:8, speed:10, defence: 18, power:60, boss:2, name: "Moonstar", desc:"Its gaze crosses dimensions"})
 enemyType.push({tileSet:3, sprite:1, end:9, speed:12, defence: 28, power:84, boss:3, name: "Audrey IV", desc:"It fights as if protecting its kin"})
 enemyType.push({tileSet:3, sprite:5, end:0, speed:0, defence: 0, power:0, isItem:true, name: "Oxygen Generator", desc:"This is it!!!"})
