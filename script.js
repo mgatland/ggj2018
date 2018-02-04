@@ -1097,13 +1097,19 @@ function sizeAtDist(size, distance) {
     const depthFactor = 2
     return size / Math.pow(depthFactor, distance-1)
   } else {
-    //hack for objects in player cell - use old algorithm
-    if (distance>0.49&&distance<0.61) return size / Math.pow(2, distance-1)
+    //hack for objects in player cell - use old algorithm and old distance
+    if (distance>0.1&&distance<0.9) return size / Math.pow(2, 0.6-1)
     //hack for walls going behind camera
-    if (distance<=0.5) return size*2
+    if (distance<=0) return size*2
     //proper
     return size*nearPlaneDist/(distance-0.5)
   }
+}
+
+let creatureDrawOffset = 0.258
+function creatureOffset() {
+  if (oldGraphics) return 0.6
+  return creatureDrawOffset
 }
 
 function draw3D(viewX, viewY, viewSize, dir) {
@@ -1131,7 +1137,7 @@ function draw3D(viewX, viewY, viewSize, dir) {
   }
 
   const across = [-8,-7,-6,-5,-4,-3,-2,-1,7,6,5,4,3,2,1,0]
-  for (let i = 15; i >= 0; i--) { //depth
+  for (let i = 30; i >= 0; i--) { //depth
     const isHomeRow = (i == 0)
     //draw edges
     for (let j of across) {
@@ -1164,7 +1170,7 @@ function draw3D(viewX, viewY, viewSize, dir) {
           const l = findAtPos(laddersUp, cellPos)
           if (l != undefined)
           {
-            const eSize = sizeAtDist(viewSizeY, i+0.6)
+            const eSize = sizeAtDist(viewSizeY, i+creatureOffset())
             const left = viewXCentre - eSize/2 + j*eSize
             const top = viewYCentre - eSize/2-eSize*(isHomeRow ? 0.4:0.2)
             tCtx.drawImage(spriteImage, 0, 5*256, 256, 256, left, top, eSize, eSize)
@@ -1174,9 +1180,10 @@ function draw3D(viewX, viewY, viewSize, dir) {
           const l = findAtPos(laddersDown, cellPos)
           if (l != undefined)
           {
-            const eSize = sizeAtDist(viewSizeY, i+0.6)
+            const eSize = sizeAtDist(viewSizeY, i+creatureOffset())
             const left = viewXCentre - eSize/2 + j*eSize
             let top = viewYCentre - eSize/2+eSize*(isHomeRow ? 0.4:0.2) + eSize*tileSetHeightAdjust()
+            if (!oldGraphics) top += eSize*0.15
             if (tileSet==1) {
               //island,ladder
               tCtx.drawImage(spriteImage, 256*2, 1*256, 255, 256, left+ladderIslandLeft*eSize, top+ladderIslandTop*eSize, eSize*ladderIslandScale*extraScale, eSize*ladderIslandScale*extraScale)
@@ -1190,9 +1197,10 @@ function draw3D(viewX, viewY, viewSize, dir) {
         const e = enemies.find(e => e.x == cellPos.x && e.y == cellPos.y)
         if (e != undefined) {
           const et = enemyType[e.type]
-          const eSize = sizeAtDist(viewSizeY, i+0.5)
+          const eSize = sizeAtDist(viewSizeY, i+creatureOffset())
           const left = viewXCentre - eSize/2 + j*eSize
-          const top = viewYCentre - eSize/2+eSize*0.2 + eSize*tileSetHeightAdjust()
+          let top = viewYCentre - eSize/2 + eSize*tileSetHeightAdjust()
+          top += eSize*0.2
           //draw island under some enemies
           if (tileSet==1 && et.special != undefined) {
             //island
@@ -1214,9 +1222,9 @@ function draw3D(viewX, viewY, viewSize, dir) {
   drawBorder(viewX, viewY, viewSizeX, viewSizeY)
 }
 
-const waterHeightAdjust = -0.07
+let waterHeightAdjust = -0.23
 function tileSetHeightAdjust() {
-  if (tileSet===1) return waterHeightAdjust
+  if (tileSet===1) return (oldGraphics ? -0.07 : waterHeightAdjust)
     return 0
 }
 
