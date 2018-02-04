@@ -99,9 +99,11 @@ saturday playtest:
 [x] full screen map
 
 sunday playtest
-[ ] ladders are not fixed in space correctly
+[ ] ladders are not fixed in space correctly - must be centered on center of the hole
 [ ] down ladders clip through walls - 2 pixels too low?
-[ ] too much gold at around level 8 - ui clipping
+
+[ ] game is too easy if you get too many upgrades
+[x] too much gold at around level 8 - ui clipping
 [x] earthstar never hit me
 [x] luck potions do not work
 [ ] you don't fall through a pit you land on via a pit
