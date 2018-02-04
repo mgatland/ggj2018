@@ -132,14 +132,14 @@ enemyType.push({tileSet:1, sprite:2, end:2, speed:5, defence: 2, power:10, name:
 enemyType.push({tileSet:1, sprite:3, end:3, speed:9, defence: 12, power:10, name: "Purple Tentacle", desc:"Does it belong to something bigger?"})
 enemyType.push({tileSet:1, sprite:4, end:20, speed:2, defence: 2, power:16, name: "Iron Giant", desc:"You hear grinding gears from the depths"})
 
-enemyType.push({tileSet:2, sprite:1, end:3, speed:10, defence: 13, power:8, name: "Sporangium Warrior", shortName:"Sporangium", desc:"A cloud of toxic spores surrounds it"})
+enemyType.push({tileSet:2, sprite:1, end:3, speed:9, defence: 13, power:8, name: "Sporangium Warrior", shortName:"Sporangium", desc:"A cloud of toxic spores surrounds it"})
 enemyType.push({tileSet:2, sprite:2, end:3, speed:10, defence: 5, power:11, name: "Aspergillus Philosopher", shortName:"Aspergillus", desc:"It quivers threateningly"})
-enemyType.push({tileSet:2, sprite:3, end:2, speed:5, defence: 5, power:19, name: "Elder Shroom", desc:"It doesn't want you here"})
-enemyType.push({tileSet:2, sprite:4, end:6, speed:5, defence: 13, power:16, name: "Earthstar", desc:"It stares expectantly"})
+enemyType.push({tileSet:2, sprite:3, end:2, speed:6, defence: 5, power:19, name: "Elder Shroom", desc:"It doesn't want you here"})
+enemyType.push({tileSet:2, sprite:4, end:6, speed:7, defence: 13, power:40, name: "Earthstar", desc:"It stares expectantly"})
 
 enemyType.push({tileSet:3, sprite:1, end:5, speed:12, defence: 10, power:28, name: "Triffid", desc:"It smells angry"})
 enemyType.push({tileSet:3, sprite:2, end:4, speed:10, defence: 28, power:17, name: "Dumble-Dor", desc:"It clutches a crude spear"})
-enemyType.push({tileSet:3, sprite:3, end:10, speed:5, defence: 7, power:24, name: "Honey Golem", desc:"It looks delicious"})
+enemyType.push({tileSet:3, sprite:3, end:10, speed:6, defence: 7, power:24, name: "Honey Golem", desc:"It looks delicious"})
 enemyType.push({tileSet:3, sprite:4, end:2, speed:5, defence: 10, power:14, name: "Larva", desc:"It writhes with ecstasy"})
 
 //potions
