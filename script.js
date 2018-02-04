@@ -1106,11 +1106,12 @@ function sizeAtDist(size, distance) {
   }
 }
 
-let creatureDrawOffset = 0.258
+let creatureDrawOffset = 0.05
 function creatureOffset() {
   if (oldGraphics) return 0.6
   return creatureDrawOffset
 }
+function ladderOffset() {return 0.5}
 
 function draw3D(viewX, viewY, viewSize, dir) {
   const viewSizeX = viewSize
@@ -1161,16 +1162,15 @@ function draw3D(viewX, viewY, viewSize, dir) {
           const pixelWidth = (viewXCentre - behindSize/2 + (j+1)*behindSize) - (left+size)
           drawWall(tCtx, tileSet, left+size, top, pixelWidth, size, behindSize)
         }
-        //front //-size*0.02*(8-Math.abs(j))
         if (i>0) {
           tCtx.drawImage(spriteImage, 0, 256*tileSet, 256, 256, left, top, size, size)
         }
       } else {
         {
           const l = findAtPos(laddersUp, cellPos)
-          if (l != undefined)
+          if (l)
           {
-            const eSize = sizeAtDist(viewSizeY, i+creatureOffset())
+            const eSize = sizeAtDist(viewSizeY, i+ladderOffset())
             const left = viewXCentre - eSize/2 + j*eSize
             const top = viewYCentre - eSize/2-eSize*(isHomeRow ? 0.4:0.2)
             tCtx.drawImage(spriteImage, 0, 5*256, 256, 256, left, top, eSize, eSize)
@@ -1178,12 +1178,11 @@ function draw3D(viewX, viewY, viewSize, dir) {
         }
         {
           const l = findAtPos(laddersDown, cellPos)
-          if (l != undefined)
+          if (l)
           {
-            const eSize = sizeAtDist(viewSizeY, i+creatureOffset())
+            const eSize = sizeAtDist(viewSizeY, i+ladderOffset())
             const left = viewXCentre - eSize/2 + j*eSize
             let top = viewYCentre - eSize/2+eSize*(isHomeRow ? 0.4:0.2) + eSize*tileSetHeightAdjust()
-            if (!oldGraphics) top += eSize*0.15
             if (tileSet==1) {
               //island,ladder
               tCtx.drawImage(spriteImage, 256*2, 1*256, 255, 256, left+ladderIslandLeft*eSize, top+ladderIslandTop*eSize, eSize*ladderIslandScale*extraScale, eSize*ladderIslandScale*extraScale)
@@ -1200,7 +1199,6 @@ function draw3D(viewX, viewY, viewSize, dir) {
           const eSize = sizeAtDist(viewSizeY, i+creatureOffset())
           const left = viewXCentre - eSize/2 + j*eSize
           let top = viewYCentre - eSize/2 + eSize*tileSetHeightAdjust()
-          top += eSize*0.2
           //draw island under some enemies
           if (tileSet==1 && et.special != undefined) {
             //island
@@ -1222,10 +1220,10 @@ function draw3D(viewX, viewY, viewSize, dir) {
   drawBorder(viewX, viewY, viewSizeX, viewSizeY)
 }
 
-let waterHeightAdjust = -0.23
+let waterHeightAdjust = -0.03
 function tileSetHeightAdjust() {
   if (tileSet===1) return (oldGraphics ? -0.07 : waterHeightAdjust)
-    return 0
+  return 0
 }
 
 function drawBorder(viewX, viewY, viewSizeX, viewSizeY) {
