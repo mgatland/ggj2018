@@ -59,6 +59,8 @@ effectNames.push("Heartbeat", "Disguised", "Ouroboros")
 const spriteImage = new Image()
 spriteImage.addEventListener('load', function() {
   loaded = true
+  spriteCache = {}
+  spriteData=null
   console.log("sprites loaded")
   if (menuState === menuStates.colorPicker) {
     if (!tryLoad()) {
@@ -3019,8 +3021,6 @@ function formatGold(n) {
 let fastMode = true
 let spriteData = null
 let spriteCache = {}
-const cacheWidth=768
-const iData = ctx.createImageData(cacheWidth, cacheWidth); //doesn't matter where it's from
 function drawPixelated(context,sx, sy, sw, sh, x, y, width,height){
   if (fastMode) {
     if (width<0) context.scale(-1,1)
@@ -3033,10 +3033,10 @@ function drawPixelated(context,sx, sy, sw, sh, x, y, width,height){
   //round it
   sx = Math.floor(sx)
   sy = Math.floor(sy)
-  sw = Math.floor(sw)
-  sh = Math.floor(sh)
-  width = Math.floor(width)
-  height = Math.floor(height)
+  sw = Math.ceil(sw)
+  sh = Math.ceil(sh)
+  width = Math.ceil(width)
+  height = Math.ceil(height)
 
   let xFlip = (width < 0)
   let yFlip = (height < 0)
@@ -3055,9 +3055,7 @@ function drawPixelated(context,sx, sy, sw, sh, x, y, width,height){
   }
   const cacheKey = ""+sx+":"+sy+":"+sw+":"+sh+":"+width+":"+height+":"+xFlip+":"+yFlip
   if (spriteCache[cacheKey]===undefined) {
-    if (width>cacheWidth||height>cacheWidth)  {
-      console.log("too big sprite!")
-    }
+    const iData = ctx.createImageData(width, height);
     const cacheCanvas = document.createElement('canvas')
     cacheCanvas.width = width
     cacheCanvas.height = height
@@ -3079,7 +3077,7 @@ function drawPixelated(context,sx, sy, sw, sh, x, y, width,height){
         //cacheCtx.fillStyle = "rgba("+r+","+g+","+b+","+(a/255)+")"
         //cacheCtx.fillRect(xO, yO, 1, 1)
         //faster
-        let outI = (xO + yO * cacheWidth)*4
+        let outI = (xO + yO * width)*4
         iData.data[0+outI] = r;
         iData.data[1+outI] = g;
         iData.data[2+outI] = b;
