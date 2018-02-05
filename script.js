@@ -6,9 +6,15 @@ const mouseBox = document.querySelector(".mouseBox")
 let debug = false
 
 const ctx = canvas.getContext('2d')
-ctx.webkitImageSmoothingEnabled = false
-ctx.mozImageSmoothingEnabled = false
-ctx.imageSmoothingEnabled = false
+
+function setPixelated(context){
+    context['imageSmoothingEnabled'] = false;       /* standard */
+    context['mozImageSmoothingEnabled'] = false;    /* Firefox */
+    context['oImageSmoothingEnabled'] = false;      /* Opera */
+    context['webkitImageSmoothingEnabled'] = false; /* Safari */
+    context['msImageSmoothingEnabled'] = false;     /* IE */
+}
+setPixelated(ctx)
 
 let smallFont = "24px \"dysin4mation\", monospace"
 let mediumFont = "36px \"dysin4mation\", monospace"
@@ -25,9 +31,7 @@ const tempCanvas = document.createElement("canvas")
 const tCtx = tempCanvas.getContext("2d")
 tempCanvas.width = 1024
 tempCanvas.height = 1024
-tCtx.webkitImageSmoothingEnabled = false
-tCtx.mozImageSmoothingEnabled = false
-tCtx.imageSmoothingEnabled = false
+setPixelated(tCtx)
 
 const width = canvas.width
 const height = canvas.height
