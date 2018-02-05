@@ -857,7 +857,7 @@ function draw() {
    
     }
     if (endState === "hasFlower") {
-      ctx.drawImage(spriteImage, 256*5, 3*256, 255, 256, rearViewX, viewSizeY+smallViewSizeY+20, smallColWidth, smallColWidth)
+      drawPixelated(ctx, 256*5, 3*256, 255, 256, rearViewX, viewSizeY+smallViewSizeY+20, smallColWidth, smallColWidth)
     }
   }
 
@@ -1159,18 +1159,10 @@ function draw3D(viewX, viewY, viewSize, dir) {
   //floor and ceiling
 
   const flipX = flipped ? -1 : 1
-  if (flipped) {
-    tCtx.scale(-1,1) 
-  }
-  tCtx.drawImage(spriteImage, 256*6, 512*tileSet, 512, 512, 0, 0, viewSizeX*flipX, viewSizeY)
+  drawPixelated(tCtx, 256*6, 512*tileSet, 512, 512, 0, 0, viewSizeX*flipX, viewSizeY)
   if (tileSet===0&&depth>0) {
     //hack to draw the floor on the ceiling in trash land
-    tCtx.scale(1,-1)
-    tCtx.drawImage(spriteImage, 256*6, 512*tileSet+256, 512, 256, 0, -0, viewSizeX*flipX, -viewSizeY/2) 
-    tCtx.scale(1,-1)
-  }
-  if (flipped) {
-    tCtx.scale(-1,1)
+    drawPixelated(tCtx, 256*6, 512*tileSet+256, 512, 256, 0, -0, viewSizeX*flipX, -viewSizeY/2) 
   }
 
   const across = [-8,-7,-6,-5,-4,-3,-2,-1,7,6,5,4,3,2,1,0]
@@ -1178,6 +1170,7 @@ function draw3D(viewX, viewY, viewSize, dir) {
     const isHomeRow = (i == 0)
     //draw edges
     for (let j of across) {
+      if (isHomeRow && (j < -1 || j > 1)) continue //don't draw too much beside us!
       let size = sizeAtDist(viewSizeY, i)
       const cellPos = viewCellPos(playerPos, dir, i, j)
       const cell = cellAt(cellPos)
@@ -1195,11 +1188,14 @@ function draw3D(viewX, viewY, viewSize, dir) {
           const pixelWidth = (left) - (viewXCentre - behindSize/2 + j*behindSize)
           drawWall(tCtx, tileSet, backLeft, backTop, pixelWidth, behindSize, size)          
         } else if (j < 0) {
+          //todo
+          //const backRight = viewXCentre - behindSize/2 + (j+1)*behindSize
+          //const pixelWidth = backRight - (left+size)
           const pixelWidth = (viewXCentre - behindSize/2 + (j+1)*behindSize) - (left+size)
           drawWall(tCtx, tileSet, left+size, top, pixelWidth, size, behindSize)
         }
         if (i>0) {
-          tCtx.drawImage(spriteImage, 0, 256*tileSet, 256, 256, left, top, size, size)
+          drawPixelated(tCtx, 0, 256*tileSet, 256, 256, left, top, size, size)
         }
       } else {
         {
@@ -1209,7 +1205,7 @@ function draw3D(viewX, viewY, viewSize, dir) {
             const eSize = sizeAtDist(viewSizeY, i+ladderOffset())
             const left = viewXCentre - eSize/2 + j*eSize
             const top = viewYCentre - eSize/2-eSize*(isHomeRow ? 0.4:0.2)
-            tCtx.drawImage(spriteImage, 0, 5*256, 256, 256, left, top, eSize, eSize)
+            drawPixelated(tCtx, 0, 5*256, 256, 256, left, top, eSize, eSize)
           }
         }
         {
@@ -1221,10 +1217,10 @@ function draw3D(viewX, viewY, viewSize, dir) {
             let top = viewYCentre - eSize/2+eSize*(isHomeRow ? 0.4:0.2) + eSize*tileSetHeightAdjust()
             if (tileSet==1) {
               //island,ladder
-              tCtx.drawImage(spriteImage, 256*2, 1*256, 255, 256, left+ladderIslandLeft*eSize, top+ladderIslandTop*eSize, eSize*ladderIslandScale*extraScale, eSize*ladderIslandScale*extraScale)
-              tCtx.drawImage(spriteImage, 0, 6*256, 256, 256, left+ladderIslandLadderLeft*eSize, top, eSize*extraScale, eSize*extraScale)  
+              drawPixelated(tCtx, 256*2, 1*256, 255, 256, left+ladderIslandLeft*eSize, top+ladderIslandTop*eSize, eSize*ladderIslandScale*extraScale, eSize*ladderIslandScale*extraScale)
+              drawPixelated(tCtx, 0, 6*256, 256, 256, left+ladderIslandLadderLeft*eSize, top, eSize*extraScale, eSize*extraScale)  
             } else {
-              tCtx.drawImage(spriteImage, 0, 6*256, 256, 256, left, top, eSize, eSize)  
+              drawPixelated(tCtx, 0, 6*256, 256, 256, left, top, eSize, eSize)  
             }
             
           }
@@ -1238,15 +1234,15 @@ function draw3D(viewX, viewY, viewSize, dir) {
           //draw island under some enemies
           if (tileSet==1 && et.special != undefined) {
             //island
-            tCtx.drawImage(spriteImage, 256*2, 1*256, 255, 256, left, top, eSize, eSize) 
-            tCtx.drawImage(spriteImage, 256*et.sprite+1, et.tileSet*256, 255, 256, left+potIslandLeft*eSize, top+potIslandTop*eSize, eSize*potIslandScale, eSize*potIslandScale)
+            drawPixelated(tCtx, 256*2, 1*256, 255, 256, left, top, eSize, eSize) 
+            drawPixelated(tCtx, 256*et.sprite+1, et.tileSet*256, 255, 256, left+potIslandLeft*eSize, top+potIslandTop*eSize, eSize*potIslandScale, eSize*potIslandScale)
           } else if (et.boss != undefined) {
             drawBoss(et.sprite, et.tileSet, left, top, eSize)
           } else {
-            tCtx.drawImage(spriteImage, 256*et.sprite+1, et.tileSet*256, 255, 256, left, top, eSize, eSize)
+            drawPixelated(tCtx, 256*et.sprite+1, et.tileSet*256, 255, 256, left, top, eSize, eSize)
           }
           if (e.hp <= 0) {
-            tCtx.drawImage(spriteImage, 256*5, 1*256, 255, 256, left, top, eSize, eSize)
+            drawPixelated(tCtx, 256*5, 1*256, 255, 256, left, top, eSize, eSize)
           }
         }
       } 
@@ -2586,7 +2582,6 @@ function inGame() {
 function drawWall(ctx, tileSet, left, top, width, leftSize, rightSize)
 {
   if (width < 1) return
-  const img = spriteImage
   const h = 255
   const w = 256
   const numSlices = width
@@ -2607,7 +2602,7 @@ function drawWall(ctx, tileSet, left, top, width, leftSize, rightSize)
     var dHeight = leftSize * (1 - progress) + rightSize * progress;
     var dy = top + (leftSize - dHeight) / 2
     try {
-      ctx.drawImage(img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+      drawPixelated(ctx, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
     } catch (e) {
       console.log("bad: " + sWidth+":"+ sHeight+":"+ dx+":"+ dy+":"+ dWidth+":"+ dHeight)
     }
@@ -3019,3 +3014,82 @@ function formatGold(n) {
   if (n < 10000) return n
   return Math.floor(n/1000) + "k"
 }
+
+// sprite drawing //
+let fastMode = true
+let spriteData = null
+let spriteCache = {}
+const cacheWidth=768
+const iData = ctx.createImageData(cacheWidth, cacheWidth); //doesn't matter where it's from
+function drawPixelated(context,sx, sy, sw, sh, x, y, width,height){
+  if (fastMode) {
+    if (width<0) context.scale(-1,1)
+    if (height<0) context.scale(1,-1)
+    context.drawImage(spriteImage, sx,sy,sw,sh,x,y,width,height)
+    if (height<0) context.scale(1,-1)
+    if (width<0) context.scale(-1,1)
+    return
+  }
+  //round it
+  sx = Math.floor(sx)
+  sy = Math.floor(sy)
+  sw = Math.floor(sw)
+  sh = Math.floor(sh)
+  width = Math.floor(width)
+  height = Math.floor(height)
+
+  let xFlip = (width < 0)
+  let yFlip = (height < 0)
+  width = Math.abs(width)
+  height = Math.abs(height)
+  if (!loaded) return
+  if (!spriteData) {
+    const sCanvas = document.createElement('canvas')
+    sCanvas.width = spriteImage.width 
+    sCanvas.height = spriteImage.height
+    const sctx = sCanvas.getContext('2d')
+    sctx.width  = spriteImage.width
+    sctx.height = spriteImage.height
+    sctx.drawImage(spriteImage,0,0)
+    spriteData = sctx.getImageData(0,0,spriteImage.width,spriteImage.height).data
+  }
+  const cacheKey = ""+sx+":"+sy+":"+sw+":"+sh+":"+width+":"+height+":"+xFlip+":"+yFlip
+  if (spriteCache[cacheKey]===undefined) {
+    if (width>cacheWidth||height>cacheWidth)  {
+      console.log("too big sprite!")
+    }
+    const cacheCanvas = document.createElement('canvas')
+    cacheCanvas.width = width
+    cacheCanvas.height = height
+    const cacheCtx = cacheCanvas.getContext('2d')
+    cacheCtx.width  = width
+    cacheCtx.height = height
+    for (var xOut=0;xOut<width;++xOut){
+      for (var yOut=0;yOut<height;++yOut){
+        let xIn = sx + Math.floor(xOut / width * sw)
+        let yIn = sy + Math.floor(yOut / height * sh)
+        var i=(yIn*spriteImage.width+xIn)*4
+        var r=spriteData[i  ]
+        var g=spriteData[i+1]
+        var b=spriteData[i+2]
+        var a=spriteData[i+3]
+        let xO = xFlip ? width - xOut : xOut
+        let yO = yFlip ? height - yOut : yOut
+        //slower, probably:
+        //cacheCtx.fillStyle = "rgba("+r+","+g+","+b+","+(a/255)+")"
+        //cacheCtx.fillRect(xO, yO, 1, 1)
+        //faster
+        let outI = (xO + yO * cacheWidth)*4
+        iData.data[0+outI] = r;
+        iData.data[1+outI] = g;
+        iData.data[2+outI] = b;
+        iData.data[3+outI] = a;
+      }
+      cacheCtx.putImageData(iData, 0, 0);
+    }
+    spriteCache[cacheKey] = cacheCanvas
+  }
+  const s = spriteCache[cacheKey]
+  context.drawImage(s, 0, 0, width, height, x, y, width, height)
+}
+////////////////
