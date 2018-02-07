@@ -1167,36 +1167,44 @@ function draw3D(viewX, viewY, viewSize, dir) {
     drawPixelated(tCtx, 256*6, 512*tileSet+256, 512, 256, 0, -0, viewSizeX*flipX, -viewSizeY/2) 
   }
 
-  const across = [-8,-7,-6,-5,-4,-3,-2,-1,7,6,5,4,3,2,1,0]
+  const across = []
+  for (let i = -16; i < 0; i++) {across.push(i)}
+  for (let i = 16; i > 0; i--) {across.push(i)}
+  across.push(0)
+
   for (let i = 30; i >= 0; i--) { //depth
     const isHomeRow = (i == 0)
     //draw edges
     for (let j of across) {
-      if (isHomeRow && (j < -1 || j > 1)) continue //don't draw too much beside us!
+      if (!isCellOnCamera(i, j)) continue //don't draw too much beside us!
       let size = sizeAtDist(viewSizeY, i)
       const cellPos = viewCellPos(playerPos, dir, i, j)
       const cell = cellAt(cellPos)
       if (cell == 0) {
-        //hack for special distorted edge of camera
-        if (i==1&&Math.abs(j)==2&&!oldGraphics) {
-          size = size*gfxHackFix
+        //draw side, if this block is next to empty space
+        //(the center row's sides are never visible)
+        if (j != 0 && cellAt(move(cellPos, (j < 0 ? dir.cw : dir.ccw)))===1) {
+          //hack for special distorted edge of camera
+          if (i==1&&Math.abs(j)==2&&!oldGraphics) {
+            size = size*gfxHackFix
+          }
+          const left = viewXCentre - size/2 + j*size
+          const top = viewYCentre - size/2
+          const behindSize = sizeAtDist(viewSizeY, i+1)
+          if (j > 0) {
+            const backLeft = viewXCentre - behindSize/2 + j*behindSize
+            const backTop = viewYCentre - behindSize/2
+            const pixelWidth = (left) - (viewXCentre - behindSize/2 + j*behindSize)
+            drawWall(tCtx, tileSet, backLeft, backTop, pixelWidth, behindSize, size)          
+          } else if (j < 0) {
+            const pixelWidth = (viewXCentre - behindSize/2 + (j+1)*behindSize) - (left+size)
+            drawWall(tCtx, tileSet, left+size, top, pixelWidth, size, behindSize)
+          }
         }
-        const left = viewXCentre - size/2 + j*size
-        const top = viewYCentre - size/2
-        const behindSize = sizeAtDist(viewSizeY, i+1)
-        if (j > 0) {
-          const backLeft = viewXCentre - behindSize/2 + j*behindSize
-          const backTop = viewYCentre - behindSize/2
-          const pixelWidth = (left) - (viewXCentre - behindSize/2 + j*behindSize)
-          drawWall(tCtx, tileSet, backLeft, backTop, pixelWidth, behindSize, size)          
-        } else if (j < 0) {
-          //todo
-          //const backRight = viewXCentre - behindSize/2 + (j+1)*behindSize
-          //const pixelWidth = backRight - (left+size)
-          const pixelWidth = (viewXCentre - behindSize/2 + (j+1)*behindSize) - (left+size)
-          drawWall(tCtx, tileSet, left+size, top, pixelWidth, size, behindSize)
-        }
-        if (i>0) {
+        //draw front face?(if cell is in front of player, and has empty space in front)
+        if (i>0 && cellAt(move(cellPos, dir.reverse))===1) {
+          const left = viewXCentre - size/2 + j*size
+          const top = viewYCentre - size/2
           drawPixelated(tCtx, 0, 256*tileSet, 256, 256, left, top, size, size)
         }
       } else {
@@ -1252,6 +1260,14 @@ function draw3D(viewX, viewY, viewSize, dir) {
   }
   ctx.drawImage(tempCanvas, 0, 0, viewSizeX, viewSizeY, viewX, viewY, viewSizeX, viewSizeY)
   drawBorder(viewX, viewY, viewSizeX, viewSizeY)
+}
+
+//depends on view ratio of 1.5x1, with tiles being equal to height
+function isCellOnCamera(dist, across) {
+  //the closest in we can appear is the innermost edge of the BACK of this cell
+  const behindSize = sizeAtDist(1, dist+1)
+  const distFromCenter = behindSize*(Math.abs(across)-0.5)
+  return distFromCenter < 0.75 //half width in tiles. Width is 1.5 tiles
 }
 
 let waterHeightAdjust = -0.03
