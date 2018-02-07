@@ -729,7 +729,9 @@ function draw() {
     button(rearViewX, viewSizeY, smallColWidth, smallViewSizeY, turnBack)
     button(col1X, viewSizeY, canvas.width, canvas.height-viewSizeY, wait)
   }
+  const startTime = performance.now()
   draw3D(col2X, 0, viewSize, playerPos.dir)
+  if (debug) console.log("Draw took " + (performance.now()-startTime))
 
   if (menuState !== menuStates.start) {
     drawLadderPopups()
@@ -2599,6 +2601,10 @@ function inGame() {
 
 function drawWall(ctx, tileSet, left, top, width, leftSize, rightSize)
 {
+  if (!fastMode) {
+    drawWall2(ctx, tileSet, left, top, width, leftSize, rightSize)
+    return
+  }
   if (width < 1) return
   const h = 255
   const w = 256
@@ -3037,6 +3043,7 @@ function formatGold(n) {
 let fastMode = true
 let spriteData = null
 let spriteCache = {}
+
 function drawPixelated(context,sx, sy, sw, sh, x, y, width,height){
   if (fastMode) {
     if (width<0) context.scale(-1,1)
@@ -3046,6 +3053,7 @@ function drawPixelated(context,sx, sy, sw, sh, x, y, width,height){
     if (width<0) context.scale(-1,1)
     return
   }
+
   //round it
   sx = Math.floor(sx)
   sy = Math.floor(sy)
@@ -3089,7 +3097,7 @@ function drawPixelated(context,sx, sy, sw, sh, x, y, width,height){
         var a=spriteData[i+3]
         let xO = xFlip ? width - xOut : xOut
         let yO = yFlip ? height - yOut : yOut
-        //slower, probably:
+        //slower:
         //cacheCtx.fillStyle = "rgba("+r+","+g+","+b+","+(a/255)+")"
         //cacheCtx.fillRect(xO, yO, 1, 1)
         //faster
@@ -3106,4 +3114,85 @@ function drawPixelated(context,sx, sy, sw, sh, x, y, width,height){
   const s = spriteCache[cacheKey]
   context.drawImage(s, 0, 0, width, height, x, y, width, height)
 }
+
+function drawWall2(context, tileSet, left, top, width, leftSize, rightSize)
+{
+  if (width < 1) return
+
+  //round it
+  let sx = Math.floor(0)
+  let sy = Math.floor(tileSet*256)
+  let sw = Math.ceil(256)
+  let sh = Math.ceil(256)
+  width = Math.ceil(width)
+  const numSlices = width
+
+  leftSize = Math.ceil(leftSize)
+  rightSize = Math.ceil(rightSize)
+  let height = Math.max(leftSize, rightSize)
+
+  //we're given top of left wall, but need highest of either
+  if (leftSize < rightSize) {
+    top -= Math.floor((rightSize - leftSize)/2)
+  }
+
+  if (!loaded) return
+  if (!spriteData) {
+    console.log("FIXME init sprite data")
+    return
+  }
+  const cacheKey = "wall-"+tileSet+":"+width+":"+leftSize+":"+rightSize
+  if (spriteCache[cacheKey]===undefined) {
+    const widthScale = width / sw
+    const sliceWidth = sw / numSlices
+    const iData = ctx.createImageData(width, height);
+    const [cacheCanvas, cacheCtx] = makeCacheCanvas(width, height)
+    for (var xOut=0;xOut<width;++xOut){
+      const progress = xOut / numSlices
+      let xIn = sx + Math.floor(xOut / width * sw)
+      let dHeight = leftSize * (1 - progress) + rightSize * progress;
+      let yOffset = Math.floor((height - dHeight) / 2)
+      for (var yOut=yOffset;yOut<dHeight+yOffset;++yOut){
+        let yProgress = (yOut-yOffset)/dHeight
+        let yIn = sy + Math.floor(yProgress*sh)
+        let i=(yIn*spriteImage.width+xIn)*4
+        let pixel = getPixel(spriteData, i)
+        let xO = xOut
+        let yO = yOut
+        let outI = (xO + yO * width)*4
+        setPixel(iData, outI, pixel)
+      }
+      cacheCtx.putImageData(iData, 0, 0);
+    }
+    spriteCache[cacheKey] = cacheCanvas
+  }
+  const s = spriteCache[cacheKey]
+  context.drawImage(s, 0, 0, width, height, left, top, width, height)
+}
+
+function getPixel(data, i) {
+  var r=spriteData[i  ]
+  var g=spriteData[i+1]
+  var b=spriteData[i+2]
+  var a=spriteData[i+3]
+  return {r:r,g:g,b:b,a:a}
+}
+
+function setPixel(iData, outI, pixel) {
+  iData.data[0+outI] = pixel.r;
+  iData.data[1+outI] = pixel.g;
+  iData.data[2+outI] = pixel.b;
+  iData.data[3+outI] = pixel.a;
+}
+
+function makeCacheCanvas(width, height) {
+  const cacheCanvas = document.createElement('canvas')
+  cacheCanvas.width = width
+  cacheCanvas.height = height
+  const cacheCtx = cacheCanvas.getContext('2d')
+  cacheCtx.width  = width
+  cacheCtx.height = height
+  return [cacheCanvas, cacheCtx]
+}
+
 ////////////////
