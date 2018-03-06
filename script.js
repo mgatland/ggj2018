@@ -873,9 +873,11 @@ function draw() {
 
   if (menuState === menuStates.start) {
     button(0, 0, canvas.width, canvas.height, pressAnyKey)
-    drawTitle("Matthew's", centerX, 80)
-    drawTitle("Dungeons of", centerX, 80+90)
-    drawTitle("the Unforgiven", centerX, 80+90+70)
+    let titleY = 80
+    drawTitle("Matthew's", centerX, titleY); titleY += 100
+    drawTitle("Dungeons", centerX, titleY); titleY += 70
+    drawTitle("of the", centerX, titleY); titleY += 70
+    drawTitle("Unforgotten", centerX, titleY)
     let y = viewSizeY + 50
     const lineHeight = 30
     if (justRestarted) {
@@ -2943,7 +2945,7 @@ addFloorMsg(1001, `The Oxygen Generator|Is Yours! Now Your|People Will Let You|R
 addFloorMsg(1002, `"You have your own|Oxygen supply! We Will|Let You Live In The|Citadel, If You Promise|To Donate It To Our|People When You Die."`)
 addFloorMsg(1003, `At $age, you are now the|oldest person in the|citadel. You become a|Teacher, helping each|new generation prepare|for life - and exile.||Your tales inspire all.`)
 addFloorMsg(1004, `"No," you say, "Give|this Oxygen To Someone|In Need. My Place Is|Here, In The:|| |   `)
-addFloorMsg(1005, `"No," you say, "Give|this Oxygen To Someone|In Need. My Place Is|Here, In The:||     Dungeons Of|   The Unforgiven!"`)
+addFloorMsg(1005, `"No," you say, "Give|this Oxygen To Someone|In Need. My Place Is|Here, In The:||     Dungeons Of|   The Unforgotten!"`)
 //
 
 //
