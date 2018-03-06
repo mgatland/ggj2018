@@ -23,10 +23,6 @@ let headingFont = "96px \"Wizard's Manse\", monospace"
 let specialFont = "64px \"Wizard's Manse\", monospace"
 let fontLineHeightScale = 0.6
 
-const audios = []
-let currentAudio = undefined
-const audioCount = 4 //repeat after this many tracks
-
 const tempCanvas = document.createElement("canvas")
 const tCtx = tempCanvas.getContext("2d")
 tempCanvas.width = 1024
@@ -74,7 +70,7 @@ spriteImage.addEventListener('load', function() {
 
 
 //start preloading
-loadAudio(0)
+music.load(0)
 var font = new FontFaceObserver('dysin4mation', {});
 font.load().then(function () {
   console.log('Font is available');
@@ -708,7 +704,7 @@ function draw() {
     } else if (state===states.retireScreen) {
       button(col2X, t.y-t.lineHeight+2, viewSize, t.lineHeight, endRestart)
       t.print("Press [R] to restart")
-    } else {
+    } else if (newLevelMsg!=1004) {
       t.print("Press any key to close")
     }
     drawBorder(col2X, 0, viewSize, viewSizeY)
@@ -2067,10 +2063,10 @@ function changeLevelTo(newLevel, isFalling)
       while (cellAt(move(playerPos, playerPos.dir))===0) playerPos.dir = playerPos.dir.cw
     }
 
-    playAudio()
+    music.play()
     //sneaky: preload the audio for the level below!
     const preLoadTileSet = Math.floor((depth+1) / levelsPerTileset) % tileSetCount
-    loadAudio(preLoadTileSet)
+    music.load(preLoadTileSet)
     if(depth==0 && endState === "hasFlower") {
       endState = "shouldSpawn"
       saveSomeone()
@@ -2190,42 +2186,13 @@ function showSpecialMessage(n) {
 function showEndChoice() {
   state = states.endChoice
   newLevelMsg = 1002
-  stopAudio()
+  music.stop()
 }
 
 function firstTimeOnLevel() {
   if (floorMsg[depth] != undefined) {
     showSpecialMessage(depth)
   }
-}
-
-function loadAudio(tileSet) {
-  if (audios[tileSet]===undefined) {
-    audios[tileSet] = new Audio((tileSet % audioCount) + '.ogg');
-    audios[tileSet].loop = true
-    audios[tileSet].volume = 0.2;
-  }  
-}
-
-function stopAudio() {
-  console.log("stop")
-  if (currentAudio != undefined) {
-    audios[currentAudio].pause()
-    audios[currentAudio].currentTime = 0;
-  }
-  currentAudio = undefined  
-}
-
-function playAudio() {
-  console.log("play")
-  if (currentAudio==tileSet) return
-  if (currentAudio != undefined) {
-    audios[currentAudio].pause()
-    audios[currentAudio].currentTime = 0;
-  }
-  loadAudio(tileSet)
-  audios[tileSet].play()
-  currentAudio = tileSet
 }
 
 const waitMessages=["You wait.","You pause.", "You hesitate.", "You think.", "You stand there.", "You sit tight.", "You stand ready."]
@@ -3031,8 +2998,8 @@ function endContinue() {
   freeze(function () {
     showSpecialMessage(1005)
     draw()
-    playAudio()
-  })
+    music.play()
+  }, 4000)
   draw()
 }
 
